@@ -1,0 +1,156 @@
+#include "os.h"
+#include "kheap.h"
+#include "paging.h"
+#include "task.h"
+#include "syscall.h"
+#include "pci.h"
+#include "cmos.h"
+#include "list.h"
+#include "storage_devManager.h"
+#include "partitionManager.h"
+#include "fileManager.h"
+#include "time.h"
+#include "pc_speaker.h"
+#include "version.h"
+#include "keyboard.h"
+
+// Operating system common Data Area
+oda_t ODA;
+
+bool fpu_install()
+{
+    if (!(cmos_read(0x14) & 0x02))
+        return false;
+
+    __asm__ volatile ("finit");
+
+    uint16_t ctrlword = 0x37F;
+    __asm__ volatile("fldcw %0"::"m"(ctrlword)); // Set the FPU Control Word. FLDCW = Load FPU Control Word
+
+    // Set the TS bit (no. 3) in CR0 to enable #NM (exception no. 7)
+    // Set NS bit (no. 5) to signal FPU exceptions internally instead using PIC
+    uint32_t cr0;
+    __asm__ volatile("mov %%cr0, %0": "=r"(cr0)); // Read cr0
+    cr0 |= 0x08 | 0x20;
+    __asm__ volatile("mov %0, %%cr0":: "r"(cr0)); // Write cr0
+
+    return true;
+}
+
+static void init()
+{
+    clear_screen(); settextcolor(14,0);
+    char* welcomemsg = __VERSION_STRING;
+    if(BSDChecksum(welcomemsg) == __VERSION_CHECKSUM) puts(welcomemsg);
+    else reboot();
+    time_t ptm;
+    time_read_rtc(&ptm);
+    printf("Date: %d.%d.%d\n", ptm.day, ptm.month, ptm.year);
+    printf("Time: %d:%d:%d\n", ptm.hour, ptm.minute, ptm.second);
+    gdt_install();
+    idt_install();
+    timer_install();
+    keyboard_install();
+    mouse_install();
+    syscall_install();
+    // paging, kernel heap, tasking
+    ODA.Memory_Size = paging_install();
+    printf("Main memory: %u MB\n", ODA.Memory_Size/(1024*1024));
+    heap_install();
+    ODA.cpu_frequency = 1000000000;
+    tasking_install();
+    randomSetSeed(cmos_read(0x00)); //Set the seconds as the seed
+    puts("FPU");
+    if(fpu_install())
+        puts(" installed\n");
+    else
+        puts(" not found\n");
+}
+
+int main()
+{
+    init();
+
+    settextcolor(15,0);
+
+    pciScan(); // scan of pci bus; results go to: pciDev_t pciDev_List;
+
+    sti();
+
+    putch('\n');
+
+    // Storage device detection
+    storage_devManager_init();
+    listHead_t* storageDevList = storage_getDevList();
+    size_t storageDevCount = list_getSize(storageDevList);
+    printf("Detected %d storage devices:\n", storageDevCount);
+    uint32_t i;
+    for(i = 0; i < storageDevCount; ++i){
+        storage_dev_t* curDev = list_getElement(storageDevList, i+1);
+        switch(curDev->type){
+            case 0:
+                puts("\t- Floppy");
+                break;
+            case 1:
+                puts("\t- Harddrive");
+                break;
+        }
+
+        listHead_t* partList = curDev->partitions;
+        if(partList == 0){
+            puts("No partitions/partition table detected");
+            continue;
+        }
+        uint32_t partNumber = list_getSize(partList);
+        printf(" %d partitions\n", partNumber);
+        for(uint8_t j = 0; j < partNumber; ++j){
+            Partition_t* partEntry = list_getElement(partList, j+1);
+            printf("\t\tPartition %d\n", j+1);
+            printf("\t\t- Start sector: %X\n", PartManage_getPartStartSector(partEntry->partEntry));
+            printf("\t\t- Length: %X\n", PartManage_getPartLength(partEntry->partEntry));
+            puts("\t\t- Type: ");
+            switch(PartManage_getPartType(partEntry->partEntry)){
+                case 0x0B: //FAT32
+                    puts("FAT32");
+                    break;
+                case 0xEE: //GPT
+                    puts("GPT");
+                    break;
+                case 0x01: //FAT12
+                    puts("FAT12");
+                    break;
+                default:
+                    puts("(undefined)");
+                    break;
+            }
+            putch('\n');
+        }
+        putch('\n');
+    }
+
+    printf("Boot partition: %c%c\n", ODA.bootDev + 'a', ODA.bootPart + '1');
+
+    ODA.ts_flag = 1; // enable task_switching
+    puts("Executing STARTUP.ELF...");
+    if(file_execute("~~/STARTUP.ELF")){
+        puts("Success\n");
+
+        for(;;){
+            switch_context(); // Huge performance boost for the user program
+            //hlt();
+        }
+    } else {
+        puts("Failed\n");
+    }
+
+    puts("Executing SHELL.ELF...");
+    if(file_execute("~~/SHELL.ELF"))
+        puts("Success\n");
+    else
+        puts("Failed\n");
+
+    for(;;)
+        switch_context(); // Huge performance boost for the user program
+
+    return 0;
+}

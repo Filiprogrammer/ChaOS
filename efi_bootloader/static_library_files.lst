@@ -1,0 +1,13 @@
+efiboot.lib
+lib/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.lib
+lib/BaseLib/BaseLib.lib
+lib/BaseMemoryLib/BaseMemoryLib.lib
+lib/BasePcdLibNull/BasePcdLibNull.lib
+lib/BasePrintLib/BasePrintLib.lib
+lib/UefiApplicationEntryPoint/UefiApplicationEntryPoint.lib
+lib/UefiBootServicesTableLib/UefiBootServicesTableLib.lib
+lib/UefiDebugLibStdErr/UefiDebugLibStdErr.lib
+lib/UefiDevicePathLib/UefiDevicePathLib.lib
+lib/UefiLib/UefiLib.lib
+lib/UefiMemoryAllocationLib/UefiMemoryAllocationLib.lib
+lib/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.lib

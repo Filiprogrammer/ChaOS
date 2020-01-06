@@ -1,0 +1,53 @@
+SOURCES = kernel.asm $(filter-out kernel.asm ,$(wildcard *.asm *.c))
+OBJECTS = $(addprefix ../obj/,$(addsuffix .o,$(basename $(SOURCES))))
+
+ASFLAGSOBJ= -O32 -f elf
+ASFLAGSOBJDEBUG= -O32 -f elf -ggdb
+NASM = nasmw
+MAKE = mingw32-make
+
+CFLAGS= -std=c99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Iinclude
+CFLAGSDEBUG= -std=c99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Iinclude -ggdb
+CC= i586-elf-gcc
+
+LDFLAGS= -T ../kernel.ld -Map ../kernel.map -nostdinc
+LDFLAGSDEBUG = -T ../kernel_debug.ld -Map ../kernel.map -nostdinc
+LD= i586-elf-ld
+
+OBJCOPY= i586-elf-objcopy
+
+../obj/%.o: %.asm
+	@cecho {09}Assembling {#}{\t}==^> $<...
+ifdef DEBUG
+	@$(NASM) $(ASFLAGSOBJDEBUG) $< -o $@
+else
+	@$(NASM) $(ASFLAGSOBJ) $< -o $@
+endif
+	@cecho .{0a}done{#}{\n}
+
+../obj/%.o: %.c
+	@cecho {09}Compiling {#}{\t}==^> $<...
+ifdef DEBUG
+	@$(CC) $(CFLAGSDEBUG) -c -o $@ $<
+else
+	@$(CC) $(CFLAGS) -c -o $@ $<
+endif
+	@cecho .{0a}done{#}{\n}
+
+../chaoskrn.sys: $(OBJECTS)
+ifdef DEBUG
+	@cecho {09}Linking Kernel{#}{\t}==^> chaoskrn.sys_debug...
+	@$(LD) $(LDFLAGSDEBUG) $+ -o $@_debug
+	@cecho .{0a}done{#}{\n}
+	@cecho {09}Stripping chaoskrn.sys_debug{#}{\t}==^> chaoskrn.sys...
+	@$(OBJCOPY) -O binary $@_debug $@
+	@cecho .{0a}done{#}{\n}
+else
+	@cecho {09}Linking Kernel{#}{\t}==^> chaoskrn.sys...
+	@$(LD) $(LDFLAGS) $+ -o $@
+	@cecho .{0a}done{#}{\n}
+endif
+
+#    $<		Erste Abh�ngigkeit
+#    $+		Liste aller Abh�ngigkeiten	
+#    $@		Name des Targets

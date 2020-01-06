@@ -1,0 +1,7 @@
+/tools
+*.o
+*.map
+*.elf
+*.bin
+*.sys
+*.dat

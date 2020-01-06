@@ -1,0 +1,1 @@
+copy BOOT2.SYS A:\BOOT2.SYS 
