@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "QEMU Debug Floppy",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/kernel/chaoskrn.sys_debug",
+            "miDebuggerServerAddress": "localhost:1234",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/kernel/src",
+            "environment": [],
+            "externalConsole": true,
+            "launchCompleteCommand": "exec-run",
+            "windows": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb.exe"
+            },
+            "preLaunchTask": "QEMU Boot Floppy & Run GDB Server"
+        },
+        {
+            "name": "QEMU Debug HD",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/kernel/chaoskrn.sys_debug",
+            "miDebuggerServerAddress": "localhost:1234",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/kernel/src",
+            "environment": [],
+            "externalConsole": true,
+            "launchCompleteCommand": "exec-run",
+            "windows": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb.exe"
+            },
+            "preLaunchTask": "QEMU Boot HD & Run GDB Server"
+        }
+    ]
+}

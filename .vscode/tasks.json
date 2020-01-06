@@ -1,0 +1,171 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Floppy Image",
+            "type": "shell",
+            "command": "${workspaceRoot}/BUILD_FLOPPY_IMAGE.BAT",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Build HD Image",
+            "type": "shell",
+            "command": "${workspaceRoot}/BUILD_HD_IMAGE.BAT",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Build HD Image with MBR",
+            "type": "shell",
+            "command": "${workspaceRoot}/BUILD_HD_MBR_IMAGE.BAT",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Build Floppy Image - Debug",
+            "type": "shell",
+            "command": "${workspaceRoot}/BUILD_FLOPPY_IMAGE_DEBUG.BAT",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Build HD Image - Debug",
+            "type": "shell",
+            "command": "${workspaceRoot}/BUILD_HD_IMAGE_DEBUG.BAT",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Build HD Image with MBR - Debug",
+            "type": "shell",
+            "command": "${workspaceRoot}/BUILD_HD_MBR_IMAGE_DEBUG.BAT",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "QEMU Boot Floppy & Run GDB Server",
+            "type": "shell",
+            "command": "\"${workspaceRoot}/tools/qemu/qemu-system-i386\" -soundhw pcspk -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s",
+            "group": "none",
+            "presentation": {
+                "echo": false,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": true,
+            "problemMatcher": [
+                {
+                    "pattern":[
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".",
+                        "endsPattern": "."
+                    }
+                }
+            ]
+        },
+        {
+            "label": "QEMU Boot HD & Run GDB Server",
+            "type": "shell",
+            "command": "\"${workspaceRoot}/tools/qemu/qemu-system-i386\" -soundhw pcspk -hda HDImage.bin -boot c -S -s",
+            "group": "none",
+            "presentation": {
+                "echo": false,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": true,
+            "problemMatcher": [
+                {
+                    "pattern":[
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".",
+                        "endsPattern": "."
+                    }
+                }
+            ]
+        }
+    ]
+}
