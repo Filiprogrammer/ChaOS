@@ -622,7 +622,7 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
                         }
                         
                         if(k == (path_size-1)){ //if is final file
-                            uint32_t* entry_loc = malloc(4, 0);
+                            uint32_t* entry_loc = malloc(16, 0);
                             entry_loc[0] = j;
                             entry_loc[1] = i;
                             if(ret_has_long) {
@@ -739,7 +739,7 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
                             }
                             
                             if(k == (path_size-1)){ //if is final file
-                                uint32_t* entry_loc = malloc(4, 0);
+                                uint32_t* entry_loc = malloc(16, 0);
                                 entry_loc[0] = cur_clust;
                                 entry_loc[1] = j * 512 + i;
                                 if(ret_has_long) {
