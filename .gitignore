@@ -4,4 +4,7 @@
 *.elf
 *.bin
 *.sys
+*.sys_debug
 *.dat
+*.lib
+*.vdi
