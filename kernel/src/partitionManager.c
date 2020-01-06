@@ -90,7 +90,7 @@ uint32_t PartManage_analyzeDev(storage_dev_t* dev) {
             list_append(partList, partition);
             if(checkBootVol(boot_sec + 0x27)) retBootPart = 1;
         }
-        else if(strncmp((char*)&boot_sec + 0x36, "FAT32   ", 8) == 0){ // if it is a FAT32 formatted device
+        else if(strncmp((char*)&boot_sec + 0x52, "FAT32   ", 8) == 0){ // if it is a FAT32 formatted device
             partList = list_create();
             Partition_t* partition = malloc(sizeof(Partition_t), 0); // Not necessary to bother with freeing this
             partition->partEntry[0] = 0x80; // boot flag
