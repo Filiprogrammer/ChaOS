@@ -5,6 +5,7 @@
 #include "task.h"
 #include "paging.h"
 #include "string.h"
+#include "math.h"
 
 void file_init(){
     storage_devManager_init();
@@ -186,12 +187,14 @@ uint8_t file_execute(char* filepath){
         if( (elf_offset + elf_filesize) > file_inst.size ) return 0;
 
         page_directory_t* pd = paging_createPageDirectory();
-        if(!paging_allocVirt( pd, (void*)elf_vaddr, /*alignUp(elf_memsz, PAGESIZE)*/0x200000, MEM_USER | MEM_WRITABLE )){
+
+        if(!paging_allocVirt(pd, (void*)elf_vaddr, alignUp(elf_memsz, PAGESIZE), MEM_USER | MEM_WRITABLE))
             return 0;
-        }
-        /*if(!paging_alloc( pd, (void*)0x5F0000, 0x10000, MEM_USER | MEM_WRITE )){
+
+        // TODO: Handle the placement of the stack differently (probably place it before the .text and .data sections)
+        // Allocate the stack
+        if(!paging_allocVirt(pd, (void*)0x4F0000, 0x10000, MEM_USER | MEM_WRITABLE))
             return 0;
-        }*/
 
         uint32_t cr3;
         __asm__ volatile("mov %%cr3, %0" : "=r"(cr3));
