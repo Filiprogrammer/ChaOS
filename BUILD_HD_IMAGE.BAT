@@ -1,6 +1,6 @@
 @echo off
 cd %~d0%~p0
-call BUILD.BAT %1
+call BUILD.BAT %1 || goto ERROR
 
 cecho {0A}Building HD Image...{\n0F}
 mkdosfs -hd -no-mbr -fats2 -fatz12 -spc1 -z2 -noverb -b stage1_bootloader/boot.bin HDImage.bin || goto ERROR
@@ -16,8 +16,7 @@ for %%a in ("%user_programs_paths: =" "%") do (
 )
 :imageBuilt
 del HDImage.vdi >nul 2>&1
-VBoxManage convertfromraw -format VDI HDImage.bin HDImage.vdi || goto ERROR
-if not errorlevel 0 cecho {0C}Failed building HD image{\n0F}&goto eof
+VBoxManage convertfromraw -format VDI HDImage.bin HDImage.vdi || cecho {0C}Failed building VDI HD image{\n0F}&&goto ERROR
 cecho {0A}HD Image was built{\n0F}
 goto eof
 
