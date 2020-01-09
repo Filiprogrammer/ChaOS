@@ -86,6 +86,12 @@ void physSetBits(uint32_t addr_begin, uint32_t addr_end, bool reserved) {
     uint32_t start = alignUp(addr_begin, PAGESIZE) / PAGESIZE;
     uint32_t end   = alignDown(addr_end, PAGESIZE) / PAGESIZE;
 
+    if(start == end)
+        return;
+
+    if((!reserved) && (start / 32 < phys_reservationTable_index))
+        phys_reservationTable_index = start / 32;
+
     // Set all these bits
     for (uint32_t j = start; j < end; ++j) {
         if (reserved)
@@ -98,7 +104,7 @@ void physSetBits(uint32_t addr_begin, uint32_t addr_end, bool reserved) {
 void physSetBit(uint32_t addr, bool reserved) {
     uint32_t pagenr = alignUp(addr, PAGESIZE) / PAGESIZE;
 
-    if (pagenr / 32 < phys_reservationTable_index)
+    if ((!reserved) && (pagenr / 32 < phys_reservationTable_index))
         phys_reservationTable_index = pagenr / 32;
 
     phys_reservationTable[pagenr / 32] = (phys_reservationTable[pagenr / 32] & ~(1 << (pagenr % 32))) | (reserved << (pagenr % 32));
