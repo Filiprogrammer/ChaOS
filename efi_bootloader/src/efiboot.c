@@ -14,7 +14,8 @@ EFI_GUID gEfiLoadedImageProtocolGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
 EFI_GUID gEfiFileInfoGuid = EFI_FILE_INFO_ID;
 
 typedef struct {
-    UINT64 base;
+    UINT32 baseLow;
+    UINT32 baseHigh;
     UINT32 sizeLow;
     UINT32 sizeHigh;
     UINT32 type;
@@ -188,16 +189,18 @@ EFI_STATUS LoadKernel(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     UINT8 E820Conversion[14] = {2, 1, 1, 1, 1, 2, 2, 1, 5, 3, 4, 2, 2, 2};
     UINT8* kernelMemMap = (UINT8*)0x1000;
     UINT32 counter = 0;
-    
+
     while((counter * (UINT32)MemMapDescriptorSize) < MemMapSize){
-        EFI_MEMORY_DESCRIPTOR* desc = (EFI_MEMORY_DESCRIPTOR*) MemMap + counter * (UINT32)MemMapDescriptorSize;
-        UINT8* descPtr = (UINT8*)desc;
+        EFI_MEMORY_DESCRIPTOR* desc = (EFI_MEMORY_DESCRIPTOR*) ((UINT32)MemMap + counter * (UINT32)MemMapDescriptorSize);
         E820Entry* kernMapEntry = (E820Entry*) (kernelMemMap + counter * sizeof(E820Entry));
-        kernMapEntry->base = desc->PhysicalStart;
-        kernMapEntry->sizeHigh = descPtr[21] + (descPtr[22] << 8) + (descPtr[23] << 16) + (descPtr[24] << 24);
-        kernMapEntry->sizeLow  = descPtr[20] << 24;
+        UINT64 base = desc->PhysicalStart;
+        kernMapEntry->baseLow = base;
+        kernMapEntry->baseHigh = base >> 32;
+        UINT64 size = (desc->NumberOfPages) * 4096;
+        kernMapEntry->sizeLow = size;
+        kernMapEntry->sizeHigh = size >> 32;
         kernMapEntry->type = E820Conversion[desc->Type];
-        kernMapEntry->ext  = 0;
+        kernMapEntry->ext = 0;
         ++counter;
     }
     UINT16* counterTmp = (UINT16*)0x0FFE;
