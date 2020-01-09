@@ -17,6 +17,8 @@ set version_checksum=%%a
 echo #define __VERSION_CHECKSUM %version_checksum%>>include\version.h
 echo #endif>>include\version.h
 
+mkdir obj >nul 2>&1
+
 IF /i "%1"=="DEBUG" (
     mingw32-make DEBUG=1 --makefile=../Windows_makefile || goto ERROR
 ) ELSE (

@@ -1,4 +1,5 @@
 @echo off
+cd %~d0%~p0
 del obj\*.obj >nul 2>&1
 del BOOTIA32.EFI >nul 2>&1
 del efiboot.lib >nul 2>&1

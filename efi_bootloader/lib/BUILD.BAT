@@ -1,4 +1,5 @@
 @echo off
+cd %~d0%~p0
 
 cecho {0A}Building BaseDebugPrintErrorLevelLib...{#}{\n}
 cd BaseDebugPrintErrorLevelLib

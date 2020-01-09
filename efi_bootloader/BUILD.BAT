@@ -1,5 +1,7 @@
 @echo off
+cd %~d0%~p0
 call CLEAN.BAT
+mkdir obj >nul 2>&1
 
 set CFLAGS=-g -fshort-wchar -fno-builtin -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -ffunction-sections -fdata-sections -fno-common -m32 -march=i586 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables -Wno-address -fno-pic -fno-pie -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -c -Ilib/MdePkg/Include -Ilib/MdePkg/Include/Ia32
 

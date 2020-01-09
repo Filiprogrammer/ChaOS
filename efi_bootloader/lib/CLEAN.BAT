@@ -1,4 +1,5 @@
 @echo off
+cd %~d0%~p0
 
 cd BaseDebugPrintErrorLevelLib
 call CLEAN.BAT

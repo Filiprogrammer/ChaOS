@@ -2,6 +2,7 @@
 
 cd %~d0%~p0
 call CLEAN.BAT
+mkdir obj >nul 2>&1
 
 cd src
 
