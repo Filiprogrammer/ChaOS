@@ -8,3 +8,10 @@
 *.dat
 *.lib
 *.vdi
+*.efi
+*.dll
+*.debug
+*.obj
+*.i
+*.iii
+*.lst
