@@ -73,7 +73,23 @@ int main()
 
     settextcolor(15,0);
 
-    pciScan(); // scan of pci bus; results go to: pciDev_t pciDev_List;
+    pci_scan(); // scan of pci bus; results go to: pciDev_t pciDevList;
+
+    uint32_t pciDevListSize = list_getSize(pciDevList);
+
+    puts("PCI List:\n");
+
+    for(uint32_t i = 0; i < pciDevListSize; ++i) {
+        pciDev_t* pciDev = list_getElement(pciDevList, i + 1);
+        printf("%d:%d.%d\t dev:%x vend:%x class:%u subclass %u", pciDev->bus, pciDev->device, pciDev->func, pciDev->deviceID, pciDev->vendorID, pciDev->class, pciDev->subclass);
+
+        if(pciDev->irq != 0xFF)
+            printf(" IRQ:%u ", pciDev->irq);
+        else
+            puts(" IRQ:-- ");
+
+        putch('\n');
+    }
 
     sti();
 

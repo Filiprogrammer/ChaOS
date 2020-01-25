@@ -50,18 +50,18 @@ typedef struct pciBasicAddressRegister {
 } pciBar_t;
 
 typedef struct pciDev {
-    uint8_t number;
-    uint8_t bus;
-    uint8_t device;
-    uint8_t func;
-    uint16_t vendorID;
-    uint16_t deviceID;
-    uint8_t classID;
-    uint8_t subclassID;
-    uint8_t interfaceID;
-    uint8_t revID;
-    uint8_t irq;
-    pciBar_t bar[6];
+    uint16_t  vendorID;
+    uint16_t  deviceID;
+    uint8_t   classID;
+    uint8_t   subclassID;
+    uint8_t   interfaceID;
+    uint8_t   revID;
+    uint8_t   bus;
+    uint8_t   device;
+    uint8_t   func;
+    uint8_t   irq;
+    uint8_t   interruptPin;
+    pciBar_t  bar[6];;
 } pciDev_t;
 
 #endif

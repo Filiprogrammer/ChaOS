@@ -1,196 +1,234 @@
 #include "pci.h"
+#include "os.h"
 
-listHead_t* pciDev_List;
+listHead_t* pciDevList = NULL;
 
-uint32_t pci_config_read( uint8_t bus, uint8_t device, uint8_t func, uint16_t content )
-{
-    // example: PCI_VENDOR_ID 0x0200 ==> length: 0x02 reg: 0x00 offset: 0x00
-    uint8_t length  = content >> 8;
-    uint8_t reg_off = content & 0x00FF;
-    uint8_t reg     = reg_off & 0xFC;     // bit mask: 11111100b
-    uint8_t offset  = reg_off % 0x04;     // remainder of modulo operation provides offset
+void pci_scanBus(uint8_t bus);
 
-    outportl(PCI_CONFIGURATION_ADDRESS,
-        0x80000000
-        | (bus    << 16)
-        | (device << 11)
-        | (func   <<  8)
-        | (reg         ));
+uint8_t pci_configReadByte(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
+    pci_config_addr_reg_t addr;
+    addr.busNumb = bus;
+    addr.devNumb = slot;
+    addr.funcNumb = func;
+    addr.registerOffset = offset & 0xFC;
+    addr.enable = true;
 
-    // use offset to find searched content
-    uint32_t readVal = inportl(PCI_CONFIGURATION_DATA) >> (8 * offset);
+    outportl(PCI_CONFIG_ADDRESS, (uint32_t)(*(uint32_t*)&addr));
 
-    switch(length)
-    {
-        case 1:
-            readVal &= 0x000000FF;
-        break;
-        case 2:
-            readVal &= 0x0000FFFF;
-        break;
-        case 4:
-            readVal &= 0xFFFFFFFF;
-        break;
-    }
-    return readVal;
+    uint32_t tmp = inportl(PCI_CONFIG_DATA);
+
+    return (tmp >> ((offset % 4) * 8));
 }
 
-void pci_config_write_dword( uint8_t bus, uint8_t device, uint8_t func, uint8_t reg, uint32_t val )
-{
-    outportl(PCI_CONFIGURATION_ADDRESS,
-        0x80000000
-        | (bus     << 16)
-        | (device  << 11)
-        | (func    <<  8)
-        | (reg & 0xFC   ));
+uint16_t pci_configReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
+    pci_config_addr_reg_t addr;
+    addr.busNumb = bus;
+    addr.devNumb = slot;
+    addr.funcNumb = func;
+    addr.registerOffset = offset & 0xFC;
+    addr.enable = true;
 
-    outportl(PCI_CONFIGURATION_DATA, val);
+    outportl(PCI_CONFIG_ADDRESS, (uint32_t)(*(uint32_t*)&addr));
+
+    uint32_t tmp = inportl(PCI_CONFIG_DATA);
+
+    return (tmp >> ((offset % 4) * 8));
 }
 
-void pciScan()
-{
-    if(!pciDev_List) pciDev_List = list_create();
-    
-    uint32_t i;
-    uint8_t  bus                = 0; // max. 256
-    uint8_t  device             = 0; // max.  32
-    uint8_t  func               = 0; // max.   8
+uint32_t pci_configReadDword(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
+    pci_config_addr_reg_t addr;
+    addr.busNumb = bus;
+    addr.devNumb = slot;
+    addr.funcNumb = func;
+    addr.registerOffset = offset & 0xFC;
+    addr.enable = true;
 
-    uint32_t pciBar             = 0; // helper variable for memory size
-    uint32_t EHCI_data          = 0; // helper variable for EHCI_data
+    outportl(PCI_CONFIG_ADDRESS, (uint32_t)(*(uint32_t*)&addr));
 
-    for(bus=0;bus<8;++bus)
-    {
-        for(device=0;device<32;++device)
-        {
-            for(func=0;func<8;++func)
-            {
-                uint16_t vendorID = pci_config_read( bus, device, func, PCI_VENDOR_ID);
-                if( vendorID && (vendorID != 0xFFFF) )
-                {
-                    pciDev_t* pciDev = malloc(sizeof(pciDev_t), 0);
-                    pciDev->vendorID     = vendorID;
-                    pciDev->deviceID     = pci_config_read( bus, device, func, PCI_DEVICE_ID  );
-                    pciDev->classID      = pci_config_read( bus, device, func, PCI_CLASS      );
-                    pciDev->subclassID   = pci_config_read( bus, device, func, PCI_SUBCLASS   );
-                    pciDev->interfaceID  = pci_config_read( bus, device, func, PCI_INTERFACE  );
-                    pciDev->revID        = pci_config_read( bus, device, func, PCI_REVISION   );
-                    pciDev->irq          = pci_config_read( bus, device, func, PCI_IRQLINE    );
-                    pciDev->bar[0].baseAddress = pci_config_read( bus, device, func, PCI_BAR0 );
-                    pciDev->bar[1].baseAddress = pci_config_read( bus, device, func, PCI_BAR1 );
-                    pciDev->bar[2].baseAddress = pci_config_read( bus, device, func, PCI_BAR2 );
-                    pciDev->bar[3].baseAddress = pci_config_read( bus, device, func, PCI_BAR3 );
-                    pciDev->bar[4].baseAddress = pci_config_read( bus, device, func, PCI_BAR4 );
-                    pciDev->bar[5].baseAddress = pci_config_read( bus, device, func, PCI_BAR5 );
+    return inportl(PCI_CONFIG_DATA);
+}
 
-                    // Valid Device
-                    pciDev->bus    = bus;
-                    pciDev->device = device;
-                    pciDev->func   = func;
+void pci_configWriteByte(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint8_t val) {
+    pci_config_addr_reg_t addr;
+    addr.busNumb = bus;
+    addr.devNumb = slot;
+    addr.funcNumb = func;
+    addr.registerOffset = offset & 0xFC;
+    addr.enable = true;
 
-                    // output to screen
-                    printf("%d:%d.%d\t dev:%x vend:%x",
-                        pciDev->bus, pciDev->device, pciDev->func, pciDev->deviceID, pciDev->vendorID );
+    outportl(PCI_CONFIG_ADDRESS, (uint32_t)(*(uint32_t*)&addr));
 
-                    if(pciDev->irq!=255)
-                    {
-                        printf(" IRQ:%d ", pciDev->irq );
-                    }
-                    else // "255 means "unknown" or "no connection" to the interrupt controller"
-                    {
-                        puts(" IRQ:-- ");
-                    }
+    outportb(PCI_CONFIG_DATA + (offset & 0x03), val);
+}
 
-                    // test on USB
-                    if( (pciDev->classID == 0x0C) && (pciDev->subclassID == 0x03) )
-                    {
-                        puts(" USB ");
-                        if( pciDev->interfaceID==0x00 ) { puts("UHCI ");   }
-                        else if( pciDev->interfaceID==0x10 ) { puts("OHCI ");   }
-                        else if( pciDev->interfaceID==0x20 ) { puts("EHCI ");   }
-                        else if( pciDev->interfaceID==0x30 ) { puts("XHCI ");   }
-                        else if( pciDev->interfaceID==0x80 ) { puts("no HCI "); }
-                        else if( pciDev->interfaceID==0xFE ) { puts("any HCI ");    }
+void pci_configWriteWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint16_t val) {
+    pci_config_addr_reg_t addr;
+    addr.busNumb = bus;
+    addr.devNumb = slot;
+    addr.funcNumb = func;
+    addr.registerOffset = offset & 0xFC;
+    addr.enable = true;
 
-                        for(i = 0; i < 6; ++i) // check USB BARs
-                        {
-                            pciDev->bar[i].memoryType = pciDev->bar[i].baseAddress & 0x01;
+    outportl(PCI_CONFIG_ADDRESS, (uint32_t)(*(uint32_t*)&addr));
 
-                            if(pciDev->bar[i].baseAddress) // check valid BAR
-                            {
-                                if(pciDev->bar[i].memoryType == 0)
-                                {
-                                    printf("%d:%X MEM ", i, pciDev->bar[i].baseAddress & 0xFFFFFFF0 );
-                                }
-                                if(pciDev->bar[i].memoryType == 1)
-                                {
-                                    printf("%d:%X I/O ", i, pciDev->bar[i].baseAddress & 0xFFFFFFFC );
-                                }
+    outportw(PCI_CONFIG_DATA + (offset & 0x01), val);
+}
 
-                                /// TEST Memory Size Begin
-                                cli();
-                                pci_config_write_dword  ( bus, device, func, PCI_BAR0 + 4*i, 0xFFFFFFFF );
-                                pciBar = pci_config_read( bus, device, func, PCI_BAR0 + 4*i             );
-                                pci_config_write_dword  ( bus, device, func, PCI_BAR0 + 4*i,
-                                                          pciDev->bar[i].baseAddress       );
-                                sti();
-                                pciDev->bar[i].memorySize = (~pciBar | 0x0F) + 1;
-                                printf("sz:%d ", pciDev->bar[i].memorySize );
-                                /// TEST Memory Size End
+void pci_configWriteDword(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint32_t val) {
+    pci_config_addr_reg_t addr;
+    addr.busNumb = bus;
+    addr.devNumb = slot;
+    addr.funcNumb = func;
+    addr.registerOffset = offset & 0xFC;
+    addr.enable = true;
 
-                                /// TEST EHCI Data Begin
-                                if(  (pciDev->interfaceID==0x20)   // EHCI
-                                   && pciDev->bar[i].baseAddress ) // valid BAR
-                                {
-                                    /*
-                                    Offset Size Mnemonic    Power Well   Register Name
-                                    00h     1   CAPLENGTH      Core      Capability Register Length
-                                    01h     1   Reserved       Core      N/A
-                                    02h     2   HCIVERSION     Core      Interface Version Number
-                                    04h     4   HCSPARAMS      Core      Structural Parameters
-                                    08h     4   HCCPARAMS      Core      Capability Parameters
-                                    0Ch     8   HCSP-PORTROUTE Core      Companion Port Route Description
-                                    */
+    outportl(PCI_CONFIG_ADDRESS, (uint32_t)(*(uint32_t*)&addr));
 
-                                    uint32_t bar = pciDev->bar[i].baseAddress & 0xFFFFFFF0;
+    outportw(PCI_CONFIG_DATA + offset, val);
+}
 
-                                    EHCI_data = *((volatile uint8_t* )(bar + 0x00));
-                                    printf("\nBAR%d CAPLENGTH:  %x \t\t",i, EHCI_data);
+void pci_checkFunction(uint8_t bus, uint8_t dev, uint8_t func) {
+    uint8_t class = pci_configReadByte(bus, dev, func, PCI_CLASS);
+    uint8_t subClass = pci_configReadByte(bus, dev, func, PCI_SUBCLASS);
+    uint8_t secondaryBus;
 
-                                    EHCI_data = *((volatile uint16_t*)(bar + 0x02));
-                                    printf(  "BAR%d HCIVERSION: %x \n",i, EHCI_data);
+    uint16_t vendorID = pci_configReadWord(bus, dev, func, PCI_VENDOR_ID);
 
-                                    EHCI_data = *((volatile uint32_t*)(bar + 0x04));
-                                    printf(  "BAR%d HCSPARAMS:  %X \t",i, EHCI_data);
+    if(vendorID != 0xFFFF) {
+        pciDev_t* pciDev = malloc(sizeof(pciDev_t), 0);
+        pciDev->bus = bus;
+        pciDev->device = dev;
+        pciDev->func = func;
+        pciDev->vendorID = vendorID;
+        pciDev->deviceID = pci_configReadWord(bus, dev, func, PCI_DEVICE_ID);
+        pciDev->class = pci_configReadByte(bus, dev, func, PCI_CLASS);
+        pciDev->subclass = pci_configReadByte(bus, dev, func, PCI_SUBCLASS);
+        pciDev->interfaceID = pci_configReadByte(bus, dev, func, PCI_PROG_IF);
+        pciDev->interruptPin = pci_configReadByte(bus, dev, func, PCI_INTERRUPT_PIN);
+        pciDev->irq = pci_configReadByte(bus, dev, func, PCI_INTERRUPT_LINE);
+        pciDev->revID = pci_configReadByte(bus, dev, func, PCI_REVISION_ID);
 
-                                    EHCI_data = *((volatile uint32_t*)(bar + 0x08));
-                                    printf(  "BAR%d HCCPARAMS:  %X \n",i, EHCI_data);
-                                }
-                                /// TEST EHCI Data End
-                            } // if
-                        } // for
-                    } // if
-                    putch('\n');
-                    list_append(pciDev_List, pciDev);
-                } // if pciVendor
+        uint8_t headerType = pci_configReadByte(bus, dev, 0, PCI_HEADER_TYPE);
 
-                // Bit 7 in header type (Bit 23-16) --> multifunctional
-                if( !(pci_config_read(bus, device, 0, PCI_HEADERTYPE) & 0x80) )
-                {
-                    break; // --> not multifunctional, only function 0 used
+        // Read BARs
+        if((headerType & 0x7F) == 0 || (headerType & 0x7F) == 1) {
+            uint8_t barCount = 0;
+
+            if((headerType & 0x7F) == 0)
+                barCount = 6;
+            else if((headerType & 0x7F) == 1)
+                barCount = 2;
+
+            for(uint8_t i = 0; i < 6; ++i) {
+                if(((headerType & 0x7F) == 1 && i >= 2) || (headerType & 0x7F) == 2) {
+                    pciDev->bar[i].memoryType = PCI_INVALID_BAR;
+                    continue;
                 }
-            } // for function
-        } // for device
-    } // for bus
-    putch('\n');
+
+                pciDev->bar[i].baseAddress = pci_configReadDword(bus, dev, func, 0x10 + i * 4);
+
+                // Check if BAR is valid
+                if(pciDev->bar[i].baseAddress) {
+                    uint32_t mask;
+
+                    if(pciDev->bar[i].baseAddress & 0x1) {
+                        pciDev->bar[i].memoryType = PCI_IO_SPACE; // I/O Space
+                        mask = 0xFFFFFFFC;
+                    } else {
+                        pciDev->bar[i].memoryType = PCI_MEM_SPACE; // Memory Space
+                        mask = 0xFFFFFFF0;
+                    }
+
+                    // Check memory size
+                    cli();
+                    pci_configWriteDword(bus, dev, func, 0x10 + i * 4, 0xFFFFFFFF);
+                    uint32_t tmp = pci_configReadDword(bus, dev, func, 0x10 + i * 4);
+                    pciDev->bar[i].memorySize = (~(tmp & mask)) + 1;
+                    sti();
+
+                    pciDev->bar[i].baseAddress &= mask;
+                } else {
+                    pciDev->bar[i].memoryType = PCI_INVALID_BAR;
+                }
+            }
+        }
+
+        list_append(pciDevList, pciDev);
+
+        if((class == 0x06) && (subClass == 0x04)) {
+            uint8_t headerType = pci_configReadByte(bus, dev, 0, PCI_HEADER_TYPE);
+
+            if((headerType & 0x7F) == 0) {
+                secondaryBus = pci_configReadByte(bus, dev, func, 0x19);
+                pci_scanBus(secondaryBus);
+            }
+        }
+    }
 }
 
+void pci_checkDevice(uint8_t bus, uint8_t dev) {
+    uint8_t headerType = pci_configReadByte(bus, dev, 0, PCI_HEADER_TYPE);
+    uint8_t funcCount = 8;
+
+    // if device is not multifunctional
+    if (!(headerType & 0x80))
+        funcCount = 1; // not multifunctional, only function 0 used
+
+    for(uint8_t i = 0; i < funcCount; ++i) {
+        pci_checkFunction(bus, dev, i);
+    }
+}
+
+void pci_scanBus(uint8_t bus) {
+    for(uint8_t i = 0; i < 32; ++i) {
+        pci_checkDevice(bus, i);
+    }
+}
+
+/**
+ * @brief Scan the PCI device tree
+ * 
+ */
+void pci_scan() {
+    if(pciDevList == NULL)
+        pciDevList = list_create();
+
+    uint8_t headerType = pci_configReadByte(0, 0, 0, PCI_HEADER_TYPE);
+
+    // if device is multifunctional
+    if (headerType & 0x80) {
+        // Multiple PCI Host controllers
+        for(uint8_t func = 0; func < 8; ++func) {
+            if(pci_configReadWord(0, 0, func, PCI_VENDOR_ID) != 0xFFFF)
+                break;
+
+            uint8_t bus = func;
+            pci_scanBus(bus);
+        }
+    } else {
+        // Single PCI Host controller
+        pci_scanBus(0);
+    }
+}
+
+/**
+ * @brief Get information about a PCI device.
+ * 
+ * @param i index of the PCI device
+ * @param pciDev pointer to a block of memory where to store the resulting pciDev_t structure
+ * @return true if device at the given index was found.
+ * @return false if no device at the given index was found.
+ */
 bool pci_getDevice(uint32_t i, pciDev_t* pciDev) {
-    if(pciDev_List && pciDev) {
-        pciDev_t* pciDevice = list_getElement(pciDev_List, i);
-        if(pciDevice == NULL) return false;
+    if(pciDevList && pciDev) {
+        pciDev_t* pciDevice = list_getElement(pciDevList, i);
+
+        if(pciDevice == NULL)
+            return false;
+
         memcpy(pciDev, pciDevice, sizeof(pciDev_t));
         return true;
     }
+
     return false;
 }
