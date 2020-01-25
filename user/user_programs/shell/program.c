@@ -376,10 +376,12 @@ int main() {
                     } else {
                         puts("File found\n");
                         settextcolor(6, 0);
-                        uint8_t file_buffer[file_inst.size];
-                        file_readContents(&file_inst, file_buffer, 0, file_inst.size);
-                        for (uint32_t i = 0; i < file_inst.size; ++i) {
-                            putch(file_buffer[i]);
+                        for(uint32_t i = 0; i < file_inst.size; i += 0x8000) {
+                            uint32_t file_buffer_size = MIN(0x8000, file_inst.size - i);
+                            uint8_t file_buffer[file_buffer_size];
+                            file_readContents(&file_inst, file_buffer, i, file_buffer_size);
+                            for (uint32_t j = 0; j < file_buffer_size; ++j)
+                                putch(file_buffer[j]);
                         }
                     }
                 }
