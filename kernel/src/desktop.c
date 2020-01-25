@@ -565,7 +565,7 @@ inline uint8_t colorToRRRGGGBB(uint32_t rgb){
 uint32_t* readBMP32(char* filepath) {
     file_t file_inst = {{0}, {0}, 0, 0};
     if(!file_find(&file_inst, filepath)) return NULL;
-    if(file_inst.size > 0x100000) return NULL; // Less than 16 MiB
+    if(file_inst.size > 0x100000) return NULL; // Less than 1 MiB
     
     uint8_t* file_contents = malloc(file_inst.size, 0);
     file_readContents(&file_inst, file_contents, 0, file_inst.size);
@@ -579,7 +579,7 @@ uint32_t* readBMP32(char* filepath) {
     
     if(biWidth*abs(biHeight) > 0x100000) return NULL; // Limit resolution
     
-    uint32_t* picture = malloc(2+4*biWidth*abs(biHeight), 0);
+    uint32_t* picture = malloc(4*(2+biWidth*abs(biHeight)), 0);
     
     picture[0] = biWidth;
     picture[1] = abs(biHeight);
@@ -682,13 +682,15 @@ uint32_t* readBMP32(char* filepath) {
             }
         }
     }
+
+    free(file_contents);
     return picture;
 }
 
 uint8_t* readBMP(char* filepath) {
     file_t file_inst = {{0}, {0}, 0, 0};
     if(!file_find(&file_inst, filepath)) return NULL;
-    if(file_inst.size > 0x100000) return NULL; // Less than 16 MiB
+    if(file_inst.size > 0x100000) return NULL; // Less than 1 MiB
     
     uint8_t* file_contents = malloc(file_inst.size, 0);
     file_readContents(&file_inst, file_contents, 0, file_inst.size);
@@ -816,6 +818,8 @@ uint8_t* readBMP(char* filepath) {
             }
         }
     }
+
+    free(file_contents);
     return picture;
 }
 
