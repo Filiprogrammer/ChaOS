@@ -128,6 +128,9 @@ inline uint8_t colorToRRRGGGBB(uint32_t rgb) {
 }
 
 bool video_set_mode(uint8_t mode) {
+    if(video_mode == mode)
+        return true;
+
     uint8_t* ret = vga_set_mode(mode);
     if (ret == 0) return false;
     vidmem = ret;
