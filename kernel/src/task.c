@@ -219,19 +219,17 @@ void exitCurrentTask() {
 void NM_fxsr(registers_t* r) {
     __asm__ volatile("clts");  // CLearTS: reset the TS bit (no. 3) in CR0 to disable #NM
 
-    // save FPU data ...
+    // save FPU data
     if (FPUTask)  // fxsave to FPUTask->FPUptr
-        __asm__ volatile("fsave %0" ::"m"(FPUTask->FPUPtr));
-        //__asm__ volatile("fxsave %0" :: "m" (*(uint8_t*)(FPUTask->fpu)));
+        __asm__ volatile("fxsave (%0)" ::"r"(FPUTask->FPUPtr));
 
     FPUTask = current_task;  // store the last task using FPU
 
-    // restore FPU data ...
-    if (current_task->FPUPtr)
-        __asm__ volatile("frstor %0" ::"m"(current_task->FPUPtr));
-        //__asm__ volatile("fxrstor %0" :: "m" (*(uint8_t*)(current_task->fpu)));
+    // restore FPU data
+    if (current_task->FPUPtr)  // fxrstor from current_task->FPUptr
+        __asm__ volatile("fxrstor (%0)" ::"r"(current_task->FPUPtr));
     else
-        current_task->FPUPtr = malloc(108, 4);
+        current_task->FPUPtr = malloc(512, 16);
 }
 
 uint32_t task_switch(uint32_t esp) {
