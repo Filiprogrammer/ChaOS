@@ -25,7 +25,7 @@ for %%a in ("%user_programs_paths: =" "%") do (
 )
 :imageBuilt
 del HDImage.vdi >nul 2>&1
-VBoxManage convertfromraw -format VDI HDImage.bin HDImage.vdi || cecho {0C}Failed building VDI HD image{\n0F}&&goto ERROR
+VBoxManage convertfromraw --uuid d32a4d71-7ccb-4864-a684-c9d7c7a425f5 -format VDI HDImage.bin HDImage.vdi || cecho {0C}Failed building VDI HD image{\n0F}&&goto ERROR
 cecho {0A}HD Image was built{\n0F}
 goto eof
 
