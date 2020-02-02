@@ -98,7 +98,7 @@ void timer_install() {
 }
 
 void timer_uninstall() {
-    irq_uninstall_handler(0);
+    irq_uninstall_handler(0, timer_handler);
 }
 
 /**

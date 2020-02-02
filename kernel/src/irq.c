@@ -1,14 +1,64 @@
 #include "os.h"
 #include "task.h"
+#include "list.h"
+
+typedef struct {
+    void* func;
+    bool hasArg;
+    void* arg;
+} irq_handler_t;
+
+typedef struct {
+    size_t calls;
+    size_t handlerCount;
+    listHead_t* handlers;
+} irq_t;
 
 /* Array of function pointers handling custom IRQ handlers for a given IRQ */
-void* irq_routines[256];
+irq_t irq_routines[256] = {{0}};
 
 /* Implement a custom IRQ handler for the given IRQ */
-void irq_install_handler(int32_t ir, void (*handler)(registers_t* r)) {irq_routines[ir+32] = handler;}
+void irq_install_handler(int32_t ir, void (*handler)(registers_t* r)) {
+    listHead_t* handlers = irq_routines[ir + 32].handlers;
+
+    if (handlers == NULL){
+        handlers = list_create();
+        irq_routines[ir + 32].handlers = handlers;
+    }
+
+    irq_handler_t* irqHandler = malloc(sizeof(irq_handler_t), 0);
+    irqHandler->hasArg = false;
+    irqHandler->func = handler;
+    list_append(handlers, irqHandler);
+    irq_routines[ir + 32].handlerCount++;
+}
+
+void irq_install_handler_arg(int32_t ir, void (*handler)(registers_t* r, void* arg), void* arg) {
+    listHead_t* handlers = irq_routines[ir + 32].handlers;
+
+    if (handlers == NULL){
+        handlers = list_create();
+        irq_routines[ir + 32].handlers = handlers;
+    }
+
+    irq_handler_t* irqHandler = malloc(sizeof(irq_handler_t), 0);
+    irqHandler->hasArg = true;
+    irqHandler->arg = arg;
+    irqHandler->func = handler;
+    list_append(handlers, irqHandler);
+    irq_routines[ir + 32].handlerCount++;
+}
 
 /* Clear the custom IRQ handler */
-void irq_uninstall_handler(int32_t ir) {irq_routines[ir] = 0;}
+void irq_uninstall_handler(int32_t ir, void* handler) {
+    listHead_t* handlers = irq_routines[ir].handlers;
+
+    for (uint32_t i = 1; i <= irq_routines[ir].handlerCount; ++i) {
+        irq_handler_t* irqHandler = list_getElement(handlers, i);
+        if (irqHandler->func == handler)
+            list_deleteAt(handlers, i);
+    }
+}
 
 /* Message string corresponding to the exception number 0-31: exception_messages[interrupt_number] */
 char* exception_messages[] =
@@ -77,11 +127,22 @@ registers_t* irq_handler(registers_t* r) {
     if(ODA.ts_flag && (r->int_no == 0x20 || r->int_no == 0x7E))
         r = (registers_t*) task_switch((uint32_t) r); //new task's esp
 
-    void (*handler)(registers_t* r);
-    handler = irq_routines[r->int_no];
+    irq_t irq = irq_routines[r->int_no];
+    irq.calls++;
 
-    if(handler)
-        handler(r);
+    for (uint32_t i = 1; i <= irq.handlerCount; ++i) {
+        irq_handler_t* irqHandler = list_getElement(irq.handlers, i);
+
+        if (irqHandler->hasArg) {
+            void (*func)(registers_t* r, void* arg);
+            func = irqHandler->func;
+            func(r, irqHandler->arg);
+        } else {
+            void (*func)(registers_t* r);
+            func = irqHandler->func;
+            func(r);
+        }
+    }
 
     if(r->int_no >= 40)
         outportb(0xA0, 0x20);

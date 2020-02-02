@@ -124,7 +124,8 @@ extern void keyboard_install();
 
 extern registers_t* irq_handler(registers_t* esp);
 extern void irq_install_handler(int32_t irq, void (*handler)(registers_t* r));
-extern void irq_uninstall_handler(int32_t irq);
+extern void irq_install_handler_arg(int32_t ir, void (*handler)(registers_t* r, void* arg), void* arg);
+extern void irq_uninstall_handler(int32_t ir, void* handler);
 
 // heap.c
 extern void heap_install();
