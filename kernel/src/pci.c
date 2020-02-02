@@ -1,5 +1,6 @@
 #include "pci.h"
 #include "os.h"
+#include "ehci.h"
 
 listHead_t* pciDevList = NULL;
 
@@ -161,6 +162,18 @@ void pci_checkFunction(uint8_t bus, uint8_t dev, uint8_t func) {
             if((headerType & 0x7F) == 0) {
                 secondaryBus = pci_configReadByte(bus, dev, func, 0x19);
                 pci_scanBus(secondaryBus);
+            }
+        } else if((class == 0x0C) && (subClass == 0x03)) {
+            // USB Controller
+            if(pciDev->interfaceID == 0x00) {
+                // UHCI
+            } else if(pciDev->interfaceID == 0x10) {
+                // OHCI
+            } else if(pciDev->interfaceID == 0x20) {
+                // EHCI (USB2)
+                ehci_create(pciDev);
+            } else if(pciDev->interfaceID == 0x30) {
+                // XHCI (USB3)
             }
         }
     }

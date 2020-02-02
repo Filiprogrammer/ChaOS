@@ -167,6 +167,12 @@ enum {
 
 extern listHead_t* pciDevList;
 
+uint8_t pci_configReadByte(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+uint16_t pci_configReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+uint32_t pci_configReadDword(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+void pci_configWriteByte(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint8_t val);
+void pci_configWriteWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint16_t val);
+void pci_configWriteDword(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint32_t val);
 void pci_scan();
 bool pci_getDevice(uint32_t i, pciDev_t* pciDev);
 
