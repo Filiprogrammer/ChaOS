@@ -110,6 +110,15 @@ void physSetBit(uint32_t addr, bool reserved) {
     phys_reservationTable[pagenr / 32] = (phys_reservationTable[pagenr / 32] & ~(1 << (pagenr % 32))) | (reserved << (pagenr % 32));
 }
 
+bool physGetBit(uint32_t addr) {
+    uint32_t pagenr = alignUp(addr, PAGESIZE) / PAGESIZE;
+
+    if (pagenr >= phys_reservationTable_size)
+        return false;
+
+    return (phys_reservationTable[pagenr / 32] | (1 << (pagenr % 32))) >> (pagenr % 32);
+}
+
 /**
  * @brief Allocate memory of given size at given virtual address, allocate physical memory and map it.
  * 
@@ -151,6 +160,50 @@ bool paging_allocVirt(page_directory_t* pd, void* addr, size_t size, uint32_t fl
         }
 
         table->values[pagenr & 0x3FF] = physAlloc() | (flags & 0xFFF) | MEM_PRESENT;
+    }
+
+    return true;
+}
+
+bool paging_allocIdentMap(page_directory_t* pd, void* addr, size_t size, uint32_t flags) {
+    ASSERT(((uint32_t)addr % PAGESIZE) == 0);
+    ASSERT((size % PAGESIZE) == 0);
+
+    if (pd == NULL)
+        pd = kernel_pd;
+
+    uint32_t pageCount = size >> 12;
+
+    for (uint32_t i = 0; i < pageCount; ++i) {
+        uint32_t pagenr = ((uint32_t)addr >> 12) + i;
+
+        if (physGetBit(pagenr * PAGESIZE)) {
+            printf("Physical page at: %X already allocated", pagenr * PAGESIZE);
+            paging_freeVirt(pd, addr, i * PAGESIZE);
+            return false;
+        }
+
+        page_directory_entry_t* pde = (page_directory_entry_t*)&(pd->values[pagenr >> 10]);  // Pointer because otherwise it would make a local copy and not write to the original address
+        page_table_t* table;
+        if (pde->present) {
+            table = pd->virtTables[pagenr >> 10];
+            if (table->entries[pagenr & 0x3FF].present) {
+                printf("Page at virtual address: %X already exists", pagenr << 12);
+                paging_freeVirt(pd, addr, i * PAGESIZE);
+                return false;
+            }
+        } else {
+            table = malloc(sizeof(page_table_t), PAGESIZE);
+            memset(table, 0, sizeof(page_directory_t));
+            pde->page_table_phys_addr = paging_getPhysAddr(kernel_pd, table) >> 12;
+            pde->present = true;
+            pde->writable = true;
+            pde->privilege = (flags & MEM_USER) == MEM_USER;
+            pd->virtTables[pagenr >> 10] = table;
+        }
+
+        physSetBit(pagenr, true);
+        table->values[pagenr & 0x3FF] = (uint32_t)(pagenr * PAGESIZE) | (flags & 0xFFF) | MEM_PRESENT;
     }
 
     return true;

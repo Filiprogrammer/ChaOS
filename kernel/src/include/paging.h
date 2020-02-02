@@ -57,6 +57,7 @@ typedef struct {
 uint32_t paging_install();
 void paging_switch(page_directory_t* pd);
 bool paging_allocVirt(page_directory_t* pd, void* addr, size_t size, uint32_t flags);
+bool paging_allocIdentMap(page_directory_t* pd, void* addr, size_t size, uint32_t flags);
 void paging_freeVirt(page_directory_t* pd, void* addr, size_t size);
 page_directory_t* paging_getActivePageDirectory();
 page_directory_t* paging_createPageDirectory();
