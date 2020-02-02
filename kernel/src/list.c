@@ -62,6 +62,47 @@ void list_delete(listHead_t* list, void* data) {
     }
 }
 
+void list_deleteAtWithoutData(listHead_t* list, uint32_t pos) {
+    element_t* cur = list->head;
+    uint32_t index = 0;
+
+    while (cur != 0 && cur->next != 0) {
+        ++index;
+
+        if (pos == index) {
+            element_t* temp = cur->next;
+
+            if (cur->next == list->tail)
+                list->tail = cur;
+
+            cur->next = cur->next->next;
+            free(temp);
+        }
+        cur = cur->next;
+    }
+}
+
+void list_deleteAt(listHead_t* list, uint32_t pos) {
+    element_t* cur = list->head;
+    uint32_t index = 0;
+
+    while (cur != 0 && cur->next != 0) {
+        ++index;
+
+        if (pos == index) {
+            element_t* temp = cur->next;
+
+            if (cur->next == list->tail)
+                list->tail = cur;
+
+            cur->next = cur->next->next;
+            free(temp->data);
+            free(temp);
+        }
+        cur = cur->next;
+    }
+}
+
 void list_deleteAllWithoutData(struct listHead* hd) {
     element_t* cur = hd->head;
     element_t* nex;
@@ -112,22 +153,18 @@ void list_show(listHead_t* hd) {
  */
 void* list_getElement(listHead_t* hd, uint32_t pos) {
     element_t* cur = hd->head;
-    void* dat = 0;
 
-    if (!cur) {
-        puts("The list is empty.");
-    } else {
-        uint32_t index = 0;
-        while (cur) {
-            ++index;
-            if (index == pos) {
-                dat = cur->data;
-            }
-            cur = cur->next;
-        }
+    uint32_t index = 1;
+
+    while (cur) {
+        if (index == pos)
+            return cur->data;
+
+        ++index;
+        cur = cur->next;
     }
 
-    return dat;
+    return NULL;
 }
 
 /**

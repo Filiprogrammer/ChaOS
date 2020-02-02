@@ -19,6 +19,8 @@ typedef struct listHead {
 listHead_t* list_create();
 bool list_append(listHead_t* hd, void* data);
 void list_delete(listHead_t* list, void* data);
+void list_deleteAtWithoutData(listHead_t* list, uint32_t pos);
+void list_deleteAt(listHead_t* list, uint32_t pos);
 void list_deleteAllWithoutData(listHead_t* list);
 void list_deleteAll(listHead_t* hd);
 void list_show(listHead_t* hd);
