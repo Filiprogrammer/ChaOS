@@ -13,6 +13,10 @@
 #include "pc_speaker.h"
 #include "keyboard.h"
 
+#ifdef __TEST
+    #include "listTest.h"
+#endif
+
 // Operating system common Data Area
 oda_t ODA;
 
@@ -144,6 +148,11 @@ int main()
     }
 
     printf("Boot partition: %c%c\n", ODA.bootDev + 'a', ODA.bootPart + '1');
+
+#ifdef __TEST
+    puts("Running tests:\n");
+    test_list_main();
+#endif
 
     ODA.ts_flag = 1; // enable task_switching
     puts("Executing STARTUP.ELF...");

@@ -1,6 +1,6 @@
 @echo off
 cd %~d0%~p0
-call BUILD.BAT %1 || goto ERROR
+call BUILD.BAT %1 %2 || goto ERROR
 
 cecho {0A}Building Floppy Image...{\n0F}
 mkdosfs -fd -spt18 -heads2 -cyls80 -fats2 -fatz12 -spc1 -noverb -b stage1_bootloader/boot.bin FloppyImage.bin || goto ERROR

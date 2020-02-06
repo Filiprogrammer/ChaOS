@@ -1,6 +1,6 @@
 @echo off
 cd %~d0%~p0
-call BUILD.BAT %1 || goto ERROR
+call BUILD.BAT %1 %2 || goto ERROR
 
 cd efi_bootloader
 cecho {0A}Building EFI Bootloader...{\n0F}

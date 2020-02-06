@@ -1,6 +1,6 @@
 @echo off
 cd %~d0%~p0
-call BUILD.BAT %1 || goto ERROR
+call BUILD.BAT %1 %2 || goto ERROR
 
 cecho {0A}Building HD Image with MBR...{\n0F}
 mkdosfs -hd -mbr -fats2 -fatz12 -spc1 -z2 -noverb -b stage1_bootloader/boot.bin -m mbr_bootloader/boot_mbr.bin HDImage.bin || goto ERROR

@@ -1,41 +1,67 @@
-SOURCES = kernel.asm $(filter-out kernel.asm ,$(wildcard *.asm *.c))
-OBJECTS = $(addprefix ../obj/,$(addsuffix .o,$(basename $(SOURCES))))
+ifeq ($(TEST), 1)
+SOURCESTEST = $(wildcard src-test/*.c)
+OBJECTSTEST = $(addprefix obj-test/,$(addsuffix .o,$(notdir $(basename $(SOURCESTEST)))))
+endif
+
+SOURCES = src/kernel.asm $(filter-out src/kernel.asm ,$(wildcard src/*.asm src/*.c))
+OBJECTS = $(addprefix obj/,$(addsuffix .o,$(notdir $(basename $(SOURCES)))))
 
 ASFLAGSOBJ= -O32 -f elf
 ASFLAGSOBJDEBUG= -O32 -f elf -ggdb
 NASM = nasmw
 MAKE = mingw32-make
 
-CFLAGS= -std=c99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Iinclude
-CFLAGSDEBUG= -std=c99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Iinclude -ggdb
+CFLAGS= -std=c99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Isrc/include
+CFLAGSDEBUG= -std=c99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Isrc/include -ggdb
 CC= i586-elf-gcc
 
-LDFLAGS= -T ../kernel.ld -Map ../kernel.map -nostdinc
-LDFLAGSDEBUG = -T ../kernel_debug.ld -Map ../kernel.map -nostdinc
+LDFLAGS= -T kernel.ld -Map kernel.map -nostdinc
+LDFLAGSDEBUG = -T kernel_debug.ld -Map kernel.map -nostdinc
 LD= i586-elf-ld
 
 OBJCOPY= i586-elf-objcopy
 
-../obj/%.o: %.asm
+obj/%.o: src/%.asm
 	@cecho {09}Assembling {#}{\t}==^> $<...
-ifdef DEBUG
+ifeq ($(DEBUG), 1)
 	@$(NASM) $(ASFLAGSOBJDEBUG) $< -o $@
 else
 	@$(NASM) $(ASFLAGSOBJ) $< -o $@
 endif
 	@cecho .{0a}done{#}{\n}
 
-../obj/%.o: %.c
+obj/%.o: src/%.c
 	@cecho {09}Compiling {#}{\t}==^> $<...
-ifdef DEBUG
+ifeq ($(TEST), 1)
+ifeq ($(DEBUG), 1)
+	@$(CC) $(CFLAGSDEBUG) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -Isrc-test/include -D__TEST -c -o $@ $<
+else
+	@$(CC) $(CFLAGS) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -Isrc-test/include -D__TEST -c -o $@ $<
+endif
+else
+ifeq ($(DEBUG), 1)
 	@$(CC) $(CFLAGSDEBUG) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -c -o $@ $<
 else
 	@$(CC) $(CFLAGS) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -c -o $@ $<
 endif
+endif
 	@cecho .{0a}done{#}{\n}
 
-../chaoskrn.sys: $(OBJECTS)
-ifdef DEBUG
+obj-test/%.o: src-test/%.c
+	@cecho {09}Compiling test {#}{\t}==^> $<...
+ifeq ($(DEBUG), 1)
+	@$(CC) $(CFLAGSDEBUG) -Isrc-test/include -c -o $@ $<
+else
+	@$(CC) $(CFLAGS) -Isrc-test/include -c -o $@ $<
+endif
+	@cecho .{0a}done{#}{\n}
+
+ifeq ($(TEST), 1)
+chaoskrn.sys: $(OBJECTS) $(OBJECTSTEST)
+else
+chaoskrn.sys: $(OBJECTS)
+endif
+ifeq ($(DEBUG), 1)
 	@cecho {09}Linking Kernel{#}{\t}==^> chaoskrn.sys_debug...
 	@$(LD) $(LDFLAGSDEBUG) $+ -o $@_debug
 	@cecho .{0a}done{#}{\n}

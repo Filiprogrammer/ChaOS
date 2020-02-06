@@ -60,7 +60,7 @@ set errorlevel=0
 ::Kernel
 cd ..\..\kernel
 cecho {0A}Building kernel...{\n0F}
-call BUILD.BAT %1 || cecho {0C}Failed building kernel{\n0F}&&goto ERROR
+call BUILD.BAT %1 %2 || cecho {0C}Failed building kernel{\n0F}&&goto ERROR
 cecho {0A}Kernel was built{\n0F}
 
 cd ..
