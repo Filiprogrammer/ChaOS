@@ -11,8 +11,8 @@ ASFLAGSOBJDEBUG= -O32 -f elf -ggdb
 NASM = nasmw
 MAKE = mingw32-make
 
-CFLAGS= -std=c99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Isrc/include
-CFLAGSDEBUG= -std=c99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Isrc/include -ggdb
+CFLAGS= -std=gnu99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Isrc/include
+CFLAGSDEBUG= -std=gnu99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Isrc/include -ggdb
 CC= i586-elf-gcc
 
 LDFLAGS= -T kernel.ld -Map kernel.map -nostdinc
