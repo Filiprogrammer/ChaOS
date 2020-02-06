@@ -11,7 +11,6 @@
 #include "fileManager.h"
 #include "time.h"
 #include "pc_speaker.h"
-#include "version.h"
 #include "keyboard.h"
 
 // Operating system common Data Area

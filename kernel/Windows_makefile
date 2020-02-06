@@ -28,9 +28,9 @@ endif
 ../obj/%.o: %.c
 	@cecho {09}Compiling {#}{\t}==^> $<...
 ifdef DEBUG
-	@$(CC) $(CFLAGSDEBUG) -c -o $@ $<
+	@$(CC) $(CFLAGSDEBUG) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -c -o $@ $<
 else
-	@$(CC) $(CFLAGS) -c -o $@ $<
+	@$(CC) $(CFLAGS) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -c -o $@ $<
 endif
 	@cecho .{0a}done{#}{\n}
 

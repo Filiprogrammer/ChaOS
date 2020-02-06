@@ -6,7 +6,10 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/kernel/src/include"
             ],
-            "defines": [],
+            "defines": [
+                "__VERSION_STRING=\"ChaOS [Ver 0.2.yymmdd] made by Filiprogrammer\\n\"",
+                "__VERSION_CHECKSUM=0xAB"
+            ],
             "compilerPath": "${workspaceFolder}/tools/crosstools-complete/bin/i586-elf-gcc.exe",
             "cStandard": "c99",
             "cppStandard": "c++98",
