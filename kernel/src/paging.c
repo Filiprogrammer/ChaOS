@@ -25,7 +25,7 @@ uint32_t* phys_reservationTable = NULL;
 uint32_t phys_reservationTable_size = 0;
 uint32_t phys_reservationTable_index = 0;
 
-#define KERNEL_AREA_SIZE 0x1400000 // First 20 MiB
+#define KERNEL_AREA_SIZE 0x1400000  // First 20 MiB
 #define MEMORY_MAP_ADDRESS 0x1000
 #define MEMORY_MAP_SIZE_ADDRESS 0xFFE
 
@@ -33,18 +33,19 @@ uint32_t phys_reservationTable_index = 0;
 
 void paging_toggle(bool enable) {
     uint32_t cr0;
-    __asm__ volatile("mov %%cr0, %0": "=r"(cr0));
+    __asm__ volatile("mov %%cr0, %0"
+                     : "=r"(cr0));
     cr0 = (cr0 & ~0x80000000) | (enable << 31);
-    __asm__ volatile("mov %0, %%cr0":: "r"(cr0));
+    __asm__ volatile("mov %0, %%cr0" ::"r"(cr0));
 }
 
 uint32_t paging_getPhysAddr(page_directory_t* pd, void* virtAddr) {
-    uint32_t pagenr = (uint32_t) virtAddr >> 12;
+    uint32_t pagenr = (uint32_t)virtAddr >> 12;
 
-    if(pd->values[pagenr >> 10] & MEM_PRESENT) {
+    if (pd->entries[pagenr >> 10].present) {
         page_table_t* table = pd->virtTables[pagenr >> 10];
         page_table_entry_t tableEntry = table->entries[pagenr & 0x3FF];
-        if(tableEntry.present)
+        if (tableEntry.present)
             return (tableEntry.page_phys_addr << 12) | ((uint32_t)virtAddr & 0xFFF);
     }
     return NULL;
@@ -56,20 +57,20 @@ uint32_t paging_getPhysAddr(page_directory_t* pd, void* virtAddr) {
  * @param pd The page directory to switch to
  */
 void paging_switch(page_directory_t* pd) {
-    if(pd == NULL)
+    if (pd == NULL)
         pd = kernel_pd;
 
-    if(pd != active_pd) {
+    if (pd != active_pd) {
         active_pd = pd;
         __asm__ volatile("mov %0, %%cr3" : : "r"(paging_getPhysAddr(active_pd, pd)));
     }
 }
 
 uint32_t physAlloc() {
-    for(; phys_reservationTable_index < phys_reservationTable_size; ++phys_reservationTable_index) {
-        if(phys_reservationTable[phys_reservationTable_index] != 0xFFFFFFFF) {
+    for (; phys_reservationTable_index < phys_reservationTable_size; ++phys_reservationTable_index) {
+        if (phys_reservationTable[phys_reservationTable_index] != 0xFFFFFFFF) {
             uint32_t bitnr;
-            if(phys_reservationTable[phys_reservationTable_index] == 0)
+            if (phys_reservationTable[phys_reservationTable_index] == 0)
                 bitnr = 0;
             else
                 bitnr = bitScanReverse(phys_reservationTable[phys_reservationTable_index]) + 1;
@@ -86,10 +87,10 @@ void physSetBits(uint32_t addr_begin, uint32_t addr_end, bool reserved) {
     uint32_t start = alignUp(addr_begin, PAGESIZE) / PAGESIZE;
     uint32_t end   = alignDown(addr_end, PAGESIZE) / PAGESIZE;
 
-    if(start == end)
+    if (start == end)
         return;
 
-    if((!reserved) && (start / 32 < phys_reservationTable_index))
+    if ((!reserved) && (start / 32 < phys_reservationTable_index))
         phys_reservationTable_index = start / 32;
 
     // Set all these bits
@@ -133,18 +134,18 @@ bool paging_allocVirt(page_directory_t* pd, void* addr, size_t size, uint32_t fl
     ASSERT(((uint32_t)addr % PAGESIZE) == 0);
     ASSERT((size % PAGESIZE) == 0);
 
-    if(pd == NULL)
+    if (pd == NULL)
         pd = kernel_pd;
 
     uint32_t pageCount = size >> 12;
 
-    for(uint32_t i = 0; i < pageCount; ++i) {
+    for (uint32_t i = 0; i < pageCount; ++i) {
         uint32_t pagenr = ((uint32_t)addr >> 12) + i;
-        page_directory_entry_t* pde = (page_directory_entry_t*) &(pd->values[pagenr >> 10]); // Pointer because otherwise it would make a local copy and not write to the original address
+        page_directory_entry_t* pde = &(pd->entries[pagenr >> 10]);  // Pointer because otherwise it would make a local copy and not write to the original address
         page_table_t* table;
-        if(pde->present) {
+        if (pde->present) {
             table = pd->virtTables[pagenr >> 10];
-            if(table->entries[pagenr & 0x3FF].present) {
+            if (table->entries[pagenr & 0x3FF].present) {
                 printf("Page at virtual address: %X already exists", pagenr << 12);
                 paging_freeVirt(pd, addr, i * PAGESIZE);
                 return false;
@@ -183,7 +184,7 @@ bool paging_allocIdentMap(page_directory_t* pd, void* addr, size_t size, uint32_
             return false;
         }
 
-        page_directory_entry_t* pde = (page_directory_entry_t*)&(pd->values[pagenr >> 10]);  // Pointer because otherwise it would make a local copy and not write to the original address
+        page_directory_entry_t* pde = &(pd->entries[pagenr >> 10]);  // Pointer because otherwise it would make a local copy and not write to the original address
         page_table_t* table;
         if (pde->present) {
             table = pd->virtTables[pagenr >> 10];
@@ -220,16 +221,16 @@ void paging_freeVirt(page_directory_t* pd, void* addr, size_t size) {
     ASSERT(((uint32_t)addr % PAGESIZE) == 0);
     ASSERT((size % PAGESIZE) == 0);
 
-    if(pd == NULL)
+    if (pd == NULL)
         pd = kernel_pd;
 
-    uint32_t pagenr = (uint32_t) addr >> 12;
+    uint32_t pagenr = (uint32_t)addr >> 12;
     uint32_t pagelast = pagenr + (size >> 12);
 
-    for(; pagenr < pagelast; ++pagenr) {
-        page_directory_entry_t* pde = (page_directory_entry_t*) &(pd->values[pagenr >> 10]);
-        if(pde->present) {
-            page_table_t* table = (page_table_t*) (pde->page_table_phys_addr << 12);
+    for (; pagenr < pagelast; ++pagenr) {
+        page_directory_entry_t* pde = &(pd->entries[pagenr >> 10]);  // Pointer because otherwise it would make a local copy and not write to the original address
+        if (pde->present) {
+            page_table_t* table = (page_table_t*)(pde->page_table_phys_addr << 12);
             uint32_t phys_addr = table->entries[pagenr & 0x3FF].page_phys_addr << 12;
             table->values[pagenr & 0x3FF] = 0;
             physSetBit(phys_addr, false);
@@ -238,15 +239,15 @@ void paging_freeVirt(page_directory_t* pd, void* addr, size_t size) {
 }
 
 void paging_setup_kernel_pd() {
-    if(!kernel_pd)
+    if (!kernel_pd)
         kernel_pd = malloc(sizeof(page_directory_t), PAGESIZE);
 
     memset(kernel_pd, 0, sizeof(page_directory_t));
 
     // Setup the page tables for the first KERNEL_AREA_SIZE bytes (Identity Mapping)
-    for(uint32_t i = 0; i < (KERNEL_AREA_SIZE >> 22); ++i) {
+    for (uint32_t i = 0; i < (KERNEL_AREA_SIZE >> 22); ++i) {
         page_table_t* table = malloc(sizeof(page_table_t), PAGESIZE);
-        kernel_pd->values[i] = (uint32_t) table | MEM_PRESENT | MEM_WRITABLE;
+        kernel_pd->values[i] = (uint32_t)table | MEM_PRESENT | MEM_WRITABLE;
         kernel_pd->virtTables[i] = table;
 
         uint32_t pagesLeft = MIN((KERNEL_AREA_SIZE >> 12) - (i << 10), 1024);
@@ -254,49 +255,49 @@ void paging_setup_kernel_pd() {
         physSetBits(i << 22, (i << 22) + pagesLeft * PAGESIZE, true);
 
         uint16_t j;
-        for(j = 0; j < pagesLeft; ++j) {
+        for (j = 0; j < pagesLeft; ++j) {
             table->values[j] = (i << 22) | (j << 12);
             table->entries[j].present = true;
             table->entries[j].writable = true;
         }
 
-        for(; j < 1024; ++j)
+        for (; j < 1024; ++j)
             table->values[j] = 0;
     }
 
     // Setup the page directory for the kernel heap unmapped (KERNEL_HEAP_START - 4 GiB)
-    for(uint16_t i = KERNEL_HEAP_START >> 22; i < 1024; ++i) {
+    for (uint16_t i = KERNEL_HEAP_START >> 22; i < 1024; ++i) {
         page_table_t* table = malloc(sizeof(page_table_t), PAGESIZE);
-        kernel_pd->values[i] = (uint32_t) table | MEM_PRESENT | MEM_WRITABLE;
+        kernel_pd->values[i] = (uint32_t)table | MEM_PRESENT | MEM_WRITABLE;
         kernel_pd->virtTables[i] = table;
         memset(table, 0, sizeof(page_table_t));
     }
 }
 
 uint32_t physMemInit() {
-    mem_map_entry_t* memoryMap = (mem_map_entry_t*) MEMORY_MAP_ADDRESS;
+    mem_map_entry_t* memoryMap = (mem_map_entry_t*)MEMORY_MAP_ADDRESS;
     uint16_t memoryMapSize = *((uint16_t*)MEMORY_MAP_SIZE_ADDRESS);
 
-    for(uint32_t i = 0; i < memoryMapSize; ++i) {
+    for (uint32_t i = 0; i < memoryMapSize; ++i) {
         mem_map_entry_t entry = memoryMap[i];
 
-        if(entry.base < FOUR_GB && (entry.base + entry.size) > FOUR_GB) {
+        if (entry.base < FOUR_GB && (entry.base + entry.size) > FOUR_GB) {
             entry.size = FOUR_GB - entry.base;
         }
 
-        if(entry.type == E820_TYPE_FREE)
+        if (entry.type == E820_TYPE_FREE)
             phys_reservationTable_size = MAX(phys_reservationTable_size, (entry.base + entry.size) >> 17);
     }
 
     phys_reservationTable = malloc(phys_reservationTable_size * 4, 4);
     memset(phys_reservationTable, 0xFF, phys_reservationTable_size * 4);
 
-    for(uint32_t i = 0; i < memoryMapSize; ++i) {
+    for (uint32_t i = 0; i < memoryMapSize; ++i) {
         mem_map_entry_t entry = memoryMap[i];
-        if(entry.base < FOUR_GB) {
+        if (entry.base < FOUR_GB) {
             printf("base: %X%X\tsize: %X%X\ttype: %u\n", entry.base, entry.size, entry.type);
-            if(entry.type == E820_TYPE_FREE)
-                physSetBits((uint32_t) entry.base, (uint32_t) (entry.base + entry.size), false);
+            if (entry.type == E820_TYPE_FREE)
+                physSetBits((uint32_t)entry.base, (uint32_t)(entry.base + entry.size), false);
         }
     }
 
@@ -320,7 +321,7 @@ page_directory_t* paging_getActivePageDirectory() {
 page_directory_t* paging_createPageDirectory() {
     page_directory_t* pd = malloc(sizeof(page_directory_t), PAGESIZE);
     memcpy(pd, kernel_pd, sizeof(page_directory_t));
-    pd->values[1] = 0; // TODO: Change this (this is temporary because of 0x400000)
+    pd->values[1] = 0;  // TODO: Change this (this is temporary because of 0x400000)
     return pd;
 }
 
@@ -332,15 +333,15 @@ page_directory_t* paging_createPageDirectory() {
 void paging_destroyPageDirectory(page_directory_t* pd) {
     ASSERT(pd != kernel_pd);
 
-    if(pd == active_pd)
+    if (pd == active_pd)
         paging_switch(kernel_pd);
 
-    for(uint32_t i = 0; i < 1024; ++i) {
+    for (uint32_t i = 0; i < 1024; ++i) {
         // Don't free page tables and memory of the kernel area
-        if((pd->values[i] & MEM_PRESENT) && (pd->virtTables[i] != kernel_pd->virtTables[i])) {
+        if ((pd->entries[i].present) && (pd->virtTables[i] != kernel_pd->virtTables[i])) {
             page_table_t* table = pd->virtTables[i];
-            for(uint32_t j = 0; j < 1024; ++j) {
-                if(table->entries[j].present)
+            for (uint32_t j = 0; j < 1024; ++j) {
+                if (table->entries[j].present)
                     physSetBit(table->values[j] & 0xFFFFF000, false);
             }
 

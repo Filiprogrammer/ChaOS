@@ -1,8 +1,8 @@
 #ifndef PAGING_H
 #define PAGING_H
 
-#include "stdint.h"
 #include "stdbool.h"
+#include "stdint.h"
 
 #define MEM_PRESENT 1
 #define MEM_WRITABLE 2
@@ -38,20 +38,17 @@ typedef struct
     uint32_t page_phys_addr : 20;
 } __attribute__((packed)) page_table_entry_t;
 
-typedef union
-{
+typedef union {
     page_table_entry_t entries[1024];
     uint32_t values[1024];
 } __attribute__((packed)) page_table_t;
 
 typedef struct {
-    // Temporarly commented out because I am still using the c99 standard
-    //union
-    //{
-        //page_directory_entry_t entries[1024];
+    union {
+        page_directory_entry_t entries[1024];
         uint32_t values[1024];
-    //};
-    page_table_t* virtTables[1024]; // Virtual for the kernel_pd
+    };
+    page_table_t* virtTables[1024];  // Virtual for the kernel_pd
 } __attribute__((packed)) page_directory_t;
 
 uint32_t paging_install();
