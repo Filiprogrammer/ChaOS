@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "stdbool.h"
+#include "os.h"
 
 void test_fail(const char* file, uint32_t line, const char* function);
 

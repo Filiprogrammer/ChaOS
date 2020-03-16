@@ -15,6 +15,7 @@
 
 #ifdef __TEST
     #include "listTest.h"
+    #include "queueTest.h"
 #endif
 
 // Operating system common Data Area
@@ -152,6 +153,7 @@ int main()
 #ifdef __TEST
     puts("Running tests:\n");
     test_list_main();
+    test_queue_main();
 #endif
 
     ODA.ts_flag = 1; // enable task_switching
