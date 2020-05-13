@@ -7,10 +7,6 @@
 
 #define KERNEL_STACK_SIZE 2048       // Use a 2kb kernel stack.
 
-#define MAX_SLEEP_AVG 10000          // 10 ms
-
-uint32_t initial_esp;
-
 typedef struct task
 {
     int32_t id;                       // Process ID.
@@ -19,7 +15,6 @@ typedef struct task
     uint32_t ss;
     page_directory_t* page_directory; // Page directory.
     uint32_t kernel_stack;            // Kernel stack location.
-    struct task* next;                // The next task in a linked list.
     uint32_t timeout;                 // Milliseconds until timeout ends (for task sleep)
     uint8_t* FPUPtr;
     uint64_t cpu_time_used;           // in microseconds
@@ -27,6 +22,7 @@ typedef struct task
     int8_t priority;                  // from -5 to 5
     uint16_t sleep_avg;               // in microseconds
     bool running;
+    uint32_t nice;
 } task_t;
 
 void tasking_install();

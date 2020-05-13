@@ -4,8 +4,21 @@
 uint16_t systemfrequency;
 uint32_t timer_ticks = 0;
 
+uint64_t lastRdtscValue = 0;
+uint32_t currentSeconds = 0xFFFFFFFF;
+
 void timer_handler(registers_t* r) {
     ++timer_ticks;
+
+    // TODO: Put this block of code somewhere else
+    if (timer_getSeconds() != currentSeconds) {
+        currentSeconds = timer_getSeconds();
+
+        uint64_t Rdtsc = rdtsc();
+        uint64_t RdtscDiff = Rdtsc - lastRdtscValue;
+        lastRdtscValue = Rdtsc;
+        ODA.cpu_frequency = RdtscDiff;
+    }
 }
 
 /**
