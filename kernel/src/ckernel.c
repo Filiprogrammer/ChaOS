@@ -161,10 +161,8 @@ int main()
     if(file_execute("~~/STARTUP.ELF")){
         puts("Success\n");
 
-        for(;;){
-            switch_context(); // Huge performance boost for the user program
-            //hlt();
-        }
+        for(;;)
+            sleepCurrentTask(99999);
     } else {
         puts("Failed\n");
     }
@@ -176,7 +174,7 @@ int main()
         puts("Failed\n");
 
     for(;;)
-        switch_context(); // Huge performance boost for the user program
+        sleepCurrentTask(99999);
 
     return 0;
 }

@@ -91,6 +91,8 @@ int main() {
                     }
                     break;
             }
+
+            sleepMilliSeconds(10);
         }
 
     exec_cmd:;
