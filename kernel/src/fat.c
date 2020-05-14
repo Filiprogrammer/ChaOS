@@ -1769,7 +1769,10 @@ uint8_t* FAT_createFile(FAT* inst, char* filepath, uint8_t attribute){
         }else{
             new_filenameext = new_file_str;
         }
-        for(uint8_t l = 0; l < (strlen(new_filenameext) + 13); l += 13){
+
+        size_t new_filenameext_len = strlen(new_filenameext);
+
+        for(uint8_t l = 0; l < (new_filenameext_len + 13); l += 13){
             ++long_fname_entry_count;
         }
         
@@ -1777,8 +1780,8 @@ uint8_t* FAT_createFile(FAT* inst, char* filepath, uint8_t attribute){
         
         char* new_fname_short = FAT_longNameToShortName(inst, filepath); //get the short name
         
-        for(uint8_t l = 0; l < strlen(new_filenameext); l += 13){
-            entry[0] = ((l+13) < strlen(new_filenameext)) ? ((uint8_t)(l / 13 + 1)) : ((uint8_t)(0x41 + l / 13));
+        for(uint8_t l = 0; l < new_filenameext_len; l += 13){
+            entry[0] = ((l+13) < new_filenameext_len) ? ((uint8_t)(l / 13 + 1)) : ((uint8_t)(0x41 + l / 13));
             uint8_t i;
             for(i = 1; i < 11; ++i){
                 entry[i] = 0xFF;
@@ -1795,8 +1798,10 @@ uint8_t* FAT_createFile(FAT* inst, char* filepath, uint8_t attribute){
             entry[29] = 0xFF;
             entry[30] = 0xFF;
             entry[31] = 0xFF;
-            
-            for(uint8_t k = 0; k < MIN(strlen(new_filenameext) + 1 - l, 13); ++k) {
+
+            uint8_t k_len = MIN(new_filenameext_len + 1 - l, 13);
+
+            for(uint8_t k = 0; k < k_len; ++k) {
                 if (k < 5) {
                     entry[1 + k * 2] = new_filenameext[l + k];
                     entry[1 + k * 2 + 1] = 0x00;
@@ -2183,8 +2188,12 @@ uint8_t FAT_readFileEntryByIndex(FAT* inst, file_t* file_inst, char* filepath, u
                         for(uint32_t l = (lastDot+1); l < cur_file_len; ++l){
                             cur_ext[l-(lastDot+1)] = long_fname_buffer[l];
                         }
-                        cur_ext[cur_file_len-lastDot-1] = 0; //Null termination
-                        
+
+                        if (cur_file_len == lastDot)
+                            cur_ext[0] = 0;
+                        else
+                            cur_ext[cur_file_len-lastDot-1] = 0; //Null termination
+
                         //Clear long_fname_buffer
                         for(uint8_t l = 0; l < 208; ++l){
                             long_fname_buffer[l] = 0;
