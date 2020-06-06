@@ -174,8 +174,8 @@ uint8_t file_execute(char* filepath){
     file_t file_inst = {{0}, {0}, 0, 0, 0};
     cli();
     if(file_find(&file_inst, filepath)){
-        uint8_t* buffer = malloc(file_inst.size, 0);
-        file_readContents(&file_inst, buffer, 0, file_inst.size);
+        uint8_t buffer[MIN(file_inst.size, PAGESIZE)];
+        file_readContents(&file_inst, buffer, 0, MIN(file_inst.size, PAGESIZE));
         cli();
         if((buffer[1] != 'E') || (buffer[2] != 'L') || (buffer[3] != 'F')) return 0;
         // TODO: add some checks to prevent buffer overflows when file is too small
@@ -196,19 +196,16 @@ uint8_t file_execute(char* filepath){
         if(!paging_allocVirt(pd, (void*)0x4F0000, 0x10000, MEM_USER | MEM_WRITABLE))
             return 0;
 
-        uint32_t cr3;
-        __asm__ volatile("mov %%cr3, %0" : "=r"(cr3));
-
+        page_directory_t* active_pagedir = paging_getActivePageDirectory();
         paging_switch(pd);
-        memcpy((void*)elf_vaddr, buffer + elf_offset, elf_filesize);
+
+        for (uint32_t elf_buffer_offset = 0; elf_buffer_offset < elf_filesize; elf_buffer_offset += MIN(elf_filesize, PAGESIZE))
+            file_readContents(&file_inst, (uint8_t*)elf_vaddr + elf_buffer_offset, elf_offset + elf_buffer_offset, MIN(elf_filesize - elf_buffer_offset, PAGESIZE));
+
         memset((void*)elf_vaddr + elf_filesize, 0, elf_memsz - elf_filesize); // fill BSS with zeros
-        paging_switch(NULL);
+        paging_switch(active_pagedir);
 
-        create_task (pd, (void*)elf_vaddr, 3, 0); // program in user space (ring 3) takes over
-        cli();
-
-        __asm__ volatile("mov %0, %%cr3" : : "r" (cr3));
-
+        create_task(pd, (void*)elf_vaddr, 3, 0); // program in user space (ring 3) takes over
         sti();
         switch_context();
         return 1;
