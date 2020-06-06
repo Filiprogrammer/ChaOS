@@ -152,7 +152,7 @@ bool paging_allocVirt(page_directory_t* pd, void* addr, size_t size, uint32_t fl
             }
         } else {
             table = malloc(sizeof(page_table_t), PAGESIZE);
-            memset(table, 0, sizeof(page_directory_t));
+            memset(table, 0, sizeof(page_table_t));
             pde->page_table_phys_addr = paging_getPhysAddr(kernel_pd, table) >> 12;
             pde->present = true;
             pde->writable = true;
