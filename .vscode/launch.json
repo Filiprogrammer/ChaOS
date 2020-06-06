@@ -15,7 +15,7 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb.exe"
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb.bat"
             },
             "preLaunchTask": "QEMU Boot Floppy & Run GDB Server"
         },
@@ -33,7 +33,7 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb.exe"
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb.bat"
             },
             "preLaunchTask": "QEMU Boot HD & Run GDB Server"
         },
@@ -51,7 +51,7 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb.exe"
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb.bat"
             },
             "preLaunchTask": "QEMU Boot HD EFI & Run GDB Server"
         }
