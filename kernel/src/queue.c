@@ -157,7 +157,7 @@ bool queue_removeElement(queue_t* queue, void* data) {
  * @return void* the element or NULL if no element was found at the given position
  */
 void* queue_peek(queue_t* queue, uint32_t pos) {
-    if (queue == NULL)
+    if (queue == NULL || queue->front == NULL)
         return NULL;
 
     queue_node_t* node = queue->front;
