@@ -21,7 +21,6 @@ typedef struct task
     uint64_t last_active;
     int8_t priority;                  // from -5 to 5
     uint16_t sleep_avg;               // in microseconds
-    bool running;
     uint32_t nice;
 } task_t;
 

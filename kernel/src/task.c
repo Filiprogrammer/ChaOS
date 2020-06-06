@@ -84,7 +84,6 @@ void tasking_install() {
     current_task->cpu_time_used = 0;
     current_task->FPUPtr = 0;
     current_task->priority = 0;
-    current_task->running = true;
     current_task->nice = 0;
 
 #ifdef _DIAGNOSIS_
@@ -184,7 +183,6 @@ static task_t* _create_task(page_directory_t* directory, void* entry, uint8_t pr
     new_task->cpu_time_used = 0;
     new_task->FPUPtr = 0;
     new_task->priority = priority;
-    new_task->running = true;
     new_task->nice = 0;
 
     return new_task;
@@ -218,16 +216,15 @@ void exit_task(task_t* t) {
     void* pkernelstack = (void*)(t->kernel_stack - KERNEL_STACK_SIZE);
     free(pkernelstack);
     paging_destroyPageDirectory(t->page_directory);
-    t->running = false;
     printf("\nTask %d exited!\n", t->id);
 
     ODA.ts_flag = true;
 
+    free(t);
+
     if (t == current_task) {
         current_task = NULL;
         switch_context();
-    } else {
-        free(t);
     }
 }
 
@@ -291,8 +288,7 @@ uint32_t task_switch(uint32_t esp) {
     if (old_task != NULL) {
         old_task->esp = esp;  // save esp
 
-        if (old_task == doNothing_task) {
-        } else if (old_task->running) {
+        if (old_task != doNothing_task) {
             ++timeQuantumCounter;
 
             if (timemillis < old_task->timeout) {
@@ -317,8 +313,6 @@ uint32_t task_switch(uint32_t esp) {
             uint64_t cpuCycles = rdtsc() - old_task->last_active;
             uint32_t microSeconds = cpuCyclesToMicroSeconds(cpuCycles);
             old_task->cpu_time_used += microSeconds;
-        } else {
-            free(old_task);
         }
     }
 

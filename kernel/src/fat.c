@@ -2666,6 +2666,7 @@ uint8_t FAT_abstract_findFile(FAT* inst, char* filepath, file_t* file_inst){
     memcpy(file_inst->data, entry, 32);
     file_inst->size = FAT_getFilesize(entry);
     file_inst->attribute = entry[0x11];
+    free(entry);
     return 1; // Operation succeeded
 }
 
