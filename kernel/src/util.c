@@ -95,6 +95,18 @@ uint32_t bitScanReverse(uint32_t val) {
 }
 
 /**
+ * @brief Search for the least significant set bit.
+ * 
+ * @param value The value to be searched
+ * @return uint32_t If a least significant bit is found, the index gets returned, otherwise 0.
+ */
+uint32_t bitScanForward(uint32_t val) {
+    uint32_t bitnr;
+    __asm__("bsfl %1, %0" : "=r"(bitnr) : "r"(val));
+    return bitnr;
+}
+
+/**
  * @brief Read an 8 bit value from the I/O bus.
  * 
  * @param port The address on the I/O bus.

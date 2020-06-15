@@ -73,7 +73,7 @@ uint32_t physAlloc() {
             if (phys_reservationTable[phys_reservationTable_index] == 0)
                 bitnr = 0;
             else
-                bitnr = bitScanReverse(phys_reservationTable[phys_reservationTable_index]) + 1;
+                bitnr = bitScanForward(~phys_reservationTable[phys_reservationTable_index]);
             phys_reservationTable[phys_reservationTable_index] |= (1 << bitnr);
             return ((phys_reservationTable_index << 5) + bitnr) << 12;
         }

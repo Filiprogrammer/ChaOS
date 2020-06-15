@@ -97,6 +97,7 @@ extern uint32_t fetchSS();
 extern uint32_t fetchCS();
 extern uint32_t fetchDS();
 extern uint32_t bitScanReverse(uint32_t val);
+extern uint32_t bitScanForward(uint32_t val);
 extern void memshow(void* start, size_t count);
 extern void* memset(void* dest, int8_t val, size_t count);
 extern uint16_t* memsetw(uint16_t* dest, uint16_t val, size_t count);
