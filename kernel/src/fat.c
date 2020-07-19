@@ -133,7 +133,7 @@ uint32_t* FAT_FATgetClusterChain(FAT* inst, uint32_t start_clust, uint32_t start
     }
     return clustList;*/
 
-    uint32_t* clustArr = malloc(4 + 4 * (alignUp(max_size, inst->sectorsPerCluster*512) / (inst->sectorsPerCluster*512)), 0);
+    uint32_t* clustArr = malloc(4 + 4 * ((alignUp(start_offset + max_size, inst->sectorsPerCluster*512) - alignDown(start_offset, inst->sectorsPerCluster*512)) / (inst->sectorsPerCluster*512)), 0);
     //listHead_t* clustList = listCreate();
     uint32_t i = 0;
     uint32_t prev_clust = start_clust+131072; // Just make sure, that prev_clust starts with a different value than start_clust
