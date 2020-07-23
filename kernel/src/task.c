@@ -52,19 +52,6 @@ static void doNothing() {
         hlt();
 }
 
-#ifdef _DIAGNOSIS_
-static void doLogging() {
-    for (;;) {
-        sleepCurrentTask(5000);
-
-        ODA.ts_flag = false;
-        log_task_list();
-        printf("CPU Frequency: %uMHz\n", ((uint32_t)ODA.cpu_frequency) / 1000000);  // TODO: Print out 64 bit value
-        ODA.ts_flag = true;
-    }
-}
-#endif
-
 void tasking_install() {
     cli();
 
@@ -96,10 +83,6 @@ void tasking_install() {
 
     page_directory_t* pd = KERNEL_DIRECTORY;
     doNothing_task = _create_task(pd, &doNothing, 0, -5);
-
-#ifdef _DIAGNOSIS_
-    create_task(pd, &doLogging, 0, -5);
-#endif
 
     sti();
 }
@@ -381,56 +364,6 @@ void sleepCurrentTask(uint32_t ms) {
  */
 void switch_context() {
     __asm__ volatile("int $0x7E");
-}
-
-void log_task_list() {
-    settextcolor(4, 0);
-    printf("Running on Q%u: \n", current_queue);
-    task_log(current_task);
-
-    for (uint8_t k = 0; k < 2; ++k) {
-        queue_t* _queues;
-        char* str;
-
-        if (k == 0) {
-            _queues = &(queues[0]);
-            str = "Q%u:\n";
-        } else {
-            _queues = &(queues_sleeping[0]);
-            str = "Sleeping Q%u:\n";
-        }
-
-        for (uint8_t i = 0; i < QUEUE_NUMBER; ++i) {
-            settextcolor(3, 0);
-            printf(str, i);
-
-            queue_t* queue = &(_queues[i]);
-
-            if (!queue_isEmpty(queue)) {
-                task_t* task = queue_peek(queue, 0);
-                uint32_t j = 1;
-
-                while (task != NULL) {
-                    task_log(task);
-                    task = queue_peek(queue, j);
-                    ++j;
-                }
-            }
-        }
-    }
-}
-
-void task_log(task_t* t) {
-    settextcolor(5, 0);
-    printf("\nid: %d ", t->id);               // Process ID
-    printf("ebp: %X ", t->ebp);               // Base pointer
-    printf("esp: %X ", t->esp);               // Stack pointer
-    printf("eip: %X ", t->eip);               // Instruction pointer
-    printf("PD: %X ", t->page_directory);     // Page directory.
-    printf("k_stack: %X ", t->kernel_stack);  // Kernel stack location.
-    printf("timeout: %u ", t->timeout);
-    printf("nice: %u ", t->nice);
-    printf("cpu_time_used: %ums\n", ((uint32_t)t->cpu_time_used) / 1000);
 }
 
 void TSS_log(tss_entry_t* tss) {
