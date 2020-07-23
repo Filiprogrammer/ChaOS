@@ -162,7 +162,7 @@ int main()
         puts("Success\n");
 
         for(;;)
-            sleepCurrentTask(99999);
+            sleepCurrentThread(99999);
     } else {
         puts("Failed\n");
     }
@@ -174,7 +174,7 @@ int main()
         puts("Failed\n");
 
     for(;;)
-        sleepCurrentTask(99999);
+        sleepCurrentThread(99999);
 
     return 0;
 }

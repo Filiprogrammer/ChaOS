@@ -1,11 +1,10 @@
 #include "syscall.h"
-#include "task.h"
 
 DEFN_SYSCALL1( puts,                       0, uint8_t*                  )
 DEFN_SYSCALL1( putch,                      1, uint8_t                   )
 DEFN_SYSCALL2( settextcolor,               2, uint8_t, uint8_t          )
 DEFN_SYSCALL0( getpid,                     3                            )
-DEFN_SYSCALL1( sleepCurrentTask,           4, uint32_t                  )
+DEFN_SYSCALL1( sleepCurrentThread,           4, uint32_t                  )
 DEFN_SYSCALL0( switch_context,             5                            )
 DEFN_SYSCALL1( keyboard_isKeyDown,         6, KEY_t                     )
 DEFN_SYSCALL0( getkey,                     7                            )
@@ -30,6 +29,8 @@ DEFN_SYSCALL1( fileManage_getBootPath,    25, char*                     )
 DEFN_SYSCALL0( exitCurrentTask,           26                            )
 DEFN_SYSCALL1( file_execute,              27, char*                     )
 DEFN_SYSCALL2( pci_getDevice,             28, uint32_t, pciDev_t*       )
+DEFN_SYSCALL1( create_thread,             29, void*                     )
+DEFN_SYSCALL0( exitCurrentThread,         30                            )
 
 static void* syscalls[] =
 {
@@ -37,7 +38,7 @@ static void* syscalls[] =
     &putch,
     &settextcolor,
     &getpid,
-    &sleepCurrentTask,
+    &sleepCurrentThread,
     &switch_context,
     &keyboard_isKeyDown,
     &getkey,
@@ -61,7 +62,9 @@ static void* syscalls[] =
     &fileManage_getBootPath,
     &exitCurrentTask,
     &file_execute,
-    &pci_getDevice
+    &pci_getDevice,
+    &create_thread,
+    &exitCurrentThread
 };
 
 void syscall_handler(registers_t* r) {

@@ -191,11 +191,6 @@ uint8_t file_execute(char* filepath){
         if(!paging_allocVirt(pd, (void*)elf_vaddr, alignUp(elf_memsz, PAGESIZE), MEM_USER | MEM_WRITABLE))
             return 0;
 
-        // TODO: Handle the placement of the stack differently (probably place it before the .text and .data sections)
-        // Allocate the stack
-        if(!paging_allocVirt(pd, (void*)0x4F0000, 0x10000, MEM_USER | MEM_WRITABLE))
-            return 0;
-
         page_directory_t* active_pagedir = paging_getActivePageDirectory();
         paging_switch(pd);
 
@@ -205,7 +200,7 @@ uint8_t file_execute(char* filepath){
         memset((void*)elf_vaddr + elf_filesize, 0, elf_memsz - elf_filesize); // fill BSS with zeros
         paging_switch(active_pagedir);
 
-        create_task(pd, (void*)elf_vaddr, 3, 0); // program in user space (ring 3) takes over
+        create_task(pd, (void*)elf_vaddr, 3); // program in user space (ring 3) takes over
         sti();
         switch_context();
         return 1;

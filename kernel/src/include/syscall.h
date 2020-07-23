@@ -5,6 +5,7 @@
 #include "fileManager.h"
 #include "keyboard.h"
 #include "pci.h"
+#include "task.h"
 
 void syscall_handler(registers_t* regs);
 void syscall_install();
@@ -70,7 +71,7 @@ DECL_SYSCALL1( puts,  uint8_t*                                         )
 DECL_SYSCALL1( putch, uint8_t                                          )
 DECL_SYSCALL2( settextcolor, uint8_t, uint8_t                          )
 DECL_SYSCALL0( getpid                                                  )
-DECL_SYSCALL1( sleepCurrentTask, uint32_t                              )
+DECL_SYSCALL1( sleepCurrentThread, uint32_t                              )
 DECL_SYSCALL0( switch_context                                          )
 DECL_SYSCALL1( keyboard_isKeyDown, KEY_t                               )
 DECL_SYSCALL0( getkey                                                  )
@@ -95,6 +96,8 @@ DECL_SYSCALL1( fileManage_getBootPath, char*                           )
 DECL_SYSCALL0( exitCurrentTask                                         )
 DECL_SYSCALL1( file_execute, char*                                     )
 DECL_SYSCALL2( pci_getDevice, uint32_t, pciDev_t*                      )
+DECL_SYSCALL1( create_thread, void*                                    )
+DECL_SYSCALL0( exitCurrentThread                                       )
 
 /***********************************************************/
 

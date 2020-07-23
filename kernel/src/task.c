@@ -23,10 +23,10 @@ task_t* kernel_task;
 
 task_t* doNothing_task;
 
-// The currently running task.
-task_t* current_task;
+// The currently running thread.
+thread_t* current_thread;
 
-volatile task_t* FPUTask;
+volatile thread_t* FPUThread;
 
 // Some externs are needed
 extern tss_entry_t tss;
@@ -40,12 +40,13 @@ uint32_t next_pid = 1;  // The next available process ID.
  * @return int32_t the process ID
  */
 int32_t getpid() {
-    return current_task->id;
+    return current_thread->parent->id;
 }
 
 static page_directory_t* const KERNEL_DIRECTORY = NULL;
 
-static task_t* _create_task(page_directory_t* directory, void* entry, uint8_t privilege, int8_t priority);
+static task_t* _create_task(page_directory_t* directory);
+static thread_t* _create_thread(task_t* task, void* entry, uint8_t privilege);
 
 static void doNothing() {
     for (;;)
@@ -54,77 +55,87 @@ static void doNothing() {
 
 void tasking_install() {
     cli();
+    kernel_task = _create_task(KERNEL_DIRECTORY);
 
-#ifdef _DIAGNOSIS_
-    settextcolor(2, 0);
-    puts("1st_task: ");
-    settextcolor(15, 0);
-#endif
+    thread_t* thread = malloc(sizeof(thread_t), 0);
+    thread->id = 0;
+    thread->esp = 0;
+    thread->ss = 0;
+    thread->kernel_stack = (uint32_t)malloc(KERNEL_STACK_SIZE, PAGESIZE) + KERNEL_STACK_SIZE;
+    thread->stack_begin = thread->kernel_stack - KERNEL_STACK_SIZE;
+    thread->stack_end = thread->kernel_stack;
+    thread->FPUPtr = NULL;
+    thread->parent = kernel_task;
+    thread->timeout = 0;
+    thread->nice = 0;
 
-    current_task = kernel_task = (task_t*)malloc(sizeof(task_t), 0);  // first task (kernel task)
-    current_task->id = next_pid++;
-    current_task->esp = current_task->ebp = 0;
-    current_task->eip = 0;
-    current_task->page_directory = KERNEL_DIRECTORY;
-    current_task->timeout = 0;
-    current_task->last_active = rdtsc();
-    current_task->cpu_time_used = 0;
-    current_task->FPUPtr = 0;
-    current_task->priority = 0;
-    current_task->nice = 0;
+    if (kernel_task->threads == NULL)
+        kernel_task->threads = list_create();
 
-#ifdef _DIAGNOSIS_
-    settextcolor(2, 0);
-    puts("1st_ks: ");
-    settextcolor(15, 0);
-#endif
+    list_append(kernel_task->threads, thread);
+    kernel_task->next_threadId = 1;
+    current_thread = thread;
 
-    current_task->kernel_stack = (uint32_t)malloc(KERNEL_STACK_SIZE, PAGESIZE) + KERNEL_STACK_SIZE;
-
-    page_directory_t* pd = KERNEL_DIRECTORY;
-    doNothing_task = _create_task(pd, &doNothing, 0, -5);
+    doNothing_task = _create_task(KERNEL_DIRECTORY);
+    _create_thread(doNothing_task, &doNothing, 0);
 
     sti();
 }
 
-/**
- * @brief Create a task and add it to the highest priority queue.
- * 
- * @param directory page directory
- * @param entry entrypoint
- * @param privilege ring the task should run on (3 for userland)
- * @param priority task priority
- * @return task_t* pointer to the new task strcuture
- */
-task_t* create_task(page_directory_t* directory, void* entry, uint8_t privilege, int8_t priority) {
-    cli();
-    task_t* new_task = _create_task(directory, entry, privilege, priority);
-    queue_enqueue(&(queues[0]), new_task);
-    sti();
+static thread_t* _create_thread(task_t* task, void* entry, uint8_t privilege) {
+    if (task->threads == NULL)
+        task->threads = list_create();
 
-    return new_task;
-}
+    uint32_t stack_begin = 0x4F0000;
+    uint32_t stack_size = 0x10000;
 
-static task_t* _create_task(page_directory_t* directory, void* entry, uint8_t privilege, int8_t priority) {
-    task_t* new_task = (task_t*)malloc(sizeof(task_t), 0);
-    new_task->id = next_pid++;
-    new_task->page_directory = directory;
+    if (privilege == 3) {
+        size_t threadCount = list_getSize(task->threads);
 
-    new_task->kernel_stack = (uint32_t)malloc(KERNEL_STACK_SIZE, PAGESIZE) + KERNEL_STACK_SIZE;
+        for (uint32_t i = 0; i < threadCount; ++i) {
+            thread_t* thread = list_getElement(task->threads, i + 1);
 
-    uint32_t* kernel_stack = (uint32_t*)new_task->kernel_stack;
+            if ((stack_begin >= thread->stack_begin && stack_begin < thread->stack_end) ||
+                (stack_begin + stack_size > thread->stack_begin && stack_begin + stack_size <= thread->stack_end)) {
+                stack_begin = thread->stack_begin - stack_size;
+            } else {
+                break;
+            }
+        }
+
+        // TODO: Handle the placement of the stack differently (probably place it before the .text and .data sections)
+        // Allocate the stack
+        if (!paging_allocVirt(task->page_directory, (void*)stack_begin, stack_size, MEM_USER | MEM_WRITABLE))
+            return NULL;
+    }
+
+    thread_t* thread = malloc(sizeof(thread_t), 0);
+
+    thread->kernel_stack = (uint32_t)malloc(KERNEL_STACK_SIZE, PAGESIZE) + KERNEL_STACK_SIZE;
+
+    uint32_t* kernel_stack = (uint32_t*)thread->kernel_stack;
 
     uint32_t code_segment = 0x08, data_segment = 0x10;
 
-///TEST///
-    *(--kernel_stack) = 0x0;  // return address dummy
-///TEST///
+    if (privilege == 0) {
+        *(--kernel_stack) = (uint32_t)&exitCurrentThread;
+        stack_begin = (uint32_t)kernel_stack;
+        stack_size = KERNEL_STACK_SIZE;
+    } else if (privilege == 3) {
+        page_directory_t* active_pagedir = paging_getActivePageDirectory();
+        paging_switch(task->page_directory);
 
-    if (privilege == 3) {
+        // Call the exitCurrentThread syscall at the end of the thread
+        *((uint32_t*)(stack_begin + stack_size - 8)) = 0x001eb890; // mov eax, 30
+        *((uint32_t*)(stack_begin + stack_size - 4)) = 0x7fcd0000; // int 0x7F
+        *((uint32_t*)(stack_begin + stack_size - 12)) = stack_begin + stack_size - 7;
+
+        paging_switch(active_pagedir);
+
         // general information: Intel 3A Chapter 5.12
-        *(--kernel_stack) = new_task->ss = 0x23;     // ss
-        *(--kernel_stack) = new_task->kernel_stack;  // esp0
-        code_segment = 0x1B;                         // 0x18|0x3=0x1B
+        *(--kernel_stack) = thread->ss = 0x23;         // ss
+        *(--kernel_stack) = stack_begin + stack_size - 12;  // esp0
+        code_segment = 0x1B;                           // 0x18|0x3=0x1B
     }
 
     *(--kernel_stack) = 0x0202;           // eflags = interrupts activated and iopl = 0
@@ -151,64 +162,134 @@ static task_t* _create_task(page_directory_t* directory, void* entry, uint8_t pr
     *(--kernel_stack) = data_segment;
     *(--kernel_stack) = data_segment;
 
-    //setup TSS
-    tss.ss0 = 0x10;
-    tss.esp0 = new_task->kernel_stack;
-    tss.ss = data_segment;
+    thread->esp = (uint32_t)kernel_stack;
+    thread->ss = data_segment;
+    thread->stack_begin = stack_begin;
+    thread->stack_end = stack_begin + stack_size;
+    thread->FPUPtr = 0;
+    thread->id = task->next_threadId++;
+    thread->parent = task;
+    thread->timeout = 0;
+    thread->nice = 0;
 
-    //setup task_t
-    new_task->ebp = 0xd00fc0de;  // test value
-    new_task->esp = (uint32_t)kernel_stack;
-    new_task->eip = (uint32_t)irq_tail;
-    new_task->ss = data_segment;
-    new_task->timeout = 0;
+    list_append(task->threads, thread);
+
+    return thread;
+}
+
+/**
+ * @brief Create a thread in the current task and add it to the highest priority queue.
+ * 
+ * @param entry entrypoint
+ * @return true thread was created successfully
+ * @return false thread creation failed
+ */
+bool create_thread(void* entry) {
+    if (current_thread == NULL)
+        return false;
+
+    task_t* task = current_thread->parent;
+
+    uint8_t privilege = 3;
+
+    if (task == kernel_task)
+        privilege = 0;
+
+    thread_t* thread = _create_thread(task, entry, privilege);
+
+    if (thread == NULL)
+        return false;
+
+    cli();
+    queue_enqueue(&(queues[0]), thread);
+    sti();
+
+    return true;
+}
+
+static task_t* _create_task(page_directory_t* directory) {
+    task_t* new_task = (task_t*)malloc(sizeof(task_t), 0);
+    new_task->id = next_pid++;
+    new_task->page_directory = directory;
+    new_task->next_threadId = 0;
     new_task->last_active = rdtsc();
     new_task->cpu_time_used = 0;
-    new_task->FPUPtr = 0;
-    new_task->priority = priority;
-    new_task->nice = 0;
+    new_task->threads = NULL;
+    return new_task;
+}
+
+/**
+ * @brief Create a task with one thread and add that thread to the highest priority queue.
+ * 
+ * @param directory page directory
+ * @param entry entrypoint
+ * @param privilege ring the task should run on (3 for userland)
+ * @return task_t* pointer to the new task struct
+ */
+task_t* create_task(page_directory_t* directory, void* entry, uint8_t privilege) {
+    task_t* new_task = _create_task(directory);
+    thread_t* thread = _create_thread(new_task, entry, privilege);
+
+    cli();
+    queue_enqueue(&(queues[0]), thread);
+    sti();
 
     return new_task;
 }
 
-void exit_task(task_t* t) {
+void exit_task(task_t* task) {
     ODA.ts_flag = false;
 
-    if (t == kernel_task) {
+    if (task == kernel_task) {
         puts("\nSystem Halted!");
         for (;;)
             hlt();
     }
 
-    for (uint8_t i = 0; i < QUEUE_NUMBER; ++i)
-        if (queue_removeElement(&(queues[i]), t))
-            goto task_dequeued;
+    size_t threadCount = list_getSize(task->threads);
 
-    for (uint8_t i = 0; i < QUEUE_NUMBER; ++i)
-        if (queue_removeElement(&(queues_sleeping[i]), t))
-            goto task_dequeued;
+    for (uint32_t i = 0; i < threadCount; ++i) {
+        thread_t* thread = list_getElement(task->threads, i + 1);
 
-    task_dequeued:
+        if (thread == current_thread) {
+            current_thread = NULL;
+        } else {
+            bool dequeued = false;
 
-    if (t->FPUPtr)
-        free(t->FPUPtr);
+            for (uint8_t j = 0; j < QUEUE_NUMBER; ++j) {
+                if (queue_removeElement(&(queues[j]), thread)) {
+                    dequeued = true;
+                    break;
+                }
+            }
 
-    if (FPUTask == t)
-        FPUTask = NULL;
+            if (!dequeued) {
+                for (uint8_t j = 0; j < QUEUE_NUMBER; ++j)
+                    if (queue_removeElement(&(queues_sleeping[j]), thread))
+                        break;
+            }
+        }
 
-    void* pkernelstack = (void*)(t->kernel_stack - KERNEL_STACK_SIZE);
-    free(pkernelstack);
-    paging_destroyPageDirectory(t->page_directory);
-    printf("\nTask %d exited!\n", t->id);
+        if (FPUThread == thread)
+            FPUThread = NULL;
+
+        if (thread->FPUPtr)
+            free(thread->FPUPtr);
+
+        void* pkernelstack = (void*)(thread->kernel_stack - KERNEL_STACK_SIZE);
+        free(pkernelstack);
+        free(thread);
+    }
+
+    list_deleteAllWithoutData(task->threads);
+    paging_destroyPageDirectory(task->page_directory);
+    free(task);
+    printf("\nTask %d exited!\n", task->id);
 
     ODA.ts_flag = true;
 
-    free(t);
-
-    if (t == current_task) {
-        current_task = NULL;
+    if (current_thread == NULL)
         switch_context();
-    }
 }
 
 /**
@@ -216,23 +297,78 @@ void exit_task(task_t* t) {
  * 
  */
 void exitCurrentTask() {
-    exit_task((task_t*)current_task);
+    exit_task(current_thread->parent);
+}
+
+void exit_thread(thread_t* thread) {
+    ODA.ts_flag = false;
+
+    if (thread == list_getElement(kernel_task->threads, 1)) {
+        puts("\nSystem Halted!");
+        for (;;)
+            hlt();
+    }
+
+    if (thread == current_thread) {
+        current_thread = NULL;
+    } else {
+        bool dequeued = false;
+
+        for (uint8_t j = 0; j < QUEUE_NUMBER; ++j) {
+            if (queue_removeElement(&(queues[j]), thread)) {
+                dequeued = true;
+                break;
+            }
+        }
+
+        if (!dequeued) {
+            for (uint8_t j = 0; j < QUEUE_NUMBER; ++j)
+                if (queue_removeElement(&(queues_sleeping[j]), thread))
+                    break;
+        }
+    }
+
+    if (FPUThread == thread)
+        FPUThread = NULL;
+
+    if (thread->FPUPtr)
+        free(thread->FPUPtr);
+
+    void* pkernelstack = (void*)(thread->kernel_stack - KERNEL_STACK_SIZE);
+    free(pkernelstack);
+
+    task_t* task = thread->parent;
+    list_delete(task->threads, thread);
+    printf("\nThread %d exited! (Task %d)\n", thread->id, task->id);
+    free(thread);
+
+    if (list_getSize(task->threads) == 0)
+        exit_task(task);
+
+    ODA.ts_flag = true;
+
+    if (current_thread == NULL)
+        switch_context();
+}
+
+void exitCurrentThread() {
+    exit_thread(current_thread);
 }
 
 void NM_fxsr(registers_t* r) {
     __asm__ volatile("clts");  // CLearTS: reset the TS bit (no. 3) in CR0 to disable #NM
 
     // save FPU data
-    if (FPUTask)  // fxsave to FPUTask->FPUptr
-        __asm__ volatile("fxsave (%0)" ::"r"(FPUTask->FPUPtr));
+    if (FPUThread)  // fxsave to FPUTask->FPUptr
+        __asm__ volatile("fxsave (%0)" ::"r"(FPUThread->FPUPtr));
 
-    FPUTask = current_task;  // store the last task using FPU
+    FPUThread = current_thread;  // store the last task using FPU
 
     // restore FPU data
-    if (current_task->FPUPtr)  // fxrstor from current_task->FPUptr
-        __asm__ volatile("fxrstor (%0)" ::"r"(current_task->FPUPtr));
+    if (current_thread->FPUPtr)  // fxrstor from current_thread->FPUptr
+        __asm__ volatile("fxrstor (%0)" ::"r"(current_thread->FPUPtr));
     else
-        current_task->FPUPtr = malloc(512, 16);
+        current_thread->FPUPtr = malloc(512, 16);
 }
 
 uint32_t task_switch(uint32_t esp) {
@@ -241,61 +377,60 @@ uint32_t task_switch(uint32_t esp) {
 
     ODA.ts_flag = false;
 
-    // Move sleeping tasks that are done sleeping back to the normal queues
+    // Move sleeping threads that are done sleeping back to the normal queues
     for (uint8_t i = 0; i < QUEUE_NUMBER; ++i) {
         queue_t* queue_sleeping = &(queues_sleeping[i]);
 
         if (!queue_isEmpty(queue_sleeping)) {
-            task_t* sleeping_task = queue_peek(queue_sleeping, 0);
+            thread_t* sleeping_thread = queue_peek(queue_sleeping, 0);
             uint32_t j = 1;
 
-            while (sleeping_task != NULL) {
-                if (sleeping_task->timeout <= timemillis) {
-                    queue_removeElement(queue_sleeping, sleeping_task);
+            while (sleeping_thread != NULL) {
+                if (sleeping_thread->timeout <= timemillis) {
+                    queue_removeElement(queue_sleeping, sleeping_thread);
 
-                    if (sleeping_task->nice > 50 * (QUEUE_NUMBER - i))
-                        // Promote task to a higher priority queue because it was a good boy
-                        queue_enqueue(&(queues[MAX(i - 1, 0)]), sleeping_task);
+                    if (sleeping_thread->nice > 50 * (QUEUE_NUMBER - i))
+                        // Promote thread to a higher priority queue because it was a good boy
+                        queue_enqueue(&(queues[MAX(i - 1, 0)]), sleeping_thread);
                     else
-                        queue_enqueue(&(queues[i]), sleeping_task);
+                        queue_enqueue(&(queues[i]), sleeping_thread);
                 }
 
-                sleeping_task = queue_peek(queue_sleeping, j);
+                sleeping_thread = queue_peek(queue_sleeping, j);
                 ++j;
             }
         }
     }
 
-    task_t* old_task = (task_t*)current_task;
+    thread_t* old_thread = current_thread;
 
-    if (old_task != NULL) {
-        old_task->esp = esp;  // save esp
+    if (old_thread != NULL) {
+        old_thread->esp = esp;  // save esp
 
-        if (old_task != doNothing_task) {
+        if (old_thread->parent != doNothing_task) {
             ++timeQuantumCounter;
 
-            if (timemillis < old_task->timeout) {
+            if (timemillis < old_thread->timeout) {
                 // Task was faster than the time quantum
-                old_task->nice = (4 * old_task->nice) / 5 + (old_task->timeout - timemillis) / 5;
+                old_thread->nice = (4 * old_thread->nice) / 5 + (old_thread->timeout - timemillis) / 5;
             } else if (timeQuantumCounter > current_queue) {
                 // Task took too long, demoting it to a lower priority queue
-                queue_enqueue(&(queues[MIN(current_queue + 1, QUEUE_NUMBER - 1)]), old_task);
-                old_task->nice = 0;
+                queue_enqueue(&(queues[MIN(current_queue + 1, QUEUE_NUMBER - 1)]), old_thread);
+                old_thread->nice = 0;
             } else {
                 // Task still has some time left to run
-                tss.esp = old_task->esp;
-                tss.esp0 = old_task->kernel_stack;
-                tss.ebp = old_task->ebp;
-                tss.ss = old_task->ss;
+                tss.esp = old_thread->esp;
+                tss.esp0 = old_thread->kernel_stack;
+                tss.ss = old_thread->ss;
 
                 ODA.ts_flag = true;
                 timefreeze = false;
-                return old_task->esp;
+                return old_thread->esp;
             }
 
-            uint64_t cpuCycles = rdtsc() - old_task->last_active;
+            uint64_t cpuCycles = rdtsc() - old_thread->parent->last_active;
             uint32_t microSeconds = cpuCyclesToMicroSeconds(cpuCycles);
-            old_task->cpu_time_used += microSeconds;
+            old_thread->parent->cpu_time_used += microSeconds;
         }
     }
 
@@ -306,27 +441,26 @@ uint32_t task_switch(uint32_t esp) {
         queue_t* queue = &(queues[i]);
 
         if (!queue_isEmpty(queue)) {
-            current_task = queue_dequeue(queue);
+            current_thread = queue_dequeue(queue);
             current_queue = i;
             goto found_new_task;
         }
     }
 
-    current_task = doNothing_task;
+    current_thread = list_getElement(doNothing_task->threads, 1);
 
     found_new_task:
 
-    current_task->last_active = rdtsc();
+    current_thread->parent->last_active = rdtsc();
 
     // new_task
-    paging_switch(current_task->page_directory);
-    tss.esp = current_task->esp;
-    tss.esp0 = current_task->kernel_stack;
-    tss.ebp = current_task->ebp;
-    tss.ss = current_task->ss;
+    paging_switch(current_thread->parent->page_directory);
+    tss.esp = current_thread->esp;
+    tss.esp0 = current_thread->kernel_stack;
+    tss.ss = current_thread->ss;
 
     // Set TS
-    if (current_task == FPUTask) {
+    if (current_thread == FPUThread) {
         __asm__ volatile("clts");  // CLearTS: reset the TS bit (no. 3) in CR0 to disable #NM
     } else {
         uint32_t cr0;
@@ -337,21 +471,21 @@ uint32_t task_switch(uint32_t esp) {
 
     ODA.ts_flag = true;
     timefreeze = false;
-    return current_task->esp;  // return new task's esp
+    return current_thread->esp;  // return new task's esp
 }
 
 /**
- * @brief Make the current task sleep for the given time.
+ * @brief Make the current thread sleep for the given time.
  * 
  * @param ms time to sleep in milliseconds
  */
-void sleepCurrentTask(uint32_t ms) {
+void sleepCurrentThread(uint32_t ms) {
     if (ms > 0) {
         cli();
         timefreeze = true;
         timemillis = timer_getMilliseconds();
-        current_task->timeout = timemillis + ms;
-        queue_enqueue(&(queues_sleeping[current_queue]), current_task);
+        current_thread->timeout = timemillis + ms;
+        queue_enqueue(&(queues_sleeping[current_queue]), current_thread);
         sti();
     }
 

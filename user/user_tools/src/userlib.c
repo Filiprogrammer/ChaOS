@@ -195,6 +195,23 @@ bool pci_getDevice(uint32_t i, pciDev_t* pciDev) {
     return ret;
 }
 
+bool create_thread(void* entry) {
+    bool ret;
+    __asm__ volatile("int $0x7F"
+                     : "=a"(ret)
+                     : "a"(29), "b"(entry));
+    return ret;
+}
+
+void exitCurrentThread() {
+    __asm__ volatile("int $0x7F"
+                     :
+                     : "a"(30));
+
+    for (;;)
+        __asm__ volatile("nop");
+}
+
 /// user functions ///
 
 // Compare two strings. Returns -1 if str1 < str2, 0 if they are equal or 1 otherwise.

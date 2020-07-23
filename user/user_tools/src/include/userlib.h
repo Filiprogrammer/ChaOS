@@ -52,6 +52,8 @@ void getBootPath(char* filepath);
 void exit();
 uint8_t file_execute(char* filepath);
 bool pci_getDevice(uint32_t i, pciDev_t* pciDev);
+bool create_thread(void* entry);
+void exitCurrentThread();
 
 // user functions
 int32_t strcmp(const char* s1, const char* s2);
