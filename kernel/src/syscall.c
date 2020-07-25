@@ -76,7 +76,6 @@ void syscall_handler(registers_t* r) {
 
     // Unknown number of parameters, so just push all of them onto the stack in the correct order.
     // The function will use all the parameters it wants, and we can pop them all back off afterwards.
-    int32_t ret;
     __asm__ volatile(
         "push %1; \
         push %2; \
@@ -85,9 +84,8 @@ void syscall_handler(registers_t* r) {
         push %5; \
         call *%6; \
         add $20, %%esp;"
-        : "=a"(ret)
-        : "r"(r->edi), "r"(r->esi), "r"(r->edx), "r"(r->ecx), "r"(r->ebx), "r"(addr));
-    r->eax = ret;
+        : "=a"(r->eax)
+        : "D"(r->edi), "S"(r->esi), "d"(r->edx), "c"(r->ecx), "b"(r->ebx), "a"(addr));
 }
 
 void syscall_install() {
