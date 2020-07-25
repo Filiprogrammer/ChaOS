@@ -516,7 +516,7 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
             cur_file_name[j] = spl_path[k][j];
         }
         cur_file_name[lastDot] = 0; //Null termination
-        char cur_file_ext[cur_file_len-lastDot];
+        char cur_file_ext[cur_file_len-lastDot+1];
         for(uint32_t j = (lastDot+1); j < cur_file_len; ++j){
             cur_file_ext[j-(lastDot+1)] = spl_path[k][j];
         }
@@ -1120,7 +1120,7 @@ uint8_t* FAT_readFileEntry(FAT* inst, char* filepath){
             cur_file_name[j] = spl_path[k][j];
         }
         cur_file_name[lastDot] = 0; //Null termination
-        char cur_file_ext[cur_file_len-lastDot];
+        char cur_file_ext[cur_file_len-lastDot+1];
         for(uint32_t j = (lastDot+1); j < cur_file_len; ++j){
             cur_file_ext[j-(lastDot+1)] = spl_path[k][j];
         }
@@ -2117,7 +2117,7 @@ uint8_t FAT_readFileEntryByIndex(FAT* inst, file_t* file_inst, char* filepath, u
             if(lastDot == -1) lastDot = cur_file_len;
         }
         char cur_file_name[lastDot+1];
-        char cur_file_ext[cur_file_len-lastDot];
+        char cur_file_ext[cur_file_len-lastDot+1];
         if(k < path_size) {
             for(uint32_t j = 0; j < lastDot; ++j){
                 cur_file_name[j] = spl_path[k][j];
