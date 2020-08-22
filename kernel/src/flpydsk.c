@@ -162,12 +162,15 @@ bool flpy_controlMotor(uint8_t drive, bool enable) {
 
 bool flpy_irqWait() {
     sti();
-    for (uint8_t i = 0; i < 100; ++i) {
+    uint32_t timeout = timer_getMilliseconds() + 2000;
+
+    while (timer_getMilliseconds() < timeout) {
         if (_irqFired) {
             _irqFired = false;
             return true;  // IRQ Fired
         }
-        sleepMilliSeconds(20);
+
+        hlt();
     }
 
     return false;  // Timeout
