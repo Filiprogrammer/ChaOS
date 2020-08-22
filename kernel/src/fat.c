@@ -1695,8 +1695,8 @@ uint8_t* FAT_createFile(FAT* inst, char* filepath, uint8_t attribute){
     }
     
     //Get the file container path
-    char spl_path_container[path_size-1][FAT_MAX_FNAME_LEN];
-    for(uint32_t k = 0; k < (path_size-1); ++k){
+    char spl_path_container[(path_size == 0) ? 0 : (path_size-1)][FAT_MAX_FNAME_LEN];
+    for(uint32_t k = 0; k < ((path_size == 0) ? 0 : (path_size-1)); ++k){
         for(uint32_t l = 0; l < FAT_MAX_FNAME_LEN; ++l){
             spl_path_container[k][l] = spl_path[k][l];
         }
@@ -1750,7 +1750,7 @@ uint8_t* FAT_createFile(FAT* inst, char* filepath, uint8_t attribute){
         new_filename[j] = new_file_str[j];
     }
     new_filename[lastDot] = 0; //Null termination
-    char new_fileext[cur_file_len-lastDot]; //TODO: I think there has be a +1
+    char new_fileext[cur_file_len-lastDot+1];
     for(uint32_t j = (lastDot+1); j < cur_file_len; ++j){
         new_fileext[j-(lastDot+1)] = new_file_str[j];
     }
