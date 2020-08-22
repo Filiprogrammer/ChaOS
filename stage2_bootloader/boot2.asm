@@ -3,6 +3,7 @@
 ;   Second Stage Bootloader
 ;******************************************************************************
 
+[map symbols boot2.map]
 [Bits 16]
 org 0x500
 jmp entry_point                         ; go to entry point

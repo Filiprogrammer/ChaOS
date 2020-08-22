@@ -2,6 +2,7 @@
 [Bits 16]
 org 0x7C00                                  ; start address of bootloader
 jmp entry_point                             ; jump to bootloader entry point
+TIMES 3-($-$$) hlt
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Memory Management:
@@ -141,7 +142,7 @@ DONE:
     mov dl, [DriveNum]
 
     ; copy the BIOS Parameter Block to the 2. Stage bootloader
-    mov di, 0x56C                           ; destination
+    mov di, BPB_OFFSET                      ; destination
     mov si, 0x7C03                          ; source
     mov cx, 0x3C                            ; number of bytes to copy
     cld
