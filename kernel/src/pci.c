@@ -121,7 +121,7 @@ void pci_checkFunction(uint8_t bus, uint8_t dev, uint8_t func) {
                 barCount = 2;
 
             for(uint8_t i = 0; i < 6; ++i) {
-                if(((headerType & 0x7F) == 1 && i >= 2) || (headerType & 0x7F) == 2) {
+                if (i >= barCount) {
                     pciDev->bar[i].memoryType = PCI_INVALID_BAR;
                     continue;
                 }

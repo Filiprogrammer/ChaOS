@@ -101,13 +101,13 @@ registers_t* irq_handler(registers_t* r) {
             int32_t id        =   r->err_code & 0x10; // Caused by an instruction fetch?
 
             // Output an error message.
-                          puts("\nPage Fault (");
+            puts("\nPage Fault (");
             if (present)  puts("page not present");
             if (rw)       puts(" read-only - write operation");
             if (us)       puts(" user-mode");
             if (reserved) puts(" overwritten CPU-reserved bits of page entry");
             if (id)       puts(" caused by an instruction fetch");
-                          printf(") at %X - EIP: %X\n", faulting_address, r->eip);
+            printf(") at %X - EIP: %X\n", faulting_address, r->eip);
         }
 
         printf("err_code: %X address(eip): %X\n", r->err_code, r->eip);

@@ -313,13 +313,13 @@ bool flpy_transfer_sectors(uint8_t drive, uint8_t head, uint8_t cyl, uint8_t sec
 
         flpy_irqWait();
 
-        uint8_t st0, st1, st2, rcy, rhe, rse, bps;
+        uint8_t st0, st1, st2, bps;
         st0 = flpy_readData();
         st1 = flpy_readData();
         st2 = flpy_readData();
-        rcy = flpy_readData();
-        rhe = flpy_readData();
-        rse = flpy_readData();
+        flpy_readData();
+        flpy_readData();
+        flpy_readData();
         bps = flpy_readData();
 
         uint8_t error = 0;
