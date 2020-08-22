@@ -3,6 +3,7 @@
 cd "$(dirname "$(readlink -f "$0")")"
 ./clean.sh
 mkdir obj 2>/dev/null
+mkdir obj/Ia32 2>/dev/null
 
 CFLAGS="-g -fshort-wchar -fno-builtin -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -ffunction-sections -fdata-sections -include src/AutoGen.h -fno-common -DSTRING_ARRAY_NAME=BaseLibStrings -m32 -march=i586 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables -Wno-address -fno-pic -fno-pie -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -c -Isrc -Isrc/Ia32 -I../MdePkg/Include -I../MdePkg/Include/Ia32"
 
