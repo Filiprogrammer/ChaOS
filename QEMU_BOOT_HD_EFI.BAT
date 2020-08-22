@@ -1,3 +1,3 @@
 @echo off
 cd %~d0%~p0
-tools\qemu\qemu-system-i386 -soundhw pcspk -bios bios32.bin -hda HDImage.bin -boot c
+tools\qemu-windows\qemu-system-i386 -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c

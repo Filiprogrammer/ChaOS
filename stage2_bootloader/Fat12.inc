@@ -8,7 +8,7 @@
 
 [BITS 16]
 
-%include "..\stage1_bootloader\Fat12_BPB.inc"
+%include "../stage1_bootloader/Fat12_BPB.inc"
 
 datasector  dw 0x0000
 cluster     dw 0x0000

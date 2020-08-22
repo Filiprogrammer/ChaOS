@@ -5,7 +5,7 @@
             "name": "QEMU Debug Floppy",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/kernel/chaoskrn.sys_debug",
+            "program": "${workspaceRoot}/kernel/CHAOSKRN.SYS_debug",
             "miDebuggerServerAddress": "localhost:1234",
             "args": [],
             "stopAtEntry": false,
@@ -15,7 +15,11 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb.bat"
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.bat"
+            },
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
             },
             "preLaunchTask": "QEMU Boot Floppy & Run GDB Server"
         },
@@ -23,7 +27,7 @@
             "name": "QEMU Debug HD",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/kernel/chaoskrn.sys_debug",
+            "program": "${workspaceRoot}/kernel/CHAOSKRN.SYS_debug",
             "miDebuggerServerAddress": "localhost:1234",
             "args": [],
             "stopAtEntry": false,
@@ -33,7 +37,11 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb.bat"
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.bat"
+            },
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
             },
             "preLaunchTask": "QEMU Boot HD & Run GDB Server"
         },
@@ -41,7 +49,7 @@
             "name": "QEMU Debug HD EFI",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/kernel/chaoskrn.sys_debug",
+            "program": "${workspaceRoot}/kernel/CHAOSKRN.SYS_debug",
             "miDebuggerServerAddress": "localhost:1234",
             "args": [],
             "stopAtEntry": false,
@@ -51,7 +59,11 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb.bat"
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.bat"
+            },
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
             },
             "preLaunchTask": "QEMU Boot HD EFI & Run GDB Server"
         }

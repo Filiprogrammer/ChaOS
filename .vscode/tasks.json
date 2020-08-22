@@ -4,7 +4,12 @@
         {
             "label": "Build Floppy Image",
             "type": "shell",
-            "command": "${workspaceRoot}/BUILD_FLOPPY_IMAGE.BAT",
+            "windows": {
+                "command": "${workspaceRoot}/BUILD_FLOPPY_IMAGE.BAT"
+            },
+            "linux": {
+                "command": "${workspaceRoot}/build_floppy_image.sh"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -21,7 +26,12 @@
         {
             "label": "Build HD Image",
             "type": "shell",
-            "command": "${workspaceRoot}/BUILD_HD_IMAGE.BAT",
+            "windows": {
+                "command": "${workspaceRoot}/BUILD_HD_IMAGE.BAT"
+            },
+            "linux": {
+                "command": "${workspaceRoot}/build_hd_image.sh"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -38,7 +48,12 @@
         {
             "label": "Build HD Image with MBR",
             "type": "shell",
-            "command": "${workspaceRoot}/BUILD_HD_MBR_IMAGE.BAT",
+            "windows": {
+                "command": "${workspaceRoot}/BUILD_HD_MBR_IMAGE.BAT"
+            },
+            "linux": {
+                "command": "${workspaceRoot}/build_hd_mbr_image.sh"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -55,7 +70,12 @@
         {
             "label": "Build HD Image EFI",
             "type": "shell",
-            "command": "${workspaceRoot}/BUILD_HD_IMAGE_EFI.BAT",
+            "windows": {
+                "command": "${workspaceRoot}/BUILD_HD_IMAGE_EFI.BAT"
+            },
+            "linux": {
+                "command": "${workspaceRoot}/build_hd_image_efi.sh"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -72,7 +92,12 @@
         {
             "label": "Build Floppy Image - Debug",
             "type": "shell",
-            "command": "${workspaceRoot}/BUILD_FLOPPY_IMAGE_DEBUG.BAT",
+            "windows": {
+                "command": "${workspaceRoot}/BUILD_FLOPPY_IMAGE_DEBUG.BAT"
+            },
+            "linux": {
+                "command": "${workspaceRoot}/build_floppy_image_debug.sh"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -89,7 +114,12 @@
         {
             "label": "Build HD Image - Debug",
             "type": "shell",
-            "command": "${workspaceRoot}/BUILD_HD_IMAGE_DEBUG.BAT",
+            "windows": {
+                "command": "${workspaceRoot}/BUILD_HD_IMAGE_DEBUG.BAT"
+            },
+            "linux": {
+                "command": "${workspaceRoot}/build_hd_image_debug.sh"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -106,7 +136,12 @@
         {
             "label": "Build HD Image with MBR - Debug",
             "type": "shell",
-            "command": "${workspaceRoot}/BUILD_HD_MBR_IMAGE_DEBUG.BAT",
+            "windows": {
+                "command": "${workspaceRoot}/BUILD_HD_MBR_IMAGE_DEBUG.BAT"
+            },
+            "linux": {
+                "command": "${workspaceRoot}/build_hd_mbr_image_debug.sh"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -123,7 +158,12 @@
         {
             "label": "Build HD Image EFI - Debug",
             "type": "shell",
-            "command": "${workspaceRoot}/BUILD_HD_IMAGE_EFI_DEBUG.BAT",
+            "windows": {
+                "command": "${workspaceRoot}/BUILD_HD_IMAGE_EFI_DEBUG.BAT"
+            },
+            "linux": {
+                "command": "${workspaceRoot}/build_hd_image_efi_debug.sh"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -140,7 +180,12 @@
         {
             "label": "QEMU Boot Floppy & Run GDB Server",
             "type": "shell",
-            "command": "\"${workspaceRoot}/tools/qemu/qemu-system-i386\" -soundhw pcspk -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s",
+            "windows": {
+                "command": "echo a & \"${workspaceRoot}/tools/qemu-windows/qemu-system-i386\" -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s"
+            },
+            "linux": {
+                "command": "cd \"${workspaceRoot}/tools/qemu-linux\" && export LD_LIBRARY_PATH=\"${workspaceRoot}/tools/qemu-linux/lib\" && echo a && ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=../../FloppyImage.bin,index=0,if=floppy -boot a -S -s || ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=../../FloppyImage.bin,index=0,if=floppy -boot a -S -s"
+            },
             "group": "none",
             "presentation": {
                 "echo": false,
@@ -172,7 +217,12 @@
         {
             "label": "QEMU Boot HD & Run GDB Server",
             "type": "shell",
-            "command": "\"${workspaceRoot}/tools/qemu/qemu-system-i386\" -soundhw pcspk -hda HDImage.bin -boot c -S -s",
+            "windows": {
+                "command": "echo a & \"${workspaceRoot}/tools/qemu-windows/qemu-system-i386.exe\" -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s"
+            },
+            "linux": {
+                "command": "cd \"${workspaceRoot}/tools/qemu-linux\" && export LD_LIBRARY_PATH=\"${workspaceRoot}/tools/qemu-linux/lib\" && echo a && ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=../../HDImage.bin,index=0,if=ide -boot c -S -s || ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=../../HDImage.bin,index=0,if=ide -boot c -S -s"
+            },
             "group": "none",
             "presentation": {
                 "echo": false,
@@ -204,7 +254,12 @@
         {
             "label": "QEMU Boot HD EFI & Run GDB Server",
             "type": "shell",
-            "command": "\"${workspaceRoot}/tools/qemu/qemu-system-i386\" -soundhw pcspk -bios bios32.bin -hda HDImage.bin -boot c -S -s",
+            "windows": {
+                "command": "echo a & \"${workspaceRoot}/tools/qemu-windows/qemu-system-i386\" -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s"
+            },
+            "linux": {
+                "command": "cd \"${workspaceRoot}/tools/qemu-linux\" && export LD_LIBRARY_PATH=\"${workspaceRoot}/tools/qemu-linux/lib\" && echo a && ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios ../bios32.bin -drive format=raw,file=../../HDImage.bin,index=0,if=ide -boot c -S -s || ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios ../bios32.bin -drive format=raw,file=../../HDImage.bin,index=0,if=ide -boot c -S -s"
+            },
             "group": "none",
             "presentation": {
                 "echo": false,

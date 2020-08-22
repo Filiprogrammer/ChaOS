@@ -3,12 +3,12 @@ cd %~d0%~p0
 call BUILD.BAT %1 %2 || goto ERROR
 
 cd efi_bootloader
-cecho {0A}Building EFI Bootloader...{\n0F}
+cecho {0A}Building EFI Bootloader...{#}{\n}
 call BUILD.BAT || goto ERROR
-cecho {0A}EFI Bootloader was built{\n0F}
+cecho {0A}EFI Bootloader was built{#}{\n}
 cd ..
 
-cecho {0A}Building HD Image EFI...{\n0F}
+cecho {0A}Building HD Image EFI...{#}{\n}
 mkdosfs -hd -no-mbr -fats2 -fatz12 -spc1 -z2 -noverb -b stage1_bootloader/boot.bin HDImage.bin || goto ERROR
 imgtools -i HDImage.bin -l ChaOS0.1 || goto ERROR
 imgtools -i HDImage.bin stage2_bootloader/BOOT2.SYS || goto ERROR
@@ -25,8 +25,8 @@ for %%a in ("%user_programs_paths: =" "%") do (
 )
 :imageBuilt
 del HDImage.vdi >nul 2>&1
-VBoxManage convertfromraw --uuid d32a4d71-7ccb-4864-a684-c9d7c7a425f5 -format VDI HDImage.bin HDImage.vdi || cecho {0C}Failed building VDI HD image{\n0F}&&goto ERROR
-cecho {0A}HD Image was built{\n0F}
+VBoxManage convertfromraw --uuid d32a4d71-7ccb-4864-a684-c9d7c7a425f5 -format VDI HDImage.bin HDImage.vdi || cecho {0C}Failed building VDI HD image{#}{\n}&&goto ERROR
+cecho {0A}HD Image was built{#}{\n}
 goto eof
 
 :ERROR

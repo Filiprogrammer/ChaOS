@@ -2,7 +2,7 @@
 cd %~d0%~p0
 call BUILD.BAT %1 %2 || goto ERROR
 
-cecho {0A}Building Floppy Image...{\n0F}
+cecho {0A}Building Floppy Image...{#}{\n}
 mkdosfs -fd -spt18 -heads2 -cyls80 -fats2 -fatz12 -spc1 -noverb -b stage1_bootloader/boot.bin FloppyImage.bin || goto ERROR
 imgtools -i FloppyImage.bin -l ChaOS0.1 || goto ERROR
 imgtools -i FloppyImage.bin stage2_bootloader/BOOT2.SYS || goto ERROR
@@ -15,8 +15,8 @@ for %%a in ("%user_programs_paths: =" "%") do (
     if %%a NEQ "" imgtools -i FloppyImage.bin %%a
 )
 :imageBuilt
-if not errorlevel 0 cecho {0C}Failed building floppy image{\n0F}&goto ERROR
-cecho {0A}Floppy Image was built{\n0F}
+if not errorlevel 0 cecho {0C}Failed building floppy image{#}{\n}&goto ERROR
+cecho {0A}Floppy Image was built{#}{\n}
 goto eof
 
 :ERROR

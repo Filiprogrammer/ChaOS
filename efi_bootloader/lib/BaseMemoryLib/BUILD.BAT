@@ -9,19 +9,19 @@ setlocal EnableDelayedExpansion
 
 FOR %%G IN (src/*.c) DO (
     set "xyz=%%G"
-    cecho {09}Compiling {#}{\t}==^> %%G...
-    i586-elf-gcc %CFLAGS% -o obj/!xyz:~,-2!.obj src/%%G || exit /B 1
+    cecho {09}Compiling {0F}{\t}==^> %%G...{#}
+    i686-elf-gcc %CFLAGS% -o obj/!xyz:~,-2!.obj src/%%G || exit /B 1
     cecho {0a}done{#}{\n}
 )
 
 
 FOR /R obj %%G IN (*.obj) DO (
-    set "xyz=%%G"
+    set "xyz="%%G^""
     ECHO !xyz:\=/!>>obj\object_files.lst
 )
 
 endlocal
 
-cecho {09}Creating Archive{#}{\t}==^> BaseMemoryLib.lib...
-i586-elf-ar cr BaseMemoryLib.lib  @obj/object_files.lst || exit /B 1
+cecho {09}Creating Archive{0F}{\t}==^> BaseMemoryLib.lib...{#}
+i686-elf-ar cr BaseMemoryLib.lib  @obj/object_files.lst || exit /B 1
 cecho {0a}done{#}{\n}

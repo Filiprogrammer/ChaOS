@@ -10,7 +10,22 @@
                 "__VERSION_STRING=\"ChaOS [Ver 0.2.yymmdd] made by Filiprogrammer\\n\"",
                 "__VERSION_CHECKSUM=0xAB"
             ],
-            "compilerPath": "${workspaceFolder}/tools/crosstools-complete/bin/i586-elf-gcc.exe",
+            "compilerPath": "${workspaceFolder}/tools/i686-elf-tools-windows/bin/i686-elf-gcc.exe",
+            "cStandard": "c99",
+            "cppStandard": "c++98",
+            "intelliSenseMode": "gcc-x86"
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/kernel/src/include"
+            ],
+            "defines": [
+                "__VERSION_STRING=\"ChaOS [Ver 0.2.yymmdd] made by Filiprogrammer\\n\"",
+                "__VERSION_CHECKSUM=0xAB"
+            ],
+            "compilerPath": "${workspaceFolder}/tools/i686-elf-tools-linux/bin/i686-elf-gcc",
             "cStandard": "c99",
             "cppStandard": "c++98",
             "intelliSenseMode": "gcc-x86"

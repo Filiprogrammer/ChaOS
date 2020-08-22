@@ -1,7 +1,7 @@
 @echo off
 cd %~d0%~p0
 call CLEAN.BAT
-mingw32-make --makefile=Windows_makefile || goto ERROR
+make --makefile=makefile || goto ERROR
 goto EOF
 
 :ERROR

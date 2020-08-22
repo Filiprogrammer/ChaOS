@@ -1,7 +1,6 @@
 {
     "files.associations": {
         "*.h": "c",
-        "*.c": "c",
-        "Windows_makefile": "makefile"
+        "*.c": "c"
     }
 }

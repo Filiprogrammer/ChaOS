@@ -2,8 +2,8 @@
 cd %~d0%~p0
 call CLEAN.BAT
 
-cecho {09}Assembling {#}{\t}==^> boot_mbr.asm...
-nasmw -f bin boot_mbr.asm -o boot_mbr.bin || goto ERROR
+cecho {09}Assembling{0F}{\t}==^> boot_mbr.asm...{#}
+nasm -f bin boot_mbr.asm -o boot_mbr.bin || goto ERROR
 cecho {0a}done{#}{\n}
 goto EOF
 
