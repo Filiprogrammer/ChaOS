@@ -29,6 +29,7 @@ void storage_devManager_init() {
             flpyDev->inst = flpydsk;
             flpyDev->readSector = (void*)flpydsk_read_sectors;
             flpyDev->writeSector = (void*)flpydsk_write_sectors;
+            flpyDev->partitions = NULL;
             uint32_t retBootPart = PartManage_analyzeDev(flpyDev);
             if(retBootPart) {
                 ODA.bootPart = retBootPart - 1;
@@ -55,6 +56,7 @@ void storage_devManager_init() {
             flpyDev->inst = flpydsk;
             flpyDev->readSector = (void*)flpydsk_read_sectors;
             flpyDev->writeSector = (void*)flpydsk_write_sectors;
+            flpyDev->partitions = NULL;
             uint32_t retBootPart = PartManage_analyzeDev(flpyDev);
             if(retBootPart) {
                 ODA.bootPart = retBootPart - 1;
@@ -74,6 +76,7 @@ void storage_devManager_init() {
         devAta->inst = ata0m;
         devAta->readSector = (void*)ATA_read;
         devAta->writeSector = (void*)ATA_write;
+        devAta->partitions = NULL;
         uint32_t retBootPart = PartManage_analyzeDev(devAta);
         if(retBootPart) {
             ODA.bootPart = retBootPart - 1;
@@ -90,6 +93,7 @@ void storage_devManager_init() {
         devAta->inst = ata0s;
         devAta->readSector = (void*)ATA_read;
         devAta->writeSector = (void*)ATA_write;
+        devAta->partitions = NULL;
         uint32_t retBootPart = PartManage_analyzeDev(devAta);
         if(retBootPart) {
             ODA.bootPart = retBootPart - 1;
@@ -106,6 +110,7 @@ void storage_devManager_init() {
         devAta->inst = ata1m;
         devAta->readSector = (void*)ATA_read;
         devAta->writeSector = (void*)ATA_write;
+        devAta->partitions = NULL;
         uint32_t retBootPart = PartManage_analyzeDev(devAta);
         if(retBootPart) {
             ODA.bootPart = retBootPart - 1;
@@ -122,6 +127,7 @@ void storage_devManager_init() {
         devAta->inst = ata1s;
         devAta->readSector = (void*)ATA_read;
         devAta->writeSector = (void*)ATA_write;
+        devAta->partitions = NULL;
         uint32_t retBootPart = PartManage_analyzeDev(devAta);
         if(retBootPart) {
             ODA.bootPart = retBootPart - 1;
