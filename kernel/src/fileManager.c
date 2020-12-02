@@ -172,7 +172,7 @@ uint8_t file_findByIndex(file_t* file_inst, char* dirpath, uint32_t index){
 
 uint8_t file_execute(char* filepath){
     file_t file_inst = {{0}, {0}, 0, 0, 0};
-    cli();
+
     if(file_find(&file_inst, filepath)){
         uint8_t buffer[MIN(file_inst.size, PAGESIZE)];
         file_readContents(&file_inst, buffer, 0, MIN(file_inst.size, PAGESIZE));
@@ -192,22 +192,12 @@ uint8_t file_execute(char* filepath){
 
         page_directory_t* active_pagedir = paging_getActivePageDirectory();
 
-        for (uint32_t elf_buffer_offset = 0; elf_buffer_offset < elf_filesize; elf_buffer_offset += MIN(elf_filesize, PAGESIZE)) {
-            ODA.ts_flag = false;
-            paging_switch(pd);
-
-            file_readContents(&file_inst, (uint8_t*)elf_vaddr + elf_buffer_offset, elf_offset + elf_buffer_offset, MIN(elf_filesize - elf_buffer_offset, PAGESIZE));
-
-            paging_switch(active_pagedir);
-            ODA.ts_flag = true;
-        }
-
-        cli();
         ODA.ts_flag = false;
         paging_switch(pd);
-
+        ODA.ts_flag = true;
+        file_readContents(&file_inst, (uint8_t*)elf_vaddr, elf_offset, elf_filesize);
         memset((void*)elf_vaddr + elf_filesize, 0, elf_memsz - elf_filesize); // fill BSS with zeros
-
+        ODA.ts_flag = false;
         paging_switch(active_pagedir);
 
         create_task(pd, (void*)elf_vaddr, 3); // program in user space (ring 3) takes over
@@ -216,7 +206,7 @@ uint8_t file_execute(char* filepath){
         switch_context();
         return 1;
     }
-    sti();
+
     return 0;
 }
 

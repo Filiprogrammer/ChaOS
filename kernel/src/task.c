@@ -68,6 +68,7 @@ void tasking_install() {
     thread->parent = kernel_task;
     thread->timeout = 0;
     thread->nice = 0;
+    thread->page_directory = KERNEL_DIRECTORY;
 
     if (kernel_task->threads == NULL)
         kernel_task->threads = list_create();
@@ -171,6 +172,7 @@ static thread_t* _create_thread(task_t* task, void* entry, uint8_t privilege) {
     thread->parent = task;
     thread->timeout = 0;
     thread->nice = 0;
+    thread->page_directory = task->page_directory;
 
     list_append(task->threads, thread);
 
@@ -431,6 +433,7 @@ uint32_t task_switch(uint32_t esp) {
             uint64_t cpuCycles = rdtsc() - old_thread->parent->last_active;
             uint32_t microSeconds = cpuCyclesToMicroSeconds(cpuCycles);
             old_thread->parent->cpu_time_used += microSeconds;
+            old_thread->page_directory = paging_getActivePageDirectory();
         }
     }
 
@@ -454,7 +457,7 @@ uint32_t task_switch(uint32_t esp) {
     current_thread->parent->last_active = rdtsc();
 
     // new_task
-    paging_switch(current_thread->parent->page_directory);
+    paging_switch(current_thread->page_directory);
     tss.esp = current_thread->esp;
     tss.esp0 = current_thread->kernel_stack;
     tss.ss = current_thread->ss;

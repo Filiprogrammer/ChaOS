@@ -28,6 +28,7 @@ typedef struct thread {
     task_t* parent;
     uint32_t timeout;                 // Milliseconds until timeout ends (for task sleep)
     uint32_t nice;
+    page_directory_t* page_directory;
 } thread_t;
 
 void tasking_install();
