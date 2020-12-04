@@ -476,6 +476,7 @@ bool flpydsk_write_sectors(Flpydsk_t* inst, uint32_t sectorLBA, uint8_t* addr, s
         if ((sectorLBA + (len - 1) / 512 + 1) / 36 == curSecLBA / 36) {  // if curSecLBA is in the last cylinder to transfer
             //printf("flpy_write_sectors if curSecLBA: %u\thead: %u\tcyl: %u\tsector: %u\t numOfSect: %u\n", curSecLBA, head, cyl, sector, ((len-1) / 512 + 1) - (curSecLBA-sectorLBA));
             memcpy((void*)FLPY_DMA_BUFFER, addr + (curSecLBA - sectorLBA) * 512, len - (curSecLBA - sectorLBA) * 512);
+            memset((void*)(FLPY_DMA_BUFFER + len - (curSecLBA - sectorLBA) * 512), 0, 512 - (len - (curSecLBA - sectorLBA) * 512));
             if (!flpy_transfer_sectors(inst->drive, head, cyl, sector, ((len - 1) / 512 + 1) - (curSecLBA - sectorLBA), floppy_dir_write))
                 return false;
             //flpy_controlMotor(inst->drive, false);
