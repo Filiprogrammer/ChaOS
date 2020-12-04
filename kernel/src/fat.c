@@ -1559,7 +1559,7 @@ char* FAT_longNameToShortName(FAT* inst, char* filepath){
         filename[j] = file_str[j];
     }
     filename[lastDot] = 0; //Null termination
-    char fileext[file_str_len-lastDot];
+    char fileext[file_str_len-lastDot+1];
     for(uint32_t j = (lastDot+1); j < file_str_len; ++j){
         fileext[j-(lastDot+1)] = file_str[j];
     }
