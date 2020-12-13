@@ -281,7 +281,7 @@ void putch(char c) {
         scroll();
         vga_update_cursor(csr_y * width + csr_x);
     } else if (video_mode == 2) {
-        if (c >= 33 || c <= 127) {
+        if (c >= 33 && c <= 127) {
             uint8_t colorindex = colorToRRRGGGBB(color);
             for (uint8_t i = 0; i < 16; ++i) {
                 for (uint8_t j = 0; j < 8; ++j) {
@@ -477,7 +477,7 @@ void draw_text_part(int16_t x, int16_t y, const char* text, int16_t xoffset, int
         h = MIN(yoffset + h, height);
         uint8_t colorindex = colorToRRRGGGBB(color);
         while (*text != 0) {
-            if (*text >= 33 || *text <= 127) {
+            if (*text >= 33 && *text <= 127) {
                 for (uint8_t i = 0; i < 16; ++i) {
                     for (uint8_t j = 0; j < 8; ++j) {
                         if (((x + j) >= xoffset) && ((x + j) < w) && ((y + i) >= yoffset) && ((y + i) < h)) {
