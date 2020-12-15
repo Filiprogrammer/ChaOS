@@ -3,7 +3,6 @@
 
 // ASM functions in flush.asm
 extern void gdt_flush(uint32_t);
-extern void idt_flush(uint32_t);
 extern void tss_flush();
 
 // Internal function prototypes.

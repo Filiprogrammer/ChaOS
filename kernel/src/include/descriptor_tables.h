@@ -8,7 +8,6 @@ void write_tss(int32_t num, uint16_t ss0, uint32_t esp0);
 // asm functions in flush.asm
 extern void gdt_flush(uint32_t);
 extern void tss_flush();
-extern void idt_flush(uint32_t);
 
 // Initialisation function is publicly accessible.
 void init_descriptor_tables();
