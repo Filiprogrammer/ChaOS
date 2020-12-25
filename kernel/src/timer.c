@@ -77,7 +77,7 @@ void sleepMilliSeconds(uint32_t ms) {
  */
 void sleepMicroSeconds(uint32_t microsec) {
     uint64_t timeout = microsec * ODA.cpu_frequency;
-    div64_32(&timeout, 1000000);
+    timeout /= 1000000;
     timeout += rdtsc();
     while (rdtsc() < timeout)
         nop();
@@ -85,8 +85,8 @@ void sleepMicroSeconds(uint32_t microsec) {
 
 uint32_t cpuCyclesToMicroSeconds(uint64_t cycles) {
     uint64_t cpuCyclesPerMicroSec = ODA.cpu_frequency;
-    div64_32(&cpuCyclesPerMicroSec, 1000000);
-    div64_32(&cycles, (uint32_t)cpuCyclesPerMicroSec);
+    cpuCyclesPerMicroSec /= 1000000;
+    cycles /= (uint32_t)cpuCyclesPerMicroSec;
     return cycles;
 }
 

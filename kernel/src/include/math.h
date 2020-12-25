@@ -14,7 +14,9 @@ extern double pow(double base, double exp);
 extern double fabs(double x);
 extern uint32_t alignUp(uint32_t val, uint32_t alignment);
 extern uint32_t alignDown(uint32_t val, uint32_t alignment);
-extern uint32_t div64_32(uint64_t *n, uint32_t base);
+extern uint64_t __udivdi3(uint64_t dividend, uint64_t divisor);
+extern uint64_t __umoddi3(uint64_t dividend, uint64_t divisor);
+extern int64_t __moddi3(int64_t dividend, int64_t divisor);
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
