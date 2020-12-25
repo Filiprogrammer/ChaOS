@@ -13,6 +13,9 @@ typedef signed long          int32_t;
 typedef signed short         int16_t;
 typedef signed char          int8_t;
 
+typedef signed long long     intmax_t;
+typedef unsigned long long   uintmax_t;
+
 #define INT8_MIN             (-128)
 #define INT16_MIN            (-32767-1)
 #define INT32_MIN            (-2147483647-1)
