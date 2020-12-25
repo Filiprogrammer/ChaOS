@@ -101,7 +101,7 @@ uint8_t darken_color(uint8_t color, float dark) {
 void draw() {
     int16_t y = 0;
     for (int16_t x = -GAME_WIDTH / 2; x < GAME_WIDTH / 2; ++x) {
-        float len = sqrt(power(x, 2) + power(FOV, 2) + power(y, 2));
+        float len = sqrt(x * x + FOV * FOV + y * y);
         float v0x = x / len;
         float v0y = FOV / len;
         float v0z = -y / len;
