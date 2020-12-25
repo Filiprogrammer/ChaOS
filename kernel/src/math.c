@@ -10,6 +10,25 @@ int32_t power(int32_t base, int32_t n) {
     return p;
 }
 
+double pow(double base, double exp) {
+    double result = 0.0;
+
+    __asm__ volatile(
+        "fyl2x \n"
+        "fld %%st(0) \n"
+        "frndint \n"
+        "fsubr %%st, %%st(1) \n"
+        "fxch \n"
+        "f2xm1 \n"
+        "fld1 \n"
+        "faddp %%st, %%st(1) \n"
+        "fscale \n"
+        : "=t"(result)
+        : "0"(base), "u"(exp));
+
+    return result;
+}
+
 /**
  * @brief Return the absolute value of i.
  * 
@@ -18,6 +37,21 @@ int32_t power(int32_t base, int32_t n) {
  */
 int32_t abs(int32_t i) {
     return i < 0 ? -i : i;
+}
+
+/**
+ * @brief Return the absolute value of i.
+ * 
+ * @param i integral value
+ * @return int64_t absolute value
+ */
+int64_t llabs(int64_t i) {
+    return i < 0 ? -i : i;
+}
+
+double fabs(double x) {
+    *(int*)&x &= 0x7fffffff;
+    return x;
 }
 
 uint32_t alignUp(uint32_t val, uint32_t alignment) {

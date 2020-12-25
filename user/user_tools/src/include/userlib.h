@@ -6,7 +6,6 @@
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 #define SIGN(X) ((0 < (X)) - ((X) < 0))
-#define ABS(X) (((X) < 0) ? (-(X) : (X)))
 
 typedef struct file_t {
     char name[35];
@@ -68,8 +67,11 @@ char* trimStart(char* str);
 char* tolower(char* str);
 char* strstr(char* string, char* substring);
 char* file_squashPath(char* filepath);
+int32_t abs(int32_t i);
+int64_t llabs(int64_t i);
 int32_t power(int32_t base, int32_t n);
-float powerf(float base, int32_t n);
+double pow(double base, double exp);
+double fabs(double x);
 int32_t fact(int32_t n);
 float sin(float deg);
 float cos(float deg);
