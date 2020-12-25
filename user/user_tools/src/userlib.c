@@ -368,9 +368,28 @@ char* strtrim(char* str) {
  * @param str string to be trimmed
  * @return char* pointer to the first non white-space charater of the string
  */
-char* trimStart(char* str) {
+char* strtrimstart(char* str) {
     // Trim leading space
     while (((unsigned char)*str) == 0x20) str++;
+    return str;
+}
+
+/**
+ * @brief Remove trailing white-space characters.
+ * 
+ * @param str string to be trimmed
+ * @return char* pointer to the string str
+ */
+char* strtrimend(char* str) {
+    char* end;
+
+    // Trim trailing space
+    end = str + strlen(str) - 1;
+    while (end >= str && ((unsigned char)*end) == 0x20) end--;
+
+    // Write new null terminator character
+    end[1] = '\0';
+
     return str;
 }
 
@@ -420,6 +439,27 @@ char* strstr(char* string, char* substring) {
         b = substring;
     }
     return NULL;
+}
+
+/**
+ * @brief Reverse the given string.
+ * 
+ * @param str the string to be reversed
+ * @return char* pointer to the reversed string
+ */
+char* strrev(char* str) {
+    if (!str || !*str)
+        return str;
+
+    char* p1 = str;
+    char* p2 = str + strlen(str) - 1;
+    for (; p2 > p1; ++p1, --p2) {
+        *p1 ^= *p2;
+        *p2 ^= *p1;
+        *p1 ^= *p2;
+    }
+
+    return str;
 }
 
 char* file_squashPath(char* filepath) {

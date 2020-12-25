@@ -212,6 +212,18 @@ char* strtrim(char* str) {
 }
 
 /**
+ * @brief Remove leading white-space characters.
+ * 
+ * @param str string to be trimmed
+ * @return char* pointer to the first non white-space charater of the string
+ */
+char* strtrimstart(char* str) {
+    // Trim leading space
+    while (((unsigned char)*str) == 0x20) str++;
+    return str;
+}
+
+/**
  * @brief Remove trailing white-space characters.
  * 
  * @param str string to be trimmed
@@ -344,4 +356,25 @@ int32_t strncmp(const char* s1, const char* s2, size_t n) {
         if (*s1++ != *s2++)
             return *(unsigned char*)(s1 - 1) - *(unsigned char*)(s2 - 1);
     return 0;
+}
+
+/**
+ * @brief Reverse the given string.
+ * 
+ * @param str the string to be reversed
+ * @return char* pointer to the reversed string
+ */
+char* strrev(char* str) {
+    if (!str || !*str)
+        return str;
+
+    char* p1 = str;
+    char* p2 = str + strlen(str) - 1;
+    for (; p2 > p1; ++p1, --p2) {
+        *p1 ^= *p2;
+        *p2 ^= *p1;
+        *p1 ^= *p2;
+    }
+
+    return str;
 }
