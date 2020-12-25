@@ -327,60 +327,505 @@ void puts(const char* text) {
         ;
 }
 
-void printf(const char* args, ...) {
-    va_list ap;
-    va_start(ap, args);
-    int32_t index = 0, d;
-    uint32_t u;
-    char c, *s;
-    char buffer[32];
+typedef enum {
+    PRINTF_FLAG_PREFIX      = 0x00000001,
+    PRINTF_FLAG_SIGNED      = 0x00000002,
+    PRINTF_FLAG_ZEROPADDED  = 0x00000004,
+    PRINTF_FLAG_LEFTALIGNED = 0x00000010,
+    PRINTF_FLAG_SHOWPLUS    = 0x00000020,
+    PRINTF_FLAG_SPACESIGN   = 0x00000040,
+    PRINTF_FLAG_BIGCHARS    = 0x00000080,
+    PRINTF_FLAG_NEGATIVE    = 0x00000100
+} printf_flag_t;
 
-    while (args[index]) {
-        switch (args[index]) {
-            case '%':
-                ++index;
-                switch (args[index]) {
-                    case 'u':
-                        u = va_arg(ap, uint32_t);
-                        uitoa(u, buffer);
-                        puts(buffer);
+typedef enum {
+    PRITNF_QUALIFIER_BYTE = 0,
+    PRITNF_QUALIFIER_SHORT,
+    PRITNF_QUALIFIER_INT,
+    PRITNF_QUALIFIER_LONG,
+    PRITNF_QUALIFIER_LONG_LONG,
+    PRITNF_QUALIFIER_POINTER,
+    PRITNF_QUALIFIER_SIZE,
+    PRITNF_QUALIFIER_MAX
+} printf_qualifier_t;
+
+#define PRINTF_GET_INT_ARGUMENT(type, ap, flags) ({  \
+    unsigned type res;                               \
+                                                     \
+    if ((flags)&PRINTF_FLAG_SIGNED) {                \
+        signed type arg = va_arg((ap), signed type); \
+                                                     \
+        if (arg < 0) {                               \
+            res = -arg;                              \
+            (flags) |= PRINTF_FLAG_NEGATIVE;         \
+        } else {                                     \
+            res = arg;                               \
+        }                                            \
+    } else {                                         \
+        res = va_arg((ap), unsigned type);           \
+    }                                                \
+                                                     \
+    res;                                             \
+})
+
+void printf(const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    size_t cur;             // Index of the currently processed character from fmt
+    size_t nxt = 0;         // Index of the next character from fmt
+    size_t firstNoFmt = 0;  // Index to the first not printed nonformating character
+
+    for (;;) {
+        cur = nxt;
+        char c = fmt[nxt++];
+
+        if (c == 0)
+            break;
+
+        // Control character
+        if (c == '%') {
+            // Print common characters if any processed
+            if (cur > firstNoFmt) {
+                for (uint32_t i = firstNoFmt; i < cur; ++i) {
+                    if (fmt[i] == 0)
                         break;
-                    case 'd':
-                    case 'i':
-                        d = va_arg(ap, int32_t);
-                        itoa(d, buffer);
-                        puts(buffer);
+
+                    putch(fmt[i]);
+                }
+            }
+
+            firstNoFmt = cur;
+
+            // Parse modifiers
+            uint32_t flags = 0;
+            bool loopEnd = false;
+
+            do {
+                cur = nxt;
+                c = fmt[nxt++];
+
+                switch (c) {
+                    case '#':
+                        flags |= PRINTF_FLAG_PREFIX;
                         break;
-                    case 'X':
-                        d = va_arg(ap, int32_t);
-                        i2hex(d, buffer, 8);
-                        puts(buffer);
+                    case '-':
+                        flags |= PRINTF_FLAG_LEFTALIGNED;
                         break;
-                    case 'x':
-                        d = va_arg(ap, int32_t);
-                        i2hex(d, buffer, 4);
-                        puts(buffer);
+                    case '+':
+                        flags |= PRINTF_FLAG_SHOWPLUS;
                         break;
-                    case 's':
-                        s = va_arg(ap, char*);
-                        puts(s);
+                    case ' ':
+                        flags |= PRINTF_FLAG_SPACESIGN;
                         break;
-                    case 'c':
-                        c = (char)va_arg(ap, int32_t);
-                        putch(c);
+                    case '0':
+                        flags |= PRINTF_FLAG_ZEROPADDED;
                         break;
                     default:
-                        putch('%');
-                        putch('%');
+                        loopEnd = true;
+                }
+            } while (!loopEnd);
+
+            // Width & '*' operator
+            int32_t width = 0;
+
+            if (c >= '0' && c <= '9') {
+                for (;;) {
+                    width *= 10;
+                    width += c - '0';
+
+                    cur = nxt;
+                    c = fmt[nxt++];
+
+                    if (c == 0)
+                        break;
+
+                    if (!(c >= '0' && c <= '9'))
                         break;
                 }
+            } else if (c == '*') {
+                // Get width value from argument list
+                cur = nxt;
+                c = fmt[nxt++];
+                width = va_arg(ap, int32_t);
+
+                if (width < 0) {
+                    // Negative width sets '-' flag
+                    width *= -1;
+                    flags |= PRINTF_FLAG_LEFTALIGNED;
+                }
+            }
+
+            // Precision and '*' operator
+            int32_t precision = 0;
+
+            if (c == '.') {
+                cur = nxt;
+                c = fmt[nxt++];
+
+                if (c >= '0' && c <= '9') {
+                    for (;;) {
+                        precision *= 10;
+                        precision += c - '0';
+
+                        cur = nxt;
+                        c = fmt[nxt++];
+
+                        if (c == 0)
+                            break;
+
+                        if (!(c >= '0' && c <= '9'))
+                            break;
+                    }
+                } else if (c == '*') {
+                    // Get precision value from the argument list
+                    cur = nxt;
+                    c = fmt[nxt++];
+                    precision = va_arg(ap, int32_t);
+
+                    if (precision < 0)
+                        // Ignore negative precision
+                        precision = 0;
+                }
+            } else {
+                precision = -1;
+            }
+
+            printf_qualifier_t qualifier;
+
+            switch (c) {
+                case 't':
+                    // ptrdiff_t
+                    qualifier = (sizeof(void*) == sizeof(int32_t)) ? PRITNF_QUALIFIER_INT : PRITNF_QUALIFIER_LONG_LONG;
+                    cur = nxt;
+                    c = fmt[nxt++];
+                    break;
+                case 'h':
+                    // Char or short
+                    qualifier = PRITNF_QUALIFIER_SHORT;
+                    cur = nxt;
+                    c = fmt[nxt++];
+
+                    if (c == 'h') {
+                        cur = nxt;
+                        c = fmt[nxt++];
+                        qualifier = PRITNF_QUALIFIER_BYTE;
+                    }
+                    break;
+                case 'l':
+                    // Long or long long
+                    qualifier = PRITNF_QUALIFIER_LONG;
+                    cur = nxt;
+                    c = fmt[nxt++];
+
+                    if (c == 'l') {
+                        cur = nxt;
+                        c = fmt[nxt++];
+                        qualifier = PRITNF_QUALIFIER_LONG_LONG;
+                    }
+                    break;
+                case 'z':
+                    qualifier = PRITNF_QUALIFIER_SIZE;
+                    cur = nxt;
+                    c = fmt[nxt++];
+                    break;
+                case 'j':
+                    qualifier = PRITNF_QUALIFIER_MAX;
+                    cur = nxt;
+                    c = fmt[nxt++];
+                    break;
+                default:
+                    // Default type
+                    qualifier = PRITNF_QUALIFIER_INT;
+            }
+
+            uint8_t base = 10;
+
+            switch (c) {
+                case 's': {
+                    char* str = va_arg(ap, char*);
+
+                    if (str == NULL) {
+                        putch('(');
+                        putch('N');
+                        putch('U');
+                        putch('L');
+                        putch('L');
+                        putch(')');
+                    } else {
+                        // Print leading spaces.
+                        size_t strw = strlen(str);
+
+                        if (precision == 0 || precision > strw)
+                            precision = strw;
+
+                        // Left padding
+                        width -= precision;
+
+                        if (!(flags & PRINTF_FLAG_LEFTALIGNED)) {
+                            while (width-- > 0)
+                                putch(' ');
+                        }
+
+                        // Part of @a str fitting into the alloted space.
+                        for (uint32_t i = 0; i < precision; ++i) {
+                            if (str[i] == 0)
+                                break;
+
+                            putch(str[i]);
+                        }
+
+                        // Right padding
+                        while (width-- > 0)
+                            putch(' ');
+                    }
+
+                    firstNoFmt = nxt;
+                    continue;
+                }
+                case 'c':
+                    if (!(flags & PRINTF_FLAG_LEFTALIGNED)) {
+                        while (--width > 0)
+                            // One space is consumed by the character itself, hence the predecrement.
+                            putch(' ');
+                    }
+
+                    putch(va_arg(ap, unsigned int));
+
+                    while (--width > 0)
+                        // One space is consumed by the character itself, hence the predecrement.
+                        putch(' ');
+
+                    firstNoFmt = nxt;
+                    continue;
+                case 'P':
+                    flags |= PRINTF_FLAG_BIGCHARS;
+                    /* Fallthrough */
+                case 'p':
+                    flags |= PRINTF_FLAG_PREFIX;
+                    flags |= PRINTF_FLAG_ZEROPADDED;
+                    base = 16;
+                    qualifier = PRITNF_QUALIFIER_POINTER;
+                    break;
+                case 'b':
+                    base = 2;
+                    break;
+                case 'o':
+                    base = 8;
+                    break;
+                case 'd':
+                case 'i':
+                    flags |= PRINTF_FLAG_SIGNED;
+                    /* Fallthrough */
+                case 'u':
+                    break;
+                case 'X':
+                    flags |= PRINTF_FLAG_BIGCHARS;
+                    /* Fallthrough */
+                case 'x':
+                    base = 16;
+                    break;
+                case 'F':
+                    flags |= PRINTF_FLAG_BIGCHARS;
+                    /* Fallthrough */
+                case 'f': {
+                    char str[32];
+                    size_t retval = ftoa(va_arg(ap, double), str, (precision >= 0) ? precision : 6);
+
+                    if ((flags & PRINTF_FLAG_BIGCHARS) && (str[0] == 'n' || str[0] == 'i'))
+                        strupr(str);
+
+                    width -= retval;
+
+                    if (!(flags & PRINTF_FLAG_LEFTALIGNED)) {
+                        char ch = (flags & PRINTF_FLAG_ZEROPADDED) ? '0' : ' ';
+
+                        while (width-- > 0)
+                            putch(ch);
+                    }
+
+                    for (uint32_t i = 0; i < retval; ++i)
+                        putch(str[i]);
+
+                    while (width-- > 0)
+                        putch(' ');
+
+                    firstNoFmt = nxt;
+                    continue;
+                }
+                case '%':
+                    firstNoFmt = cur;
+                    continue;
+                default:
+                    continue;
+            }
+
+            // Print integers
+            uint64_t number;
+
+            switch (qualifier) {
+                case PRITNF_QUALIFIER_BYTE:
+                    number = PRINTF_GET_INT_ARGUMENT(int, ap, flags);
+                    break;
+                case PRITNF_QUALIFIER_SHORT:
+                    number = PRINTF_GET_INT_ARGUMENT(int, ap, flags);
+                    break;
+                case PRITNF_QUALIFIER_INT:
+                    number = PRINTF_GET_INT_ARGUMENT(int, ap, flags);
+                    break;
+                case PRITNF_QUALIFIER_LONG:
+                    number = PRINTF_GET_INT_ARGUMENT(long, ap, flags);
+                    break;
+                case PRITNF_QUALIFIER_LONG_LONG:
+                    number = PRINTF_GET_INT_ARGUMENT(long long, ap, flags);
+                    break;
+                case PRITNF_QUALIFIER_POINTER:
+                    precision = sizeof(void*) << 1;
+                    number = (uint32_t)(va_arg(ap, void*));
+                    break;
+                case PRITNF_QUALIFIER_SIZE:
+                    number = va_arg(ap, size_t);
+                    break;
+                case PRITNF_QUALIFIER_MAX:
+                    number = va_arg(ap, uintmax_t);
+                    break;
+                default:
+                    // Unknown qualifier
+                    return;
+            }
+
+            static const char* digits_small = "0123456789abcdef";
+            static const char* digits_big = "0123456789ABCDEF";
+
+            const char* digits = (flags & PRINTF_FLAG_BIGCHARS) ? digits_big : digits_small;
+            char data[69];
+            char* ptr = &data[68];
+
+            if (precision < 0)
+                precision = 0;
+
+            // Size of number with all prefixes and signs
+            int size = 0;
+
+            // Put zero at end of string
+            *ptr-- = 0;
+
+            if (number == 0) {
+                *ptr-- = '0';
+                size++;
+            } else {
+                do {
+                    *ptr-- = digits[number % base];
+                    size++;
+                } while (number /= base);
+            }
+
+            // Size of plain number
+            int number_size = size;
+
+            // Collect the sum of all prefixes/signs/etc. to calculate padding and leading zeroes.
+            if (flags & PRINTF_FLAG_PREFIX) {
+                switch (base) {
+                    case 2:
+                        // Binary formating is not standard, but usefull
+                        size += 2;
+                        break;
+                    case 8:
+                        size++;
+                        break;
+                    case 16:
+                        size += 2;
+                        break;
+                }
+            }
+
+            char sgn = 0;
+
+            if (flags & PRINTF_FLAG_SIGNED) {
+                if (flags & PRINTF_FLAG_NEGATIVE) {
+                    sgn = '-';
+                    size++;
+                } else if (flags & PRINTF_FLAG_SHOWPLUS) {
+                    sgn = '+';
+                    size++;
+                } else if (flags & PRINTF_FLAG_SPACESIGN) {
+                    sgn = ' ';
+                    size++;
+                }
+            }
+
+            if (flags & PRINTF_FLAG_LEFTALIGNED)
+                flags &= ~PRINTF_FLAG_ZEROPADDED;
+
+            /*
+            * If the number is left-aligned or precision is specified then
+            * padding with zeros is ignored.
+            */
+            if (flags & PRINTF_FLAG_ZEROPADDED) {
+                if ((precision == 0) && (width > size))
+                    precision = width - size + number_size;
+            }
+
+            // Print leading spaces
+            if (number_size > precision)
+                // Print the whole number, not only a part
+                precision = number_size;
+
+            width -= precision + size - number_size;
+
+            if (!(flags & PRINTF_FLAG_LEFTALIGNED)) {
+                while (width-- > 0)
+                    putch(' ');
+            }
+
+            // Print sign
+            if (sgn)
+                putch(sgn);
+
+            // Print prefix
+            if (flags & PRINTF_FLAG_PREFIX) {
+                switch (base) {
+                    case 2:
+                        // Binary formating is not standard, but usefull
+                        putch('0');
+                        putch((flags & PRINTF_FLAG_BIGCHARS) ? 'B' : 'b');
+                        break;
+                    case 8:
+                        putch('0');
+                        break;
+                    case 16:
+                        putch('0');
+                        putch((flags & PRINTF_FLAG_BIGCHARS) ? 'X' : 'x');
+                        break;
+                }
+            }
+
+            // Print leading zeroes
+            precision -= number_size;
+
+            while (precision-- > 0)
+                putch('0');
+
+            // Print the number itself
+            ptr++;
+
+            while (*ptr != 0)
+                putch(*(ptr++));
+
+            // Print trailing spaces
+            while (width-- > 0)
+                putch(' ');
+
+            firstNoFmt = nxt;
+        }
+    }
+
+    if (cur > firstNoFmt) {
+        for (uint32_t i = firstNoFmt; i < cur; ++i) {
+            if (fmt[i] == 0)
                 break;
 
-            default:
-                putch(args[index]);
-                break;
+            putch(fmt[i]);
         }
-        ++index;
     }
 }
 
