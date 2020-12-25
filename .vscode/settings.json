@@ -2,5 +2,8 @@
     "files.associations": {
         "*.h": "c",
         "*.c": "c"
-    }
+    },
+    "C_Cpp.clang_format_style": "{ BasedOnStyle: Google, IndentWidth: 4, ColumnLimit: 0 }",
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.preferredPathSeparator": "Forward Slash"
 }
