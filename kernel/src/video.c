@@ -322,12 +322,12 @@ void scroll() {
     }
 }
 
-void puts(char* text) {
+void puts(const char* text) {
     for (; *text; putch(*text), ++text)
         ;
 }
 
-void printf(char* args, ...) {
+void printf(const char* args, ...) {
     va_list ap;
     va_start(ap, args);
     int32_t index = 0, d;

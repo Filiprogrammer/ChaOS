@@ -203,7 +203,7 @@ void panic_assert(char* file, uint32_t line, char* desc) {
  * @param start pointer to the block of memory
  * @param count number of bytes
  */
-void memshow(void* start, size_t count) {
+void memshow(const void* start, size_t count) {
     const uint8_t* end = (const uint8_t*)(start + count);
     for (; count != 0; count--) printf("%x ", *(end - count));
 }
@@ -257,7 +257,7 @@ uint16_t* memsetw(uint16_t* dest, uint16_t val, size_t count) {
  * @param str string pointer to the string
  * @return uint8_t the resulting checksum
  */
-uint8_t BSDChecksum(char* str) {
+uint8_t BSDChecksum(const char* str) {
     uint8_t sum;
     uint8_t i;
     size_t len = strlen(str);
@@ -308,65 +308,69 @@ void reboot() {
  * @brief Convert uint32_t to a string.
  * 
  * @param value value to be converted
- * @param valuestring pointer to a block of memory where to store the resulting string
+ * @param str pointer to a block of memory where to store the resulting string
+ * @param base numerical base used to represent the value as a string (between 2 and 36)
  */
-void uitoa(uint32_t value, char* valuestring) {
-    uint32_t min_flag;
-    char swap, *p;
-    min_flag = 0;
+void uitoa(uint32_t value, char* str, int32_t base) {
+    if (base < 2 || base > 36) {
+        str[0] = 0;
+        return;
+    }
 
-    p = valuestring;
+    char* p = str;
 
     do {
-        *p++ = (char)(value % 10) + '0';
-        value /= 10;
+        char digit = '0' + (value % base);
+
+        if (digit > '9')
+            digit += 'a' - '9' - 1;
+
+        *p++ = digit;
+        value /= base;
     } while (value);
 
-    if (min_flag != 0) {
-        ++*valuestring;
-    }
     *p-- = '\0';
-
-    while (p > valuestring) {
-        swap = *valuestring;
-        *valuestring++ = *p;
-        *p-- = swap;
-    }
+    strrev(str);
 }
 
 /**
  * @brief Convert int32_t to a string.
  * 
  * @param value value to be converted
- * @param valuestring pointer to a block of memory where to store the resulting string
+ * @param str pointer to a block of memory where to store the resulting string
+ * @param base numerical base used to represent the value as a string (between 2 and 36)
  */
-void itoa(int32_t value, char* valuestring) {
-    int32_t min_flag;
-    char swap, *p;
-    min_flag = 0;
-
-    if (0 > value) {
-        *valuestring++ = '-';
-        value = -INT32_MAX > value ? min_flag = INT32_MAX : -value;
+void itoa(int32_t value, char* str, int32_t base) {
+    if (base < 2 || base > 36) {
+        str[0] = 0;
+        return;
     }
 
-    p = valuestring;
+    bool neg = false;
+
+    if (value < 0) {
+        *str++ = '-';
+        value = -value;
+        neg = true;
+    }
+
+    char* p = str;
 
     do {
-        *p++ = (char)(value % 10) + '0';
-        value /= 10;
+        char digit = '0' + (value % base);
+
+        if (digit > '9')
+            digit += 'a' - '9' - 1;
+
+        *p++ = digit;
+        value /= base;
     } while (value);
 
-    if (min_flag != 0) {
-        ++*valuestring;
-    }
-    *p-- = '\0';
+    if (neg)
+        ++*str;
 
-    while (p > valuestring) {
-        swap = *valuestring;
-        *valuestring++ = *p;
-        *p-- = swap;
-    }
+    *p-- = '\0';
+    strrev(str);
 }
 
 /**
@@ -395,46 +399,104 @@ void i2hex(uint32_t val, char* dest, int32_t len) {
  * @brief Convert float to a string.
  * 
  * @param value value to be converted
- * @param decimal number of digits to be considered after the decimal point
- * @param valuestring pointer to a block memory where to store the resulting string
+ * @param str pointer to a block of memory where to store the resulting string
+ * @param precision number of digits to be considered after the decimal point
  */
-void ftoa(float value, int32_t decimal, char* valuestring) {
-    int32_t neg = 0;
-    char tempstr[20];
-    int32_t i = 0;
-    int32_t j = 0;
-    int32_t c;
-    int32_t val1, val2;
-    char* tempstring;
-    tempstring = valuestring;
+size_t ftoa(double value, char* str, int32_t precision) {
+    if (!(value == value)) {
+        str[0] = 'n';
+        str[1] = 'a';
+        str[2] = 'n';
+        str[3] = '\0';
+        return 3;
+    } else if (value >= 9223372036854775296.0) {
+        str[0] = 'i';
+        str[1] = 'n';
+        str[2] = 'f';
+        str[3] = '\0';
+        return 3;
+    } else if (value <= -9223372036854775296.0) {
+        str[0] = '-';
+        str[1] = 'i';
+        str[2] = 'n';
+        str[3] = 'f';
+        str[4] = '\0';
+        return 4;
+    }
+
+    double diff = 0.0;
+    char* wstr = str;
+
+    if (precision < 0)
+        precision = 0;
+    else if (precision > 10)
+        // Precision of >= 10 can lead to overflow errors
+        precision = 10;
+
+    // Work in positive values and deal with the negative sign later
+    bool neg = false;
+
     if (value < 0) {
         neg = true;
         value = -value;
     }
-    for (j = 0; j < decimal; ++j) {
-        value = value * 10;
-    }
-    val1 = (value * 2);
-    val2 = (val1 / 2) + (val1 % 2);
-    while (val2 != 0) {
-        if ((decimal > 0) && (i == decimal)) {
-            tempstr[i] = (char)(0x2E);
-            ++i;
-        } else {
-            c = (val2 % 10);
-            tempstr[i] = (char)(c + 0x30);
-            val2 = val2 / 10;
-            ++i;
+
+    int64_t whole = (int64_t)value;
+    double tmp = (value - whole) * ipow(10, precision);
+    uint32_t frac = (uint32_t)(tmp);
+    diff = tmp - frac;
+
+    if (diff > 0.5) {
+        ++frac;
+        // Handle rollover, e.g. case 0.99 with prec 1 is 1.0
+        if (frac >= ipow(10, precision)) {
+            frac = 0;
+            ++whole;
         }
+    } else if (diff == 0.5 && ((frac == 0) || (frac & 1))) {
+        // if halfway, round up if odd, or if last digit is 0
+        ++frac;
     }
-    if (neg) {
-        *tempstring = '-';
-        ++tempstring;
+
+    if (precision == 0) {
+        diff = value - whole;
+        if (diff > 0.5)
+            // greater than 0.5, round up, e.g. 1.6 -> 2
+            ++whole;
+        else if (diff == 0.5 && (whole & 1))
+            // exactly 0.5 and odd, then round up
+            // 1.5 -> 2, but 2.5 -> 2
+            ++whole;
+    } else {
+        int count = precision;
+
+        // Now do fractional part, as an unsigned number
+        do {
+            --count;
+            *wstr++ = (char)(48 + (frac % 10));
+        } while (frac /= 10);
+
+        // Add extra 0s
+        while (count-- > 0)
+            *wstr++ = '0';
+
+        // Add decimal point
+        *wstr++ = '.';
     }
-    i--;
-    for (; i > -1; i--) {
-        *tempstring = tempstr[i];
-        ++tempstring;
-    }
-    *tempstring = '\0';
+
+    // Take care of whole digits
+    do {
+        *wstr++ = (char)(48 + (whole % 10));
+    } while (whole /= 10);
+
+    // Take care of sign
+    if (neg)
+        *wstr++ = '-';
+
+    *wstr = '\0';
+
+    // Number is reversed
+    strrev(str);
+
+    return (size_t)(wstr - str);
 }

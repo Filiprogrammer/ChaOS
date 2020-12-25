@@ -9,7 +9,7 @@
 
 extern int32_t abs(int32_t i);
 extern int64_t llabs(int64_t i);
-extern int32_t power(int32_t base, int32_t n);
+extern int32_t ipow(int32_t base, int32_t exp);
 extern double pow(double base, double exp);
 extern double fabs(double x);
 extern uint32_t alignUp(uint32_t val, uint32_t alignment);

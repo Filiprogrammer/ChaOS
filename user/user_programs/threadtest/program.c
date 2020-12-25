@@ -32,7 +32,7 @@ int main() {
     puts("End of thread test\n");
 
     char x_str[11] = {0};
-    uitoa(x, x_str);
+    uitoa(x, x_str, 10);
     puts(x_str);
     putch('\n');
 

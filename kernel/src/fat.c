@@ -509,8 +509,11 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
     for(uint32_t k = 0; k < path_size; ++k){
         //Split the current file into name and extension
         int32_t cur_file_len = strlen(spl_path[k]);
-        int32_t lastDot = strrchr(spl_path[k], '.');
-        if(lastDot == -1) lastDot = cur_file_len;
+        int32_t lastDot = (int32_t)strrchr(spl_path[k], '.');
+        if(lastDot == NULL)
+            lastDot = cur_file_len;
+        else
+            lastDot -= (int32_t)spl_path[k];
         char cur_file_name[lastDot+1];
         for(uint32_t j = 0; j < lastDot; ++j){
             cur_file_name[j] = spl_path[k][j];
@@ -580,8 +583,11 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
                     }else{ //if file name is long
                         //Split the current file into name and extension
                         cur_file_len = strlen(long_fname_buffer);
-                        lastDot = strrchr(long_fname_buffer, '.');
-                        if(lastDot == -1) lastDot = cur_file_len;
+                        lastDot = (int32_t)strrchr(long_fname_buffer, '.');
+                        if(lastDot == NULL)
+                            lastDot = cur_file_len;
+                        else
+                            lastDot -= (int32_t)long_fname_buffer;
                         cur_filename[1] = 0; //Null termination if lastDot = 0
                         for(uint32_t l = 0; l < lastDot; ++l){
                             cur_filename[l] = long_fname_buffer[l];
@@ -598,8 +604,8 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
                         }
                     }
                     
-                    tolower(cur_filename);
-                    tolower(cur_file_name);
+                    strlwr(cur_filename);
+                    strlwr(cur_file_name);
                     if(strcmp(cur_filename, cur_file_name) == 0){ //if the requested file name matches the file name of the current entry
                         if(*cur_file_ext == 0){ //if cur_file_ext is empty
                             //Copy the current file entry to ret
@@ -607,8 +613,8 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
                                 ret[l] = cur_sec_bytes[i+l];
                             }
                         }else{
-                            tolower(cur_ext);
-                            tolower(cur_file_ext);
+                            strlwr(cur_ext);
+                            strlwr(cur_file_ext);
                             if(strcmp(cur_ext, cur_file_ext) == 0){ //if the requested file extension matches the file extension of the current entry
                                 //Copy the current file entry to ret
                                 for(uint8_t l = 0; l < 32; ++l){
@@ -697,8 +703,11 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
                         }else{ //if file name is long
                             //Split the current file into name and extension
                             cur_file_len = strlen(long_fname_buffer);
-                            lastDot = strrchr(long_fname_buffer, '.');
-                            if(lastDot == -1) lastDot = cur_file_len;
+                            lastDot = (int32_t)strrchr(long_fname_buffer, '.');
+                            if(lastDot == NULL)
+                                lastDot = cur_file_len;
+                            else
+                                lastDot -= (int32_t)long_fname_buffer;
                             cur_filename[1] = 0; //Null termination if lastDot = 0
                             for(uint32_t l = 0; l < lastDot; ++l){
                                 cur_filename[l] = long_fname_buffer[l];
@@ -715,8 +724,8 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
                             }
                         }
                         
-                        tolower(cur_filename);
-                        tolower(cur_file_name);
+                        strlwr(cur_filename);
+                        strlwr(cur_file_name);
                         if(strcmp(cur_filename, cur_file_name) == 0){ //if the requested file name matches the file name of the current entry
                             if(*cur_file_ext == 0){ //if cur_file_ext is empty
                                 //Copy the current file entry to ret
@@ -724,8 +733,8 @@ uint32_t* FAT_readFileEntryLocation(FAT* inst, char* filepath){
                                     ret[l] = cur_sec_bytes[i+l];
                                 }
                             }else{
-                                tolower(cur_ext);
-                                tolower(cur_file_ext);
+                                strlwr(cur_ext);
+                                strlwr(cur_file_ext);
                                 if(strcmp(cur_ext, cur_file_ext) == 0){ //if the requested file extension matches the file extension of the current entry
                                     //Copy the current file entry to ret
                                     for(uint8_t l = 0; l < 32; ++l){
@@ -1113,8 +1122,11 @@ uint8_t* FAT_readFileEntry(FAT* inst, char* filepath){
     for(uint32_t k = 0; k < path_size; ++k){
         //Split the current file into name and extension
         int cur_file_len = strlen(spl_path[k]);
-        int32_t lastDot = strrchr(spl_path[k], '.');
-        if(lastDot == -1) lastDot = cur_file_len;
+        int32_t lastDot = (int32_t)strrchr(spl_path[k], '.');
+        if(lastDot == NULL)
+            lastDot = cur_file_len;
+        else
+            lastDot -= (int32_t)spl_path[k];
         char cur_file_name[lastDot+1];
         for(uint32_t j = 0; j < lastDot; ++j){
             cur_file_name[j] = spl_path[k][j];
@@ -1176,8 +1188,11 @@ uint8_t* FAT_readFileEntry(FAT* inst, char* filepath){
                     }else{ //if file name is long
                         //Split the current file into name and extension
                         cur_file_len = strlen(long_fname_buffer);
-                        lastDot = strrchr(long_fname_buffer, '.');
-                        if(lastDot == -1) lastDot = cur_file_len;
+                        lastDot = (int32_t)strrchr(long_fname_buffer, '.');
+                        if(lastDot == NULL)
+                            lastDot = cur_file_len;
+                        else
+                            lastDot -= (int32_t)long_fname_buffer;
                         cur_filename[1] = 0; //Null termination if lastDot = 0
                         for(uint32_t l = 0; l < lastDot; ++l){
                             cur_filename[l] = long_fname_buffer[l];
@@ -1194,8 +1209,8 @@ uint8_t* FAT_readFileEntry(FAT* inst, char* filepath){
                         }
                     }
                     
-                    tolower(cur_filename);
-                    tolower(cur_file_name);
+                    strlwr(cur_filename);
+                    strlwr(cur_file_name);
                     if(strcmp(cur_filename, cur_file_name) == 0){ //if the requested file name matches the file name of the current entry
                         if(*cur_file_ext == 0){ //if cur_file_ext is empty
                             //Copy the current file entry to ret
@@ -1203,8 +1218,8 @@ uint8_t* FAT_readFileEntry(FAT* inst, char* filepath){
                                 ret[l] = cur_sec_bytes[i+l];
                             }
                         }else{
-                            tolower(cur_ext);
-                            tolower(cur_file_ext);
+                            strlwr(cur_ext);
+                            strlwr(cur_file_ext);
                             if(strcmp(cur_ext, cur_file_ext) == 0){ //if the requested file extension matches the file extension of the current entry
                                 //Copy the current file entry to ret
                                 for(uint8_t l = 0; l < 32; ++l){
@@ -1276,8 +1291,11 @@ uint8_t* FAT_readFileEntry(FAT* inst, char* filepath){
                         }else{ //if file name is long
                             //Split the current file into name and extension
                             cur_file_len = strlen(long_fname_buffer);
-                            lastDot = strrchr(long_fname_buffer, '.');
-                            if(lastDot == -1) lastDot = cur_file_len;
+                            lastDot = (int32_t)strrchr(long_fname_buffer, '.');
+                            if(lastDot == NULL)
+                                lastDot = cur_file_len;
+                            else
+                                lastDot -= (int32_t)long_fname_buffer;
                             cur_filename[1] = 0; //Null termination if lastDot = 0
                             for(uint32_t l = 0; l < lastDot; ++l){
                                 cur_filename[l] = long_fname_buffer[l];
@@ -1294,8 +1312,8 @@ uint8_t* FAT_readFileEntry(FAT* inst, char* filepath){
                             }
                         }
                         
-                        tolower(cur_filename);
-                        tolower(cur_file_name);
+                        strlwr(cur_filename);
+                        strlwr(cur_file_name);
                         if(strcmp(cur_filename, cur_file_name) == 0){ //if the requested file name matches the file name of the current entry
                             if(*cur_file_ext == 0){ //if cur_file_ext is empty
                                 //Copy the current file entry to ret
@@ -1303,8 +1321,8 @@ uint8_t* FAT_readFileEntry(FAT* inst, char* filepath){
                                     ret[l] = cur_sec_bytes[i+l];
                                 }
                             }else{
-                                tolower(cur_ext);
-                                tolower(cur_file_ext);
+                                strlwr(cur_ext);
+                                strlwr(cur_file_ext);
                                 if(strcmp(cur_ext, cur_file_ext) == 0){ //if the requested file extension matches the file extension of the current entry
                                     //Copy the current file entry to ret
                                     for(uint8_t l = 0; l < 32; ++l){
@@ -1548,12 +1566,15 @@ char* FAT_longNameToShortName(FAT* inst, char* filepath){
     
     ///Get the short file name without tilda
     char* file_str = spl_path[path_size - 1];
-    toupper(file_str);
+    strupr(file_str);
     
     //Split the new file into name and extension
     size_t file_str_len = strlen(file_str);
-    int32_t lastDot = strrchr(file_str, '.');
-    if(lastDot == -1) lastDot = file_str_len;
+    int32_t lastDot = (int32_t)strrchr(file_str, '.');
+    if(lastDot == NULL)
+        lastDot = file_str_len;
+    else
+        lastDot -= (int32_t)file_str;
     char filename[lastDot+1];
     for(uint32_t j = 0; j < lastDot; ++j){
         filename[j] = file_str[j];
@@ -1743,8 +1764,11 @@ uint8_t* FAT_createFile(FAT* inst, char* filepath, uint8_t attribute){
     
     //Split the new file into name and extension
     int32_t cur_file_len = strlen(new_file_str);
-    int32_t lastDot = strrchr(new_file_str, '.');
-    if(lastDot == -1) lastDot = cur_file_len;
+    int32_t lastDot = (int32_t)strrchr(new_file_str, '.');
+    if(lastDot == NULL)
+        lastDot = cur_file_len;
+    else
+        lastDot -= (int32_t)new_file_str;
     char new_filename[lastDot+1];
     for(uint32_t j = 0; j < lastDot; ++j){
         new_filename[j] = new_file_str[j];
@@ -2113,8 +2137,11 @@ uint8_t FAT_readFileEntryByIndex(FAT* inst, file_t* file_inst, char* filepath, u
         if(k < path_size) {
             //Split the current file into name and extension
             cur_file_len = strlen(spl_path[k]);
-            lastDot = strrchr(spl_path[k], '.');
-            if(lastDot == -1) lastDot = cur_file_len;
+            lastDot = (int32_t)strrchr(spl_path[k], '.');
+            if(lastDot == NULL)
+                lastDot = cur_file_len;
+            else
+                lastDot -= (int32_t)spl_path[k];
         }
         char cur_file_name[lastDot+1];
         char cur_file_ext[cur_file_len-lastDot+1];
@@ -2178,8 +2205,11 @@ uint8_t FAT_readFileEntryByIndex(FAT* inst, file_t* file_inst, char* filepath, u
                     }else{ //if file name is long
                         //Split the current file into name and extension
                         cur_file_len = strlen(long_fname_buffer);
-                        lastDot = strrchr(long_fname_buffer, '.');
-                        if(lastDot == -1) lastDot = cur_file_len;
+                        lastDot = (int32_t)strrchr(long_fname_buffer, '.');
+                        if(lastDot == NULL)
+                            lastDot = cur_file_len;
+                        else
+                            lastDot -= (int32_t)long_fname_buffer;
                         cur_filename[1] = 0; //Null termination if lastDot = 0
                         for(uint32_t l = 0; l < lastDot; ++l){
                             cur_filename[l] = long_fname_buffer[l];
@@ -2215,8 +2245,8 @@ uint8_t FAT_readFileEntryByIndex(FAT* inst, file_t* file_inst, char* filepath, u
                         file_inst->attribute = cur_sec_bytes[i+11];
                         return 1;
                     } else {
-                        tolower(cur_filename);
-                        tolower(cur_file_name);
+                        strlwr(cur_filename);
+                        strlwr(cur_file_name);
                         if(strcmp(cur_filename, cur_file_name) == 0){ //if the requested file name matches the file name of the current entry
                             if(*cur_file_ext == 0){ //if cur_file_ext is empty
                                 //Copy the current file entry to ret
@@ -2224,8 +2254,8 @@ uint8_t FAT_readFileEntryByIndex(FAT* inst, file_t* file_inst, char* filepath, u
                                     ret[l] = cur_sec_bytes[i+l];
                                 }
                             }else{
-                                tolower(cur_ext);
-                                tolower(cur_file_ext);
+                                strlwr(cur_ext);
+                                strlwr(cur_file_ext);
                                 if(strcmp(cur_ext, cur_file_ext) == 0){ //if the requested file extension matches the file extension of the current entry
                                     //Copy the current file entry to ret
                                     for(uint8_t l = 0; l < 32; ++l){
@@ -2298,8 +2328,11 @@ uint8_t FAT_readFileEntryByIndex(FAT* inst, file_t* file_inst, char* filepath, u
                         }else{ //if file name is long
                             //Split the current file into name and extension
                             cur_file_len = strlen(long_fname_buffer);
-                            lastDot = strrchr(long_fname_buffer, '.');
-                            if(lastDot == -1) lastDot = cur_file_len;
+                            lastDot = (int32_t)strrchr(long_fname_buffer, '.');
+                            if(lastDot == NULL)
+                                lastDot = cur_file_len;
+                            else
+                                lastDot -= (int32_t)long_fname_buffer;
                             cur_filename[1] = 0; //Null termination if lastDot = 0
                             for(uint32_t l = 0; l < lastDot; ++l){
                                 cur_filename[l] = long_fname_buffer[l];
@@ -2331,8 +2364,8 @@ uint8_t FAT_readFileEntryByIndex(FAT* inst, file_t* file_inst, char* filepath, u
                             file_inst->attribute = cur_sec_bytes[i+11];
                             return 1;
                         } else {
-                            tolower(cur_filename);
-                            tolower(cur_file_name);
+                            strlwr(cur_filename);
+                            strlwr(cur_file_name);
                             if(strcmp(cur_filename, cur_file_name) == 0){ //if the requested file name matches the file name of the current entry
                                 if(*cur_file_ext == 0){ //if cur_file_ext is empty
                                     //Copy the current file entry to ret
@@ -2340,8 +2373,8 @@ uint8_t FAT_readFileEntryByIndex(FAT* inst, file_t* file_inst, char* filepath, u
                                         ret[l] = cur_sec_bytes[i+l];
                                     }
                                 }else{
-                                    tolower(cur_ext);
-                                    tolower(cur_file_ext);
+                                    strlwr(cur_ext);
+                                    strlwr(cur_file_ext);
                                     if(strcmp(cur_ext, cur_file_ext) == 0){ //if the requested file extension matches the file extension of the current entry
                                         //Copy the current file entry to ret
                                         for(uint8_t l = 0; l < 32; ++l){

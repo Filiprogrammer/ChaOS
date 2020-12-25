@@ -16,10 +16,10 @@ void putch(char val) {
                      : "a"(1), "b"(val));
 }
 
-void puts(char* pString) {
+void puts(const char* str) {
     __asm__ volatile("int $0x7F"
                      :
-                     : "a"(0), "b"(pString));
+                     : "a"(0), "b"(str));
 }
 
 void sleepMilliSeconds(uint32_t ms) {
@@ -237,7 +237,7 @@ int32_t strcmp(const char* s1, const char* s2) {
  * @return true beginning of str matches prefix.
  * @return false beginning of str does not match prefix.
  */
-bool startsWith(char* str, char* prefix) {
+bool strstarts(const char* str, const char* prefix) {
     while (*prefix)
         if (*prefix++ != *str++)
             return false;
@@ -289,13 +289,14 @@ char* strcpy(char* dest, const char* src) {
  * @return char* a pointer to the resulting string dest
  */
 char* strcat(char* dest, const char* src) {
+    char* tmp = dest;
     while (*dest)
         dest++;
 
     do {
         *dest++ = *src++;
     } while (*src);
-    return dest;
+    return tmp;
 }
 
 /**
@@ -399,7 +400,9 @@ char* strtrimend(char* str) {
  * @param str string to be converted
  * @return char* pointer to the converted string str
  */
-char* tolower(char* str) {
+char* strlwr(char* str) {
+    char* tmp = str;
+
     while (*str != '\0') {
         if (*str >= 65 && *str <= 90)
             *str = *str + 32;
@@ -407,7 +410,7 @@ char* tolower(char* str) {
         ++str;
     }
 
-    return str;
+    return tmp;
 }
 
 /**
@@ -417,12 +420,12 @@ char* tolower(char* str) {
  * @param substring the string containing the sequence of characters to match
  * @return char* pointer to the first occurrence of substring in string
  */
-char* strstr(char* string, char* substring) {
-    char *a, *b;
+char* strstr(const char* string, const char* substring) {
+    const char *a, *b;
 
     b = substring;
     if (*b == 0)
-        return string;
+        return (char*)string;
 
     for (; *string != 0; ++string) {
         if (*string != *b)
@@ -431,7 +434,7 @@ char* strstr(char* string, char* substring) {
         a = string;
         while (1) {
             if (*b == 0)
-                return string;
+                return (char*)string;
 
             if (*a++ != *b++)
                 break;
@@ -645,14 +648,59 @@ int64_t llabs(int64_t i) {
     return i < 0 ? -i : i;
 }
 
-int32_t power(int32_t base, int32_t n) {
-    int32_t i, p;
-    if (n == 0)
-        return 1;
-    p = 1;
-    for (i = 1; i <= n; ++i)
-        p = p * base;
-    return p;
+int32_t ipow(int32_t base, int32_t exp) {
+    int32_t result = 1;
+
+    if (exp < 0) {
+        if (base == 1)
+            return 1;
+
+        if (base == -1)
+            return -1;
+
+        return 0;
+    }
+
+    switch (31 - __builtin_clrsb(exp)) {
+        case 255:
+            if (base == 1)
+                return 1;
+
+            if (base == -1)
+                return 1 - 2 * (exp & 1);
+
+            // Return 0 on overflow/underflow
+            return 0;
+        case 5:
+            if (exp & 1)
+                result *= base;
+
+            exp >>= 1;
+            base *= base;
+        case 4:
+            if (exp & 1)
+                result *= base;
+
+            exp >>= 1;
+            base *= base;
+        case 3:
+            if (exp & 1)
+                result *= base;
+
+            exp >>= 1;
+            base *= base;
+        case 2:
+            if (exp & 1)
+                result *= base;
+
+            exp >>= 1;
+            base *= base;
+        case 1:
+            if (exp & 1)
+                result *= base;
+        default:
+            return result;
+    }
 }
 
 double pow(double base, double exp) {
@@ -705,64 +753,80 @@ float cos(float deg) {
     return sin(deg + 90);
 }
 
-void uitoa(uint32_t value, char* valuestring) {
-    uint32_t min_flag;
-    char swap, *p;
-    min_flag = 0;
+/**
+ * @brief Convert uint32_t to a string.
+ * 
+ * @param value value to be converted
+ * @param str pointer to a block of memory where to store the resulting string
+ * @param base numerical base used to represent the value as a string (between 2 and 36)
+ */
+void uitoa(uint32_t value, char* str, int32_t base) {
+    if (base < 2 || base > 36) {
+        str[0] = 0;
+        return;
+    }
 
-    p = valuestring;
+    char* p = str;
 
     do {
-        *p++ = (char)(value % 10) + '0';
-        value /= 10;
+        char digit = '0' + (value % base);
+
+        if (digit > '9')
+            digit += 'a' - '9' - 1;
+
+        *p++ = digit;
+        value /= base;
     } while (value);
 
-    if (min_flag != 0) {
-        ++*valuestring;
-    }
     *p-- = '\0';
-
-    while (p > valuestring) {
-        swap = *valuestring;
-        *valuestring++ = *p;
-        *p-- = swap;
-    }
+    strrev(str);
 }
 
-void itoa(int32_t value, char* valuestring) {
-    int32_t min_flag;
-    char swap, *p;
-    min_flag = 0;
-
-    if (0 > value) {
-        *valuestring++ = '-';
-        value = -INT_MAX > value ? min_flag = INT_MAX : -value;
+/**
+ * @brief Convert int32_t to a string.
+ * 
+ * @param value value to be converted
+ * @param str pointer to a block of memory where to store the resulting string
+ * @param base numerical base used to represent the value as a string (between 2 and 36)
+ */
+void itoa(int32_t value, char* str, int32_t base) {
+    if (base < 2 || base > 36) {
+        str[0] = 0;
+        return;
     }
 
-    p = valuestring;
+    bool neg = false;
+
+    if (value < 0) {
+        *str++ = '-';
+        value = -value;
+        neg = true;
+    }
+
+    char* p = str;
 
     do {
-        *p++ = (char)(value % 10) + '0';
-        value /= 10;
+        char digit = '0' + (value % base);
+
+        if (digit > '9')
+            digit += 'a' - '9' - 1;
+
+        *p++ = digit;
+        value /= base;
     } while (value);
 
-    if (min_flag != 0) {
-        ++*valuestring;
-    }
-    *p-- = '\0';
+    if (neg)
+        ++*str;
 
-    while (p > valuestring) {
-        swap = *valuestring;
-        *valuestring++ = *p;
-        *p-- = swap;
-    }
+    *p-- = '\0';
+    strrev(str);
 }
 
 void ftoa(float f, char* buffer) {
     if (f < 0)
         *(buffer++) = '-';
     int32_t i = (int32_t)f;
-    itoa(i < 0 ? -i : i, buffer);
+    itoa(i < 0 ? -i : i, buffer, 10);
 
     if (f < 0.0f)
         f = -f;
@@ -780,11 +844,11 @@ void ftoa(float f, char* buffer) {
     *buffer = '\0';
 }
 
-float sqrt(float x) {
+double sqrt(double x) {
     if (x < 0.0)
         return NAN;
 
-    float result;
+    double result;
     __asm__("fsqrt"
             : "=t"(result)
             : "0"(x));

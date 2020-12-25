@@ -1,13 +1,58 @@
 #include "os.h"
 
-int32_t power(int32_t base, int32_t n) {
-    int32_t i, p;
-    if (n == 0)
-        return 1;
-    p = 1;
-    for (i = 1; i <= n; ++i)
-        p = p * base;
-    return p;
+int32_t ipow(int32_t base, int32_t exp) {
+    int32_t result = 1;
+
+    if (exp < 0) {
+        if (base == 1)
+            return 1;
+
+        if (base == -1)
+            return -1;
+
+        return 0;
+    }
+
+    switch (31 - __builtin_clrsb(exp)) {
+        case 255:
+            if (base == 1)
+                return 1;
+
+            if (base == -1)
+                return 1 - 2 * (exp & 1);
+
+            // Return 0 on overflow/underflow
+            return 0;
+        case 5:
+            if (exp & 1)
+                result *= base;
+
+            exp >>= 1;
+            base *= base;
+        case 4:
+            if (exp & 1)
+                result *= base;
+
+            exp >>= 1;
+            base *= base;
+        case 3:
+            if (exp & 1)
+                result *= base;
+
+            exp >>= 1;
+            base *= base;
+        case 2:
+            if (exp & 1)
+                result *= base;
+
+            exp >>= 1;
+            base *= base;
+        case 1:
+            if (exp & 1)
+                result *= base;
+        default:
+            return result;
+    }
 }
 
 double pow(double base, double exp) {

@@ -71,7 +71,7 @@ void syscall_install();
         return a;                                                                                           \
     }
 
-DECL_SYSCALL1(puts, char*)
+DECL_SYSCALL1(puts, const char*)
 DECL_SYSCALL1(putch, char)
 DECL_SYSCALL2(settextcolor, uint8_t, uint8_t)
 DECL_SYSCALL0(getpid)

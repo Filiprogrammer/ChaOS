@@ -37,7 +37,7 @@ int main() {
                 move_cursor_right();
 
             char irq_str[] = {0, 0, 0, 0};
-            uitoa(pciDev.irq, irq_str);
+            uitoa(pciDev.irq, irq_str, 10);
             puts(irq_str);
             putch('\n');
         } else {

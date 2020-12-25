@@ -154,7 +154,7 @@ char* strtok(char* str, const char* delim) {
  * @param str string to be converted
  * @return char* pointer to the converted string str
  */
-char* tolower(char* str) {
+char* strlwr(char* str) {
     char* tmp = str;
 
     while (*str != '\0') {
@@ -173,7 +173,7 @@ char* tolower(char* str) {
  * @param str string to be converted
  * @return char* pointer to the converted string str
  */
-char* toupper(char* str) {
+char* strupr(char* str) {
     char* tmp = str;
 
     while (*str != '\0') {
@@ -250,7 +250,7 @@ char* strtrimend(char* str) {
  * @return true beginning of str matches prefix.
  * @return false beginning of str does not match prefix.
  */
-bool startsWith(char* str, char* prefix) {
+bool strstarts(const char* str, const char* prefix) {
     while (*prefix)
         if (*prefix++ != *str++)
             return false;
@@ -263,14 +263,14 @@ bool startsWith(char* str, char* prefix) {
  * 
  * @param str the string to search in
  * @param c the character to be located
- * @return int32_t the zero-based position of c if that character is found, or -1 if it is not.
+ * @return int32_t a pointer to the last occurence of c if the character is found, or a null pointer if it is not.
  */
-int32_t strrchr(char* str, char c) {
-    int32_t ret = -1;
+char* strrchr(const char* str, char c) {
+    char* ret = NULL;
 
-    for (int32_t i = 0; str[i] != 0; ++i)
-        if (str[i] == c)
-            ret = i;
+    for (; *str != 0; ++str)
+        if (*str == c)
+            ret = (char*)str;
 
     return ret;
 }
@@ -282,12 +282,12 @@ int32_t strrchr(char* str, char c) {
  * @param substring the string containing the sequence of characters to match
  * @return char* pointer to the first occurrence of substring in string
  */
-char* strstr(char* string, char* substring) {
-    char *a, *b;
+char* strstr(const char* string, const char* substring) {
+    const char *a, *b;
 
     b = substring;
     if (*b == 0)
-        return string;
+        return (char*)string;
 
     for (; *string != 0; ++string) {
         if (*string != *b)
@@ -296,7 +296,7 @@ char* strstr(char* string, char* substring) {
         a = string;
         while (1) {
             if (*b == 0)
-                return string;
+                return (char*)string;
 
             if (*a++ != *b++)
                 break;

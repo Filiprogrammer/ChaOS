@@ -154,7 +154,7 @@ int main() {
 
         int32_t cmd_index = -1;
         if (argc != 0) {
-            tolower(argv[0]);
+            strlwr(argv[0]);
 
             cmd_index = binarySearch(commands, COMMAND_COUNT, argv[0]);
             if (cmd_index == -1) {
@@ -245,7 +245,7 @@ int main() {
                         puts("(DIR)");
                     else {
                         char file_size_str[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-                        uitoa(file_inst.size, file_size_str);
+                        uitoa(file_inst.size, file_size_str, 10);
                         puts(file_size_str);
                         putch('\t');
                         if (file_inst.attribute & FILE_ATTR_ARCHIVE) puts("(ARCH)");
@@ -393,7 +393,7 @@ int main() {
             case 10:  // random
                 settextcolor(0xE, 0);
                 char rand_str[11] = {0};
-                uitoa(random(), rand_str);
+                uitoa(random(), rand_str, 10);
                 puts(rand_str);
                 settextcolor(15, 0);
                 putch('\n');

@@ -26,7 +26,7 @@ extern "C" {
 // syscalls
 void settextcolor(uint8_t foreground, uint8_t background);
 void putch(char val);
-void puts(char* pString);
+void puts(const char* str);
 void sleepMilliSeconds(uint32_t ms);
 bool isKeyDown(KEY_t key);
 KEY_t getkey();
@@ -56,7 +56,7 @@ void exitCurrentThread();
 
 // user functions
 int32_t strcmp(const char* s1, const char* s2);
-bool startsWith(char* str, char* prefix);
+bool strstarts(const char* str, const char* prefix);
 void substring(char* str, char* sub, int pos, int len);
 size_t strlen(const char* str);
 char* strcpy(char* dest, const char* src);
@@ -65,8 +65,8 @@ char* strtok(char* str, const char* delim);
 char* strtrim(char* str);
 char* strtrimstart(char* str);
 char* strtrimend(char* str);
-char* tolower(char* str);
-char* strstr(char* string, char* substring);
+char* strlwr(char* str);
+char* strstr(const char* string, const char* substring);
 char* strrev(char* str);
 char* file_squashPath(char* filepath);
 uint64_t __udivdi3(uint64_t dividend, uint64_t divisor);
@@ -74,16 +74,16 @@ uint64_t __umoddi3(uint64_t dividend, uint64_t divisor);
 int64_t __moddi3(int64_t dividend, int64_t divisor);
 int32_t abs(int32_t i);
 int64_t llabs(int64_t i);
-int32_t power(int32_t base, int32_t n);
+int32_t ipow(int32_t base, int32_t exp);
 double pow(double base, double exp);
 double fabs(double x);
 int32_t fact(int32_t n);
 float sin(float deg);
 float cos(float deg);
-void uitoa(uint32_t value, char* valuestring);
-void itoa(int32_t value, char* valuestring);
+void uitoa(uint32_t value, char* str, int32_t base);
+void itoa(int32_t value, char* str, int32_t base);
 void ftoa(float f, char* buffer);
-float sqrt(float x);
+double sqrt(double x);
 uint32_t random();
 
 #ifdef _cplusplus
