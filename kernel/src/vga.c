@@ -198,9 +198,8 @@ void vga_set_palette_text() {
         outportb(0x03c9, vga_text_palette[i * 3 + 1]);
         outportb(0x03c9, vga_text_palette[i * 3 + 2]);
     }
-    for (i = 0; i < 192 * 3; ++i) {
+    for (i = 0; i < 192 * 3; ++i)
         outportb(0x03c9, 0);
-    }
 }
 
 uint8_t* vga_set_mode(uint8_t mode) {
@@ -208,16 +207,16 @@ uint8_t* vga_set_mode(uint8_t mode) {
         vga_write_registers(g_320x200x256);
         vga_set_palette_graph();
         uint8_t* pixelAddress = vga_getFrameBufferSegment();
-        for (uint16_t i = 0; i < 64000; ++i) {
+        for (uint16_t i = 0; i < 64000; ++i)
             vga_text_mode_backup[i] = pixelAddress[i];
-        }
+
         return pixelAddress;
     } else if (mode == 1) {
     } else if (mode == 0) {
         uint8_t* pixelAddress = vga_getFrameBufferSegment();
-        for (uint16_t i = 0; i < 64000; ++i) {
+        for (uint16_t i = 0; i < 64000; ++i)
             pixelAddress[i] = vga_text_mode_backup[i];
-        }
+
         vga_write_registers(g_80x50_text);
         vga_set_palette_text();
         return vga_getFrameBufferSegment();

@@ -18,13 +18,13 @@ int main() {
             for (uint32_t j = 0; j < PCI_DEVTABLE_LEN; ++j) {
                 if (PciDevTable[j].VenId == pciDev.vendorID && PciDevTable[j].DevId == pciDev.deviceID) {
                     putch('\r');
-                    for(uint8_t k = 0; k < 20; ++k)
+                    for (uint8_t k = 0; k < 20; ++k)
                         move_cursor_right();
-                    
+
                     puts((char*)PciDevTable[j].Chip);
 
                     putch('\r');
-                    for(uint8_t k = 0; k < 35; ++k)
+                    for (uint8_t k = 0; k < 35; ++k)
                         move_cursor_right();
 
                     puts((char*)PciDevTable[j].ChipDesc);
@@ -33,7 +33,7 @@ int main() {
             }
 
             putch('\r');
-            for(uint8_t k = 0; k < 77; ++k)
+            for (uint8_t k = 0; k < 77; ++k)
                 move_cursor_right();
 
             char irq_str[] = {0, 0, 0, 0};

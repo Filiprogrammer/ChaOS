@@ -11,8 +11,8 @@ KernelStart:
     mov ecx, __bss_end
     sub ecx, __bss_start
     mov al, 0
-    rep stosb           ; repeats instruction decrementing ECX until zero
-                        ; and stores value from AL incrementing ES:EDI
+    rep stosb           ; repeat instruction decrementing ECX until zero
+                        ; and store value from AL incrementing ES:EDI
 
     mov esp, 0x190000   ; set stack below 2 MB limit
 

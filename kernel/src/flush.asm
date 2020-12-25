@@ -2,7 +2,7 @@ section .text
 
 ; flush.asm -- contains global descriptor table and interrupt descriptor table setup code
 
-GLOBAL _gdt_flush       ; Allows the C code to call gdt_flush().
+GLOBAL _gdt_flush       ; Allow the C code to call gdt_flush().
 
 _gdt_flush:
     mov eax, [esp+4]    ; Get the pointer to the GDT, passed as a parameter.
@@ -18,7 +18,7 @@ _gdt_flush:
 .flush:
     ret
 
-GLOBAL _tss_flush       ; Allows our C code to call tss_flush().
+GLOBAL _tss_flush       ; Allow the C code to call tss_flush().
 
 _tss_flush:
     mov ax, 0x2B        ; Load the index of our TSS structure - The index is

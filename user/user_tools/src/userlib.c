@@ -214,7 +214,13 @@ void exitCurrentThread() {
 
 /// user functions ///
 
-// Compare two strings. Returns -1 if str1 < str2, 0 if they are equal or 1 otherwise.
+/**
+ * @brief Compare two strings.
+ * 
+ * @param s1 first string to be compared
+ * @param s2 second string to be compared
+ * @return int32_t less than 0 if s1 is less than s2, 0 if they are equal or 1 otherwise.
+ */
 int32_t strcmp(const char* s1, const char* s2) {
     while ((*s1) && (*s1 == *s2)) {
         ++s1;
@@ -223,12 +229,19 @@ int32_t strcmp(const char* s1, const char* s2) {
     return (*s1 - *s2);
 }
 
+/**
+ * @brief Check if the beginning of a string matches a specified string.
+ * 
+ * @param str string to get checked
+ * @param prefix string to look for
+ * @return true beginning of str matches prefix.
+ * @return false beginning of str does not match prefix.
+ */
 bool startsWith(char* str, char* prefix) {
-    while (*prefix) {
-        if (*prefix++ != *str++) {
+    while (*prefix)
+        if (*prefix++ != *str++)
             return false;
-        }
-    }
+
     return true;
 }
 
@@ -241,13 +254,26 @@ void substring(char* str, char* sub, int pos, int len) {
     sub[c] = '\0';
 }
 
+/**
+ * @brief Compute the length of a string (not including the null terminator).
+ * 
+ * @param str pointer to the string
+ * @return size_t length of the string
+ */
 size_t strlen(const char* str) {
-    unsigned int retval;
+    size_t retval;
     for (retval = 0; *str != '\0'; ++str)
         ++retval;
     return retval;
 }
 
+/**
+ * @brief Copy the string pointed to by src to dest.
+ * 
+ * @param dest pointer to destination where the content is to be copied to
+ * @param src the string to be copied
+ * @return char* pointer to the destination string
+ */
 char* strcpy(char* dest, const char* src) {
     do {
         *dest++ = *src++;
@@ -255,16 +281,30 @@ char* strcpy(char* dest, const char* src) {
     return dest;
 }
 
+/**
+ * @brief Append the string pointed to by src to the end of the string pointed to by dest.
+ * 
+ * @param dest pointer to the destination array, which should be large enough to contain the concatenated resulting string including the null terminator.
+ * @param src string to be appended
+ * @return char* a pointer to the resulting string dest
+ */
 char* strcat(char* dest, const char* src) {
-    while (*dest) {
+    while (*dest)
         dest++;
-    }
+
     do {
         *dest++ = *src++;
     } while (*src);
     return dest;
 }
 
+/**
+ * @brief Break string str into a series of tokens using the delimiter delim.
+ * 
+ * @param str string to truncate (Note that the string is being modified.)
+ * @param delim string containing the delimiters
+ * @return char* pointer to the first token found in the string
+ */
 char* strtok(char* str, const char* delim) {
     static char* _buffer;
     static char _reachedEnd;
@@ -297,6 +337,12 @@ char* strtok(char* str, const char* delim) {
     return ret;
 }
 
+/**
+ * @brief Remove leading and trailing white-space characters.
+ * 
+ * @param str string to be trimmed
+ * @return char* pointer to the first non white-space charater of the string
+ */
 char* strtrim(char* str) {
     char* end;
 
@@ -316,50 +362,64 @@ char* strtrim(char* str) {
     return str;
 }
 
+/**
+ * @brief Remove leading white-space characters.
+ * 
+ * @param str string to be trimmed
+ * @return char* pointer to the first non white-space charater of the string
+ */
 char* trimStart(char* str) {
     // Trim leading space
     while (((unsigned char)*str) == 0x20) str++;
     return str;
 }
 
+/**
+ * @brief Convert all letters of a string to lower case.
+ * 
+ * @param str string to be converted
+ * @return char* pointer to the converted string str
+ */
 char* tolower(char* str) {
     while (*str != '\0') {
-        if (*str >= 65 && *str <= 90) {
+        if (*str >= 65 && *str <= 90)
             *str = *str + 32;
-        }
+
         ++str;
     }
+
     return str;
 }
 
+/**
+ * @brief Find the first occurrence of substring in string.
+ * 
+ * @param string the string to be scanned
+ * @param substring the string containing the sequence of characters to match
+ * @return char* pointer to the first occurrence of substring in string
+ */
 char* strstr(char* string, char* substring) {
     char *a, *b;
 
-    /* First scan quickly through the two strings looking for a
-     * single-character match.  When it's found, then compare the
-     * rest of the substring.
-     */
-
     b = substring;
-    if (*b == 0) {
+    if (*b == 0)
         return string;
-    }
-    for (; *string != 0; string += 1) {
-        if (*string != *b) {
+
+    for (; *string != 0; ++string) {
+        if (*string != *b)
             continue;
-        }
+
         a = string;
         while (1) {
-            if (*b == 0) {
+            if (*b == 0)
                 return string;
-            }
-            if (*a++ != *b++) {
+
+            if (*a++ != *b++)
                 break;
-            }
         }
         b = substring;
     }
-    return (char*)0;
+    return NULL;
 }
 
 char* file_squashPath(char* filepath) {
@@ -450,35 +510,6 @@ float floor(float x) {
 float fmod(float a, float b) {
     return ((((a / b) - (floor(a / b))) * b) + 0.5);
 }
-
-/*float angle_shift ( float alpha, float beta ) {
-    float gamma;
-
-    if ( alpha < beta ) {
-        gamma = beta - fmod ( beta - alpha, 2.0 * 180.0 ) + 2.0 * 180.0;
-    }
-    else {
-        gamma = beta + fmod ( alpha - beta, 2.0 * 180.0 );
-    }
-
-    return gamma;
-}
-
-float sin(int32_t deg) {
-    deg = fmod(deg, 360);
-    deg = angle_shift(deg, -180.0);
-    float rad = deg * PI / 180;
-    float ret = 0;
-
-    for(int32_t i = 0; i < 5; ++i) { // That's Taylor series!!
-        ret += power(-1, i) * powerf(rad, 2 * i + 1) / fact(2 * i + 1);
-    }
-    return ret;
-}
-
-float cos(int32_t deg) {
-    return sin(deg + 90);
-}*/
 
 float sin(float deg) {
     float rad = deg * PI / 180;

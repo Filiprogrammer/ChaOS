@@ -8,8 +8,7 @@
 #define MEM_WRITABLE 2
 #define MEM_USER 4
 
-typedef struct
-{
+typedef struct {
     uint8_t present : 1;
     uint8_t writable : 1;
     uint8_t privilege : 1;
@@ -23,8 +22,7 @@ typedef struct
     uint32_t page_table_phys_addr : 20;
 } __attribute__((packed)) page_directory_entry_t;
 
-typedef struct
-{
+typedef struct {
     uint8_t present : 1;
     uint8_t writable : 1;
     uint8_t privilege : 1;

@@ -61,19 +61,19 @@ bool box_isCollidingRot(uint8_t boxId, float xoffset, float yoffset, float zoffs
     float sin_rot_z = sin(rot_z);
     float cos_rot_z = cos(rot_z);
 
-    //FINAL RXYZ
+    // FINAL RXYZ
     float ix = cos_rot_z;
     float iy = -sin_rot_z;
 
     float jx = sin_rot_z;
     float jy = cos_rot_z;
 
-    //DETERMINANTS
+    // DETERMINANTS
     float _D = ix * jy - jx * iy;
     float _DX = x * jy - jx * y;
     float _DY = ix * y - x * iy;
 
-    //OUTPUT
+    // OUTPUT
     float ax = _DX / _D;
     float ay = _DY / _D;
 

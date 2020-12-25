@@ -1,6 +1,6 @@
+#include "list.h"
 #include "os.h"
 #include "task.h"
-#include "list.h"
 
 typedef struct {
     void* func;
@@ -14,14 +14,19 @@ typedef struct {
     listHead_t* handlers;
 } irq_t;
 
-/* Array of function pointers handling custom IRQ handlers for a given IRQ */
+// Array of function pointers handling custom IRQ handlers for a given IRQ
 irq_t irq_routines[256] = {{0}};
 
-/* Implement a custom IRQ handler for the given IRQ */
+/**
+ * @brief Add a custom IRQ handler for the given IRQ.
+ * 
+ * @param ir IRQ number
+ * @param handler function pointer to the handler function
+ */
 void irq_install_handler(int32_t ir, void (*handler)(registers_t* r)) {
     listHead_t* handlers = irq_routines[ir + 32].handlers;
 
-    if (handlers == NULL){
+    if (handlers == NULL) {
         handlers = list_create();
         irq_routines[ir + 32].handlers = handlers;
     }
@@ -33,10 +38,17 @@ void irq_install_handler(int32_t ir, void (*handler)(registers_t* r)) {
     irq_routines[ir + 32].handlerCount++;
 }
 
+/**
+ * @brief Add a custom IRQ handler for the given IRQ.
+ * 
+ * @param ir IRQ number
+ * @param handler function pointer to the handler function
+ * @param arg argument to pass to the handler function
+ */
 void irq_install_handler_arg(int32_t ir, void (*handler)(registers_t* r, void* arg), void* arg) {
     listHead_t* handlers = irq_routines[ir + 32].handlers;
 
-    if (handlers == NULL){
+    if (handlers == NULL) {
         handlers = list_create();
         irq_routines[ir + 32].handlers = handlers;
     }
@@ -49,7 +61,12 @@ void irq_install_handler_arg(int32_t ir, void (*handler)(registers_t* r, void* a
     irq_routines[ir + 32].handlerCount++;
 }
 
-/* Clear the custom IRQ handler */
+/**
+ * @brief Remove a custom IRQ handler from the given IRQ.
+ * 
+ * @param ir IRQ number
+ * @param handler pointer to the handler function to remove
+ */
 void irq_uninstall_handler(int32_t ir, void* handler) {
     listHead_t* handlers = irq_routines[ir].handlers;
 
@@ -60,9 +77,9 @@ void irq_uninstall_handler(int32_t ir, void* handler) {
     }
 }
 
-/* Message string corresponding to the exception number 0-31: exception_messages[interrupt_number] */
-char* exception_messages[] =
-{
+// Message string corresponding to the exception number 0-31: exception_messages[interrupt_number]
+// clang-format off
+char* exception_messages[] = {
     "Division By Zero",        "Debug",                         "Non Maskable Interrupt",    "Breakpoint",
     "Into Detected Overflow",  "Out of Bounds",                 "Invalid Opcode",            "No Coprocessor",
     "Double Fault",            "Coprocessor Segment Overrun",   "Bad TSS",                   "Segment Not Present",
@@ -72,26 +89,28 @@ char* exception_messages[] =
     "Reserved",                "Reserved",                      "Reserved",                  "Reserved",
     "Reserved",                "Reserved",                      "Reserved",                  "Reserved"
 };
+// clang-format on
 
 registers_t* irq_handler(registers_t* r) {
-    if (r->int_no < 32) { // exception
+    if (r->int_no < 32) {  // exception
         if (r->int_no == 7) {
             NM_fxsr(r);
             return r;
         }
 
-        settextcolor(4,0);
+        settextcolor(4, 0);
 
-        if (r->int_no == 6 || r->int_no == 1) { // Invalid Opcode
+        if (r->int_no == 6 || r->int_no == 1) {  // Invalid Opcode
             printf("err_code: %X address(eip): %X\n", r->err_code, r->eip);
             printf("edi: %X esi: %X ebp: %X eax: %X ebx: %X ecx: %X edx: %X\n", r->edi, r->esi, r->ebp, r->eax, r->ebx, r->ecx, r->edx);
             printf("cs: %X ds: %X es: %X fs: %X gs %X ss %X\n", r->cs, r->ds, r->es, r->fs, r->gs, r->ss);
             printf("int_no %d eflags %X useresp %X\n", r->int_no, r->eflags, r->useresp);
         }
 
-        if (r->int_no == 14) { // Page Fault
+        if (r->int_no == 14) {  // Page Fault
             uint32_t faulting_address;
-            __asm__ volatile("mov %%cr2, %0" : "=r" (faulting_address)); // faulting address <== CR2 register
+            __asm__ volatile("mov %%cr2, %0"
+                             : "=r"(faulting_address));  // faulting address <== CR2 register
 
             // The error code gives us details of what happened.
             int32_t present   = !(r->err_code & 0x1); // Page not present
@@ -115,7 +134,8 @@ registers_t* irq_handler(registers_t* r) {
         printf("cs: %X ds: %X es: %X fs: %X gs %X ss %X\n", r->cs, r->ds, r->es, r->fs, r->gs, r->ss);
         printf("int_no %d eflags %X useresp %X\n", r->int_no, r->eflags, r->useresp);
         uint16_t fpu_status_word;
-        __asm__ volatile("fnstsw %0": "=m"(fpu_status_word));
+        __asm__ volatile("fnstsw %0"
+                         : "=m"(fpu_status_word));
         printf("fpu_status_word: %x\n", fpu_status_word);
         printf("esp: %X\n", r);
         printf("\n%s >>> Exception <<<", exception_messages[r->int_no]);
@@ -124,8 +144,8 @@ registers_t* irq_handler(registers_t* r) {
         return r;
     }
 
-    if(ODA.ts_flag && (r->int_no == 0x20 || r->int_no == 0x7E))
-        r = (registers_t*) task_switch((uint32_t) r); //new task's esp
+    if (ODA.ts_flag && (r->int_no == 0x20 || r->int_no == 0x7E))
+        r = (registers_t*)task_switch((uint32_t)r);  //new task's esp
 
     irq_t irq = irq_routines[r->int_no];
     irq.calls++;
@@ -144,7 +164,7 @@ registers_t* irq_handler(registers_t* r) {
         }
     }
 
-    if(r->int_no >= 40)
+    if (r->int_no >= 40)
         outportb(0xA0, 0x20);
     outportb(0x20, 0x20);
 

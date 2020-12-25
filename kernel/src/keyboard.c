@@ -1,6 +1,8 @@
-#include "os.h"
 #include "keyboard.h"
 
+#include "os.h"
+
+// clang-format off
 static const KEY_t scancodeToKey_default[] = {
 //  0           1           2           3           4           5            6             7
 //---------------------------------------------------------------------------------------------------------
@@ -87,31 +89,32 @@ static const char keyToASCII_altGr[__KEY_NUMBER] = {
       0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
       0,   0,   0,   0, '|'
 };
+// clang-format on
 
 static const char keyToASCII_shiftAltGr[__KEY_NUMBER] = {0};
 
 static bool pressedKeys[__KEY_NUMBER] = {false};
 static uint8_t led = 0;
 
-#define KQSIZE    20 // size of key queue
+#define KQSIZE 20  // size of key queue
 
 // Key Queue
-KEY_t  KEYQUEUE[KQSIZE];     // circular queue buffer
-KEY_t* pHeadKQ;              // pointer to the head of valid data
-KEY_t* pTailKQ;              // pointer to the tail of valid data
-uint32_t KQ_count_read;      // number of data read from queue buffer
-uint32_t KQ_count_write;     // number of data put into queue buffer
+KEY_t KEYQUEUE[KQSIZE];   // circular queue buffer
+KEY_t* pHeadKQ;           // pointer to the head of valid data
+KEY_t* pTailKQ;           // pointer to the tail of valid data
+uint32_t KQ_count_read;   // number of data read from queue buffer
+uint32_t KQ_count_write;  // number of data put into queue buffer
 
 static uint8_t getScancode() {
     uint8_t scancode = 0;
 
-    if( inportb(0x64)&1 )
-        scancode = inportb(0x60);   // 0x60: get scan code from the keyboard
+    if (inportb(0x64) & 1)
+        scancode = inportb(0x60);  // 0x60: get scan code from the keyboard
 
     // ACK: toggle bit 7 at port 0x61
     uint8_t port_value = inportb(0x61);
-    outportb(0x61, port_value |  0x80); // 0->1
-    outportb(0x61, port_value &~ 0x80); // 1->0
+    outportb(0x61, port_value | 0x80);   // 0->1
+    outportb(0x61, port_value & ~0x80);  // 1->0
 
     return scancode;
 }
@@ -121,22 +124,19 @@ static KEY_t scancodeToKey(uint8_t scancode, bool* pressed) {
 
     *pressed = !(scancode & 0x80);
 
-    if(scancode == 0xE0) {
+    if (scancode == 0xE0) {
         byteCounter = 0xFF;
-    }
-    else if(scancode == 0xE1) {
+    } else if (scancode == 0xE1) {
         byteCounter = 1;
-    }
-    else {
-        if(byteCounter != 0 && byteCounter <= 3) { // E1
+    } else {
+        if (byteCounter != 0 && byteCounter <= 3) {  // E1
             ++byteCounter;
-            if(byteCounter == 3){
+            if (byteCounter == 3)
                 return KEY_PAUSE;
-            }
-        } else if(byteCounter == 0xFF) { // E0
+        } else if (byteCounter == 0xFF) {  // E0
             byteCounter = 0;
             return scancodeToKey_E0[scancode & 0x7F];
-        } else { // Default
+        } else {  // Default
             return scancodeToKey_default[scancode & 0x7F];
         }
     }
@@ -146,16 +146,15 @@ static KEY_t scancodeToKey(uint8_t scancode, bool* pressed) {
 char keyToASCII(KEY_t key) {
     bool altGr = pressedKeys[KEY_ALTGR];
     bool shift = pressedKeys[KEY_LSHIFT] || pressedKeys[KEY_RSHIFT];
-    if(led & 0x04) // is CapsLock on?
+    if (led & 0x04)  // is CapsLock on?
         shift = !shift;
 
-    if(altGr){
-        if(shift) {
+    if (altGr) {
+        if (shift)
             return keyToASCII_shiftAltGr[key];
-        } else {
+        else
             return keyToASCII_altGr[key];
-        }
-    } else if(shift) {
+    } else if (shift) {
         return keyToASCII_shift[key];
     }
     return keyToASCII_default[key];
@@ -172,43 +171,50 @@ void keyboard_handler(registers_t* r) {
     uint8_t scancode = getScancode();
     bool pressed = false;
     KEY_t key = scancodeToKey(scancode, &pressed);
-    if(key == __KEY_INVALID) return;
+    if (key == __KEY_INVALID) return;
     pressedKeys[key] = pressed;
-    if(pressed) {
-        if(key == KEY_CAPS) {
+    if (pressed) {
+        if (key == KEY_CAPS) {
             led ^= 0x04;
             keyboard_updateLED();
         }
         *(pTailKQ) = key;
         ++(KQ_count_write);
 
-        if(pTailKQ > KEYQUEUE){
-           --pTailKQ;
-        }
-        if(pTailKQ == KEYQUEUE){
-           pTailKQ = (KEYQUEUE)+KQSIZE-1;
-        }
+        if (pTailKQ > KEYQUEUE)
+            --pTailKQ;
+
+        if (pTailKQ == KEYQUEUE)
+            pTailKQ = KEYQUEUE + KQSIZE - 1;
     }
 }
 
-// Read from key queue and return the key
+/**
+ * @brief Read key from the key queue.
+ * 
+ * @return KEY_t the next key in the queue or NULL if the queue is empty.
+ */
 KEY_t getkey() {
-    if(KQ_count_write > KQ_count_read) {
+    if (KQ_count_write > KQ_count_read) {
         KEY_t key = *(pHeadKQ);
         ++(KQ_count_read);
 
-        if(pHeadKQ > KEYQUEUE) {
+        if (pHeadKQ > KEYQUEUE)
             --pHeadKQ;
-        }
-        if(pHeadKQ == KEYQUEUE) {
-            pHeadKQ = (KEYQUEUE)+KQSIZE-1;
-        }
+
+        if (pHeadKQ == KEYQUEUE)
+            pHeadKQ = KEYQUEUE + KQSIZE - 1;
+
         return key;
     }
-    return 0;
+    return NULL;
 }
 
-// Read from key queue and convert that to ASCII and return the ASCII char
+/**
+ * @brief Read from the key queue and convert that to ASCII.
+ * 
+ * @return char the ASCII character corresponding to the key or NULL if the key queue is empty.
+ */
 char getch() {
     return keyToASCII(getkey());
 }
@@ -234,12 +240,12 @@ void keyboard_setTypematic(uint8_t rate, uint8_t delay) {
 void keyboard_install() {
     /* Installs 'keyboard_handler' to IRQ1 */
     irq_install_handler(1, keyboard_handler);
-    while( inportb(0x64)&1 )
+    while (inportb(0x64) & 1)
         inportb(0x60);
 
     memset(KEYQUEUE, 0, KQSIZE);
-    pHeadKQ = KEYQUEUE;          // pointer to the head of valid data
-    pTailKQ = KEYQUEUE;          // pointer to the tail of valid data
-    KQ_count_read  = 0;          // number of data read from queue buffer
-    KQ_count_write = 0;          // number of data put into queue buffer
+    pHeadKQ = KEYQUEUE;  // pointer to the head of valid data
+    pTailKQ = KEYQUEUE;  // pointer to the tail of valid data
+    KQ_count_read = 0;   // number of data read from queue buffer
+    KQ_count_write = 0;  // number of data put into queue buffer
 }

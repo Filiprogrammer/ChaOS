@@ -1,9 +1,9 @@
 #include "kheap.h"
+
 #include "math.h"
 #include "paging.h"
 
-typedef struct
-{
+typedef struct {
     uint32_t size;
     bool reserved;
 } region_t;

@@ -24,7 +24,7 @@ task_t* kernel_task;
 task_t* doNothing_task;
 
 // The currently running thread.
-thread_t* current_thread;
+static thread_t* current_thread;
 
 volatile thread_t* FPUThread;
 
@@ -127,16 +127,16 @@ static thread_t* _create_thread(task_t* task, void* entry, uint8_t privilege) {
         paging_switch(task->page_directory);
 
         // Call the exitCurrentThread syscall at the end of the thread
-        *((uint32_t*)(stack_begin + stack_size - 8)) = 0x001eb890; // mov eax, 30
-        *((uint32_t*)(stack_begin + stack_size - 4)) = 0x7fcd0000; // int 0x7F
+        *((uint32_t*)(stack_begin + stack_size - 8)) = 0x001eb890;  // mov eax, 30
+        *((uint32_t*)(stack_begin + stack_size - 4)) = 0x7fcd0000;  // int 0x7F
         *((uint32_t*)(stack_begin + stack_size - 12)) = stack_begin + stack_size - 7;
 
         paging_switch(active_pagedir);
 
         // general information: Intel 3A Chapter 5.12
-        *(--kernel_stack) = thread->ss = 0x23;         // ss
+        *(--kernel_stack) = thread->ss = 0x23;              // ss
         *(--kernel_stack) = stack_begin + stack_size - 12;  // esp0
-        code_segment = 0x1B;                           // 0x18|0x3=0x1B
+        code_segment = 0x1B;                                // 0x18|0x3=0x1B
     }
 
     *(--kernel_stack) = 0x0202;           // eflags = interrupts activated and iopl = 0

@@ -83,7 +83,7 @@ int main() {
                     goto exec_cmd;
                     break;
                 default:;
-                    unsigned char input_char = (unsigned char)keyToASCII(key);  // Has to be insigned because of the if statement
+                    unsigned char input_char = (unsigned char)keyToASCII(key);  // Has to be unsigned because of the if statement
                     if ((input_char >= ' ') && (input_pos < MAX_CHAR_PER_LINE)) {
                         putch(input_char);
                         input_line[input_pos] = input_char;
@@ -378,7 +378,7 @@ int main() {
                     } else {
                         puts("File found\n");
                         settextcolor(6, 0);
-                        for(uint32_t i = 0; i < file_inst.size; i += 0x8000) {
+                        for (uint32_t i = 0; i < file_inst.size; i += 0x8000) {
                             uint32_t file_buffer_size = MIN(0x8000, file_inst.size - i);
                             uint8_t file_buffer[file_buffer_size];
                             file_readContents(&file_inst, file_buffer, i, file_buffer_size);

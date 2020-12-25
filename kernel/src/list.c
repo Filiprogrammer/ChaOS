@@ -1,4 +1,5 @@
 #include "list.h"
+
 #include "kheap.h"
 #include "paging.h"
 
@@ -201,9 +202,9 @@ uint32_t list_findElement(listHead_t* list, void* data) {
 
     while (cur != 0 && cur->next != 0) {
         ++i;
-        if (cur->next->data == data) {
+        if (cur->next->data == data)
             return i;
-        }
+
         cur = cur->next;
     }
 

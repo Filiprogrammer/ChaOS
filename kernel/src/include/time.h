@@ -1,11 +1,8 @@
 #ifndef TIME_H
 #define TIME_H
 
-#include "os.h"
 #include "cmos.h"
-
-#define CMOS_ADDRESS 0x70
-#define CMOS_DATA 0x71
+#include "os.h"
 
 typedef struct {
     uint8_t second;

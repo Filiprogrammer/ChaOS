@@ -1,4 +1,5 @@
 #include "paging.h"
+
 #include "kheap.h"
 #include "math.h"
 #include "os.h"
@@ -11,11 +12,10 @@ enum e820_type {
     E820_TYPE_BAD      = 5
 };
 
-typedef struct
-{
-    uint64_t base; /**< The address of the region */
-    uint64_t size; /**< The size of the region */
-    uint32_t type; /**< The e820_type of the region */
+typedef struct {
+    uint64_t base;  // The address of the region
+    uint64_t size;  // The size of the region
+    uint32_t type;  // The e820_type of the region
     uint32_t ext;
 } __attribute__((packed)) mem_map_entry_t;
 
@@ -36,7 +36,9 @@ void paging_toggle(bool enable) {
     __asm__ volatile("mov %%cr0, %0"
                      : "=r"(cr0));
     cr0 = (cr0 & ~0x80000000) | (enable << 31);
-    __asm__ volatile("mov %0, %%cr0" ::"r"(cr0));
+    __asm__ volatile("mov %0, %%cr0"
+                     :
+                     : "r"(cr0));
 }
 
 uint32_t paging_getPhysAddr(page_directory_t* pd, void* virtAddr) {
@@ -62,7 +64,9 @@ void paging_switch(page_directory_t* pd) {
 
     if (pd != active_pd) {
         active_pd = pd;
-        __asm__ volatile("mov %0, %%cr3" : : "r"(paging_getPhysAddr(active_pd, pd)));
+        __asm__ volatile("mov %0, %%cr3"
+                         :
+                         : "r"(paging_getPhysAddr(active_pd, pd)));
     }
 }
 
@@ -281,9 +285,8 @@ uint32_t physMemInit() {
     for (uint32_t i = 0; i < memoryMapSize; ++i) {
         mem_map_entry_t entry = memoryMap[i];
 
-        if (entry.base < FOUR_GB && (entry.base + entry.size) > FOUR_GB) {
+        if (entry.base < FOUR_GB && (entry.base + entry.size) > FOUR_GB)
             entry.size = FOUR_GB - entry.base;
-        }
 
         if (entry.type == E820_TYPE_FREE)
             phys_reservationTable_size = MAX(phys_reservationTable_size, (entry.base + entry.size) >> 17);

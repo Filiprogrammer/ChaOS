@@ -1,15 +1,16 @@
 #include "pc_speaker.h"
+
 #include "task.h"
 
 /**
  * @brief Play sound using built in speaker.
  * 
- * @param frequency The frequence of the sound in Hz
+ * @param frequency The frequency of the sound in Hz
  */
 void play_sound(uint32_t frequency) {
     outportb(0x43, 0xB6);
     frequency = 1193180 / frequency;
-    outportb(0x42, frequency );
+    outportb(0x42, frequency);
     outportb(0x42, frequency >> 8);
     uint8_t temp = inportb(0x61);
     if (temp != (temp | 3)) {

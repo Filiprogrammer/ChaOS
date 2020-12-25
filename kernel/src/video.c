@@ -1,6 +1,7 @@
 #include "math.h"
-#include "my_stdarg.h"
 #include "os.h"
+#include "stdarg.h"
+#include "string.h"
 #include "vga.h"
 
 // Video modes
@@ -128,7 +129,7 @@ inline uint8_t colorToRRRGGGBB(uint32_t rgb) {
 }
 
 bool video_set_mode(uint8_t mode) {
-    if(video_mode == mode)
+    if (video_mode == mode)
         return true;
 
     uint8_t* ret = vga_set_mode(mode);
@@ -246,8 +247,7 @@ void putch(char c) {
 
         uint16_t* pos;
 
-        if (uc == '\b')  // backspace: move the cursor one space backwards and delete
-        {
+        if (uc == '\b') {  // backspace: move the cursor one space backwards and delete
             if (csr_x) {
                 --csr_x;
                 pos = (uint16_t*)vidmem + (csr_y * width + csr_x);
@@ -258,8 +258,7 @@ void putch(char c) {
                 pos = (uint16_t*)vidmem + (csr_y * width + csr_x);
                 *pos = ' ' | ((txtcolor & 0xFF) << 8);
             }
-        }
-        else if (uc == '\t')  // tab: increment csr_x (divisible by 8)
+        } else if (uc == '\t')  // tab: increment csr_x (divisible by 8)
             csr_x = (csr_x + 8) & ~(8 - 1);
         else if (uc == '\r')  // cr: cursor back to the margin
             csr_x = 0;

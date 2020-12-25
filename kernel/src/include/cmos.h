@@ -7,6 +7,6 @@
 #define CMOS_DATA     0x71
 
 uint8_t cmos_read(uint8_t off);
-void cmos_write(uint8_t off,uint8_t val);
+void cmos_write(uint8_t off, uint8_t val);
 
 #endif

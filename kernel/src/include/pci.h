@@ -1,9 +1,9 @@
 #ifndef PCI_H
 #define PCI_H
 
-#include "stdint.h"
-#include "stdbool.h"
 #include "list.h"
+#include "stdbool.h"
+#include "stdint.h"
 
 #define PCI_CONFIG_ADDRESS 0xCF8
 #define PCI_CONFIG_DATA    0xCFC
@@ -140,23 +140,23 @@ typedef struct {
 
 typedef struct {
     uint32_t baseAddress;
-    size_t   memorySize;
-    uint8_t  memoryType;
+    size_t memorySize;
+    uint8_t memoryType;
 } pciBar_t;
 
 typedef struct {
-    uint16_t  vendorID;
-    uint16_t  deviceID;
-    uint8_t   class;
-    uint8_t   subclass;
-    uint8_t   interfaceID;
-    uint8_t   revID;
-    uint8_t   bus;
-    uint8_t   device;
-    uint8_t   func;
-    uint8_t   irq;
-    uint8_t   interruptPin;
-    pciBar_t  bar[6];
+    uint16_t vendorID;
+    uint16_t deviceID;
+    uint8_t class;
+    uint8_t subclass;
+    uint8_t interfaceID;
+    uint8_t revID;
+    uint8_t bus;
+    uint8_t device;
+    uint8_t func;
+    uint8_t irq;
+    uint8_t interruptPin;
+    pciBar_t bar[6];
 } pciDev_t;
 
 enum {

@@ -1,8 +1,8 @@
 #ifndef EHCI_H
 #define EHCI_H
 
-#include "stdint.h"
 #include "pci.h"
+#include "stdint.h"
 
 typedef struct {
     uint8_t N_PORTS : 4;
@@ -32,12 +32,12 @@ typedef struct {
 } __attribute__((packed)) ehci_HCCPARAMS_t;
 
 typedef struct {
-    uint8_t CAPLENGTH;      // Capability Register Length
+    uint8_t CAPLENGTH;  // Capability Register Length
     uint8_t reserved;
-    uint16_t HCIVERSION;    // Interface Version Number (BCD)
-    ehci_HCSPARAMS_t HCSPARAMS;     // Structural Parameters
-    ehci_HCCPARAMS_t HCCPARAMS;     // Capability Parameters
-    uint64_t HCSPPORTROUTE; // Companion Port Route Description
+    uint16_t HCIVERSION;         // Interface Version Number (BCD)
+    ehci_HCSPARAMS_t HCSPARAMS;  // Structural Parameters
+    ehci_HCCPARAMS_t HCCPARAMS;  // Capability Parameters
+    uint64_t HCSPPORTROUTE;      // Companion Port Route Description
 } __attribute__((packed)) ehci_capRegs_t;
 
 typedef struct {
@@ -128,16 +128,16 @@ typedef struct {
 } __attribute__((packed)) ehci_PORTSC_t;
 
 typedef struct {
-    ehci_USBCMD_t USBCMD;           // USB Command
-    ehci_USBSTS_t USBSTS;           // USB Status
-    ehci_USBINTR_t USBINTR;          // USB Interrupt Enable
-    ehci_FRINDEX_t FRINDEX;          // USB Frame Index
-    uint32_t CTRLDSSEGMENT;    // 4G Segment Selector
-    uint32_t PERIODICLISTBASE; // Frame List Base Address
-    uint32_t ASYNCLISTADDR;    // Next Asynchronous List Address
+    ehci_USBCMD_t USBCMD;       // USB Command
+    ehci_USBSTS_t USBSTS;       // USB Status
+    ehci_USBINTR_t USBINTR;     // USB Interrupt Enable
+    ehci_FRINDEX_t FRINDEX;     // USB Frame Index
+    uint32_t CTRLDSSEGMENT;     // 4G Segment Selector
+    uint32_t PERIODICLISTBASE;  // Frame List Base Address
+    uint32_t ASYNCLISTADDR;     // Next Asynchronous List Address
     uint32_t reserved[9];
     uint32_t CONFIGFLAG;       // Configure Flag Register
-    ehci_PORTSC_t PORTSC[16];       // Port Status/Control
+    ehci_PORTSC_t PORTSC[16];  // Port Status/Control
 } __attribute__((packed)) ehci_opRegs_t;
 
 typedef struct {

@@ -11,10 +11,10 @@ int32_t power(int32_t base, int32_t n) {
 }
 
 /**
- * @brief Returns the absolute value of i.
+ * @brief Return the absolute value of i.
  * 
- * @param i integral value.
- * @return int32_t absolute value.
+ * @param i integral value
+ * @return int32_t absolute value
  */
 int32_t abs(int32_t i) {
     return i < 0 ? -i : i;

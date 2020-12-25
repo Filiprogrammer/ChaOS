@@ -9,49 +9,37 @@ void write_tss(int32_t num, uint16_t ss0, uint32_t esp0);
 extern void gdt_flush(uint32_t);
 extern void tss_flush();
 
-// Initialisation function is publicly accessible.
-void init_descriptor_tables();
-
-// Allows the kernel stack in the TSS to be changed.
 void set_kernel_stack(uint32_t stack);
 
-/* Defines a GDT entry */
-struct gdt_entry {
+typedef struct {
     uint16_t limit_low;
     uint16_t base_low;
     uint8_t base_middle;
     uint8_t access;
     uint8_t granularity;
     uint8_t base_high;
-} __attribute__((packed));
+} __attribute__((packed)) gdt_entry_t;
 
-struct gdt_ptr {
+typedef struct {
     uint16_t limit;
     uint32_t base;
-} __attribute__((packed));
+} __attribute__((packed)) gdt_ptr_t;
 
-typedef struct gdt_entry gdt_entry_t;
-typedef struct gdt_ptr gdt_ptr_t;
-
-// IDT entry
-struct idt_entry {
+typedef struct {
     uint16_t base_lo;
     uint16_t sel;
     uint8_t always0;
     uint8_t flags;
     uint16_t base_hi;
-} __attribute__((packed));  //prevent compiler optimization
+} __attribute__((packed)) idt_entry_t;
 
-struct idt_ptr {
+typedef struct {
     uint16_t limit;
     uint32_t base;
-} __attribute__((packed));  //prevent compiler optimization
-
-typedef struct idt_entry idt_entry_t;
-typedef struct idt_ptr idt_ptr_t;
+} __attribute__((packed)) idt_ptr_t;
 
 // Task State Segment (TSS)
-struct tss_entry_struct {
+typedef struct {
     uint32_t prev_tss;  // The previous TSS - if we used hardware task switching this would form a linked list.
     uint32_t esp0;      // The stack pointer to load when we change to kernel mode.
     uint32_t ss0;       // The stack segment to load when we change to kernel mode.
@@ -79,9 +67,6 @@ struct tss_entry_struct {
     uint32_t ldt;       // Unused...
     uint16_t trap;
     uint16_t iomap_base;
-
-} __attribute__((packed));
-
-typedef struct tss_entry_struct tss_entry_t;
+} __attribute__((packed)) tss_entry_t;
 
 #endif

@@ -24,7 +24,7 @@ void timer_handler(registers_t* r) {
 /**
  * @brief Gets the total time passed in seconds.
  * 
- * @return uint32_t seconds passed.
+ * @return uint32_t seconds passed
  */
 uint32_t timer_getSeconds() {
     return timer_ticks / systemfrequency;
@@ -33,7 +33,7 @@ uint32_t timer_getSeconds() {
 /**
  * @brief Gets the total time passed in milliseconds.
  * 
- * @return uint32_t milliseconds passed.
+ * @return uint32_t milliseconds passed
  */
 uint32_t timer_getMilliseconds() {
     return (timer_ticks * 1000) / systemfrequency;
@@ -42,21 +42,20 @@ uint32_t timer_getMilliseconds() {
 /**
  * @brief Enters a hlt loop for the given amount of ticks.
  * 
- * @param ticks number of ticks to wait.
+ * @param ticks number of ticks to wait
  */
 static void timer_wait(uint32_t ticks) {
     sti();
     uint32_t eticks = 0;
     eticks = ticks + timer_ticks;
-    while (eticks > timer_ticks) {
+    while (eticks > timer_ticks)
         hlt();
-    }
 }
 
 /**
  * @brief Enters a hlt loop for the given amount of seconds.
  * 
- * @param seconds number of seconds to wait.
+ * @param seconds number of seconds to wait
  */
 void sleepSeconds(uint32_t seconds) {
     timer_wait((uint32_t)100 * seconds);
@@ -65,7 +64,7 @@ void sleepSeconds(uint32_t seconds) {
 /**
  * @brief Enters a hlt loop for the given amount of milliseconds.
  * 
- * @param ms number of milliseconds to wait.
+ * @param ms number of milliseconds to wait
  */
 void sleepMilliSeconds(uint32_t ms) {
     timer_wait((uint32_t)(ms / 10));
@@ -74,15 +73,14 @@ void sleepMilliSeconds(uint32_t ms) {
 /**
  * @brief Enters a nop loop for the given amount of microseconds.
  * 
- * @param microsec number of microseconds to wait.
+ * @param microsec number of microseconds to wait
  */
 void sleepMicroSeconds(uint32_t microsec) {
     uint64_t timeout = microsec * ODA.cpu_frequency;
     div64_32(&timeout, 1000000);
     timeout += rdtsc();
-    while (rdtsc() < timeout) {
+    while (rdtsc() < timeout)
         nop();
-    }
 }
 
 uint32_t cpuCyclesToMicroSeconds(uint64_t cycles) {
@@ -117,10 +115,11 @@ void timer_uninstall() {
 /**
  * @brief Reads the time-stamp counter of the processor. (number of clock cycles since the last reset)
  * 
- * @return uint64_t number of clock cycles.
+ * @return uint64_t number of clock cycles
  */
 uint64_t rdtsc() {
     uint64_t val;
-    __asm__ volatile ("rdtsc" : "=A"(val));  // "=A" for getting 64 bit value
+    __asm__ volatile("rdtsc"
+                     : "=A"(val));  // "=A" for getting 64 bit value
     return val;
 }

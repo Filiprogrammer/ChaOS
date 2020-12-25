@@ -1,10 +1,10 @@
 #include "syscall.h"
 
-DEFN_SYSCALL1( puts,                       0, uint8_t*                  )
-DEFN_SYSCALL1( putch,                      1, uint8_t                   )
+DEFN_SYSCALL1( puts,                       0, char*                     )
+DEFN_SYSCALL1( putch,                      1, char                      )
 DEFN_SYSCALL2( settextcolor,               2, uint8_t, uint8_t          )
 DEFN_SYSCALL0( getpid,                     3                            )
-DEFN_SYSCALL1( sleepCurrentThread,           4, uint32_t                  )
+DEFN_SYSCALL1( sleepCurrentThread,         4, uint32_t                  )
 DEFN_SYSCALL0( switch_context,             5                            )
 DEFN_SYSCALL1( keyboard_isKeyDown,         6, KEY_t                     )
 DEFN_SYSCALL0( getkey,                     7                            )
@@ -32,8 +32,7 @@ DEFN_SYSCALL2( pci_getDevice,             28, uint32_t, pciDev_t*       )
 DEFN_SYSCALL1( create_thread,             29, void*                     )
 DEFN_SYSCALL0( exitCurrentThread,         30                            )
 
-static void* syscalls[] =
-{
+static void* syscalls[] = {
     &puts,
     &putch,
     &settextcolor,
@@ -64,8 +63,7 @@ static void* syscalls[] =
     &file_execute,
     &pci_getDevice,
     &create_thread,
-    &exitCurrentThread
-};
+    &exitCurrentThread};
 
 void syscall_handler(registers_t* r) {
     // Firstly, check if the requested syscall number is valid. The syscall number is found in EAX.

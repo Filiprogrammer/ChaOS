@@ -1,10 +1,10 @@
 #ifndef PARTITIONMANAGER_H
 #define PARTITIONMANAGER_H
 
-#include "os.h"
-#include "storage_devManager.h"
 #include "fileManager.h"
 #include "list.h"
+#include "os.h"
+#include "storage_devManager.h"
 
 struct file_t;
 typedef struct Partition_t {

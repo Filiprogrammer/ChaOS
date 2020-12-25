@@ -14,12 +14,12 @@ typedef signed short         int16_t;
 typedef signed char          int8_t;
 
 #ifndef __bool_true_false_are_defined
-    #ifndef _cplusplus
-        typedef _Bool bool;
-        #define true   1
-        #define false  0
-    #endif
-    #define __bool_true_false_are_defined 1
+#ifndef _cplusplus
+typedef _Bool bool;
+#define true 1
+#define false 0
+#endif
+#define __bool_true_false_are_defined 1
 #endif
 
 #define NULL 0
@@ -27,6 +27,7 @@ typedef signed char          int8_t;
 #define INT_MAX 2147483647
 #define NAN (__builtin_nanf(""))
 
+// clang-format off
 typedef enum {
     __KEY_INVALID,
     KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_F, KEY_G, KEY_H, KEY_I, KEY_J, KEY_K, KEY_L, KEY_M, KEY_N, KEY_O, KEY_P, KEY_Q, KEY_R, KEY_S, KEY_T, KEY_U, KEY_V, KEY_W, KEY_X, KEY_Y, KEY_Z, // KEY_Z is bottom left
@@ -42,6 +43,7 @@ typedef enum {
     KEY_OEM_102, // German keyboard has one key more than the international one. ( <>| ) <-- Beside left shift
     __KEY_NUMBER
 } KEY_t;
+// clang-format on
 
 typedef struct pciBasicAddressRegister {
     uint32_t baseAddress;
@@ -50,18 +52,18 @@ typedef struct pciBasicAddressRegister {
 } pciBar_t;
 
 typedef struct pciDev {
-    uint16_t  vendorID;
-    uint16_t  deviceID;
-    uint8_t   classID;
-    uint8_t   subclassID;
-    uint8_t   interfaceID;
-    uint8_t   revID;
-    uint8_t   bus;
-    uint8_t   device;
-    uint8_t   func;
-    uint8_t   irq;
-    uint8_t   interruptPin;
-    pciBar_t  bar[6];;
+    uint16_t vendorID;
+    uint16_t deviceID;
+    uint8_t classID;
+    uint8_t subclassID;
+    uint8_t interfaceID;
+    uint8_t revID;
+    uint8_t bus;
+    uint8_t device;
+    uint8_t func;
+    uint8_t irq;
+    uint8_t interruptPin;
+    pciBar_t bar[6];
 } pciDev_t;
 
 #endif

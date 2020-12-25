@@ -8,7 +8,7 @@ void doSomething() {
 
     for (uint32_t i = 0; i < 1000000; ++i)
         ++x;
-    
+
     sleepMilliSeconds(700);
 }
 

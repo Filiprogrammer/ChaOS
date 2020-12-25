@@ -1,4 +1,5 @@
 #include "flpydsk.h"
+
 #include "math.h"
 
 // IO ports
@@ -11,16 +12,16 @@ enum FLPYDSK_IO {
 
 // Bits 0-4 of command byte.
 enum FLPYDSK_CMD {
-    FDC_CMD_READ_TRACK   =    2,
-    FDC_CMD_SPECIFY      =    3,
-    FDC_CMD_CHECK_STAT   =    4,
-    FDC_CMD_WRITE_SECT   =    5,
-    FDC_CMD_READ_SECT    =    6,
-    FDC_CMD_CALIBRATE    =    7,
-    FDC_CMD_CHECK_INT    =    8,
-    FDC_CMD_FORMAT_TRACK =   13,
-    FDC_CMD_SEEK         =   15,
-    FDC_CMD_VERSION      =   16
+    FDC_CMD_READ_TRACK   =  2,
+    FDC_CMD_SPECIFY      =  3,
+    FDC_CMD_CHECK_STAT   =  4,
+    FDC_CMD_WRITE_SECT   =  5,
+    FDC_CMD_READ_SECT    =  6,
+    FDC_CMD_CALIBRATE    =  7,
+    FDC_CMD_CHECK_INT    =  8,
+    FDC_CMD_FORMAT_TRACK = 13,
+    FDC_CMD_SEEK         = 15,
+    FDC_CMD_VERSION      = 16
 };
 
 // Additional command masks. Can be masked with above commands
@@ -32,36 +33,36 @@ enum FLPYDSK_CMD_EXT {
 
 // Digital Output Register
 enum FLPYDSK_DOR_MASK {
-    FLPYDSK_DOR_MASK_DRIVE0         =    0,
-    FLPYDSK_DOR_MASK_DRIVE1         =    1,
-    FLPYDSK_DOR_MASK_DRIVE2         =    2,
-    FLPYDSK_DOR_MASK_DRIVE3         =    3,
-    FLPYDSK_DOR_MASK_RESET          = 0x04,
-    FLPYDSK_DOR_MASK_DMA            = 0x08,
-    FLPYDSK_DOR_MASK_DRIVE0_MOTOR   = 0x10,
-    FLPYDSK_DOR_MASK_DRIVE1_MOTOR   = 0x20,
-    FLPYDSK_DOR_MASK_DRIVE2_MOTOR   = 0x40,
-    FLPYDSK_DOR_MASK_DRIVE3_MOTOR   = 0x80
+    FLPYDSK_DOR_MASK_DRIVE0       =    0,
+    FLPYDSK_DOR_MASK_DRIVE1       =    1,
+    FLPYDSK_DOR_MASK_DRIVE2       =    2,
+    FLPYDSK_DOR_MASK_DRIVE3       =    3,
+    FLPYDSK_DOR_MASK_RESET        = 0x04,
+    FLPYDSK_DOR_MASK_DMA          = 0x08,
+    FLPYDSK_DOR_MASK_DRIVE0_MOTOR = 0x10,
+    FLPYDSK_DOR_MASK_DRIVE1_MOTOR = 0x20,
+    FLPYDSK_DOR_MASK_DRIVE2_MOTOR = 0x40,
+    FLPYDSK_DOR_MASK_DRIVE3_MOTOR = 0x80
 };
 
 // Main Status Register
 enum FLPYDSK_MSR_MASK {
-    FLPYDSK_MSR_MASK_DRIVE1_POS_MODE    = 0x01,
-    FLPYDSK_MSR_MASK_DRIVE2_POS_MODE    = 0x02,
-    FLPYDSK_MSR_MASK_DRIVE3_POS_MODE    = 0x04,
-    FLPYDSK_MSR_MASK_DRIVE4_POS_MODE    = 0x08,
-    FLPYDSK_MSR_MASK_BUSY               = 0x10,
-    FLPYDSK_MSR_MASK_DMA                = 0x20,
-    FLPYDSK_MSR_MASK_DATAIO             = 0x40,
-    FLPYDSK_MSR_MASK_DATAREG            = 0x80
+    FLPYDSK_MSR_MASK_DRIVE1_POS_MODE = 0x01,
+    FLPYDSK_MSR_MASK_DRIVE2_POS_MODE = 0x02,
+    FLPYDSK_MSR_MASK_DRIVE3_POS_MODE = 0x04,
+    FLPYDSK_MSR_MASK_DRIVE4_POS_MODE = 0x08,
+    FLPYDSK_MSR_MASK_BUSY            = 0x10,
+    FLPYDSK_MSR_MASK_DMA             = 0x20,
+    FLPYDSK_MSR_MASK_DATAIO          = 0x40,
+    FLPYDSK_MSR_MASK_DATAREG         = 0x80
 };
 
 // Controller Status Port 0
 enum FLPYDSK_ST0_MASK {
-    FLPYDSK_ST0_MASK_DRIVE0     = 0,
-    FLPYDSK_ST0_MASK_DRIVE1     = 1,
-    FLPYDSK_ST0_MASK_DRIVE2     = 2,
-    FLPYDSK_ST0_MASK_DRIVE3     = 3,
+    FLPYDSK_ST0_MASK_DRIVE0     =    0,
+    FLPYDSK_ST0_MASK_DRIVE1     =    1,
+    FLPYDSK_ST0_MASK_DRIVE2     =    2,
+    FLPYDSK_ST0_MASK_DRIVE3     =    3,
     FLPYDSK_ST0_MASK_HEADACTIVE = 0x04,
     FLPYDSK_ST0_MASK_NOTREADY   = 0x08,
     FLPYDSK_ST0_MASK_UNITCHECK  = 0x10,
@@ -522,7 +523,7 @@ uint8_t flpy_readVersion() {
 }
 
 /**
- * @brief Create a new instance of a floppy disk
+ * @brief Create a new instance of a floppy disk.
  * 
  * @param drive floppy drive number (0 - 3)
  * @return Flpydsk_t* pointer to the instance or NULL if something goes wrong
@@ -543,7 +544,7 @@ Flpydsk_t* flpydsk_create(uint8_t drive) {
 }
 
 /**
- * @brief Destroy the given instance of a floppy disk
+ * @brief Destroy the given instance of a floppy disk.
  * 
  * @param inst pointer to the instance
  */

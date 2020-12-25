@@ -1,3 +1,4 @@
+#include "math.h"
 #include "os.h"
 #include "string.h"
 
@@ -28,7 +29,7 @@ void hlt() { __asm__ volatile("hlt"); }
 /**
  * @brief Fetch the value from the 32 bit stack pointer.
  * 
- * @return uint32_t the value from the esp register.
+ * @return uint32_t the value from the esp register
  */
 uint32_t fetchESP() {
     uint32_t esp;
@@ -40,7 +41,7 @@ uint32_t fetchESP() {
 /**
  * @brief Fetch the value from the 32 bit base pointer.
  * 
- * @return uint32_t the value from the ebp register.
+ * @return uint32_t the value from the ebp register
  */
 uint32_t fetchEBP() {
     uint32_t ebp;
@@ -52,33 +53,33 @@ uint32_t fetchEBP() {
 /**
  * @brief Fetch the value from the 16 bit stack segment.
  * 
- * @return uint32_t the value from the ss register.
+ * @return uint32_t the value from the ss register
  */
 uint32_t fetchSS() {
     register uint32_t eax __asm__("%eax");
-    __asm__ volatile("movl %ss,%eax");
+    __asm__ volatile("movl %ss, %eax");
     return eax;
 }
 
 /**
  * @brief Fetch the value from the 16 bit code segment.
  * 
- * @return uint32_t the value from the cs register.
+ * @return uint32_t the value from the cs register
  */
 uint32_t fetchCS() {
     register uint32_t eax __asm__("%eax");
-    __asm__ volatile("movl %cs,%eax");
+    __asm__ volatile("movl %cs, %eax");
     return eax;
 }
 
 /**
  * @brief Fetch the value from the 16 bit data segment.
  * 
- * @return uint32_t the value from the ds register.
+ * @return uint32_t the value from the ds register
  */
 uint32_t fetchDS() {
     register uint32_t eax __asm__("%eax");
-    __asm__ volatile("movl %ds,%eax");
+    __asm__ volatile("movl %ds, %eax");
     return eax;
 }
 
@@ -90,7 +91,9 @@ uint32_t fetchDS() {
  */
 uint32_t bitScanReverse(uint32_t val) {
     uint32_t bitnr;
-    __asm__("bsrl %1, %0" : "=r"(bitnr) : "r"(val));
+    __asm__("bsrl %1, %0"
+            : "=r"(bitnr)
+            : "r"(val));
     return bitnr;
 }
 
@@ -102,90 +105,103 @@ uint32_t bitScanReverse(uint32_t val) {
  */
 uint32_t bitScanForward(uint32_t val) {
     uint32_t bitnr;
-    __asm__("bsfl %1, %0" : "=r"(bitnr) : "r"(val));
+    __asm__("bsfl %1, %0"
+            : "=r"(bitnr)
+            : "r"(val));
     return bitnr;
 }
 
 /**
  * @brief Read an 8 bit value from the I/O bus.
  * 
- * @param port The address on the I/O bus.
- * @return uint8_t The 8 bit value that was read.
+ * @param port The address on the I/O bus
+ * @return uint8_t The 8 bit value that was read
  */
 uint8_t inportb(uint16_t port) {
     uint8_t ret_val;
-    __asm__ volatile ("inb %w1,%b0"	: "=a"(ret_val)	: "d"(port));
+    __asm__ volatile("inb %w1, %b0"
+                     : "=a"(ret_val)
+                     : "d"(port));
     return ret_val;
 }
 
 /**
  * @brief Read a 16 bit value from the I/O bus.
  * 
- * @param port The address on the I/O bus.
- * @return uint16_t The 16 bit value that was read.
+ * @param port The address on the I/O bus
+ * @return uint16_t The 16 bit value that was read
  */
 uint16_t inportw(uint16_t port) {
     uint16_t ret_val;
-    __asm__ volatile ("inw %%dx,%%ax" : "=a" (ret_val) : "d" (port));
+    __asm__ volatile("inw %%dx, %%ax"
+                     : "=a"(ret_val)
+                     : "d"(port));
     return ret_val;
 }
 
 /**
  * @brief Read a 32 bit value from the I/O bus.
  * 
- * @param port The address on the I/O bus.
- * @return uint32_t The 32 bit value that was read.
+ * @param port The address on the I/O bus
+ * @return uint32_t The 32 bit value that was read
  */
 uint32_t inportl(uint16_t port) {
     uint32_t ret_val;
-    __asm__ volatile ("inl %1,%0" : "=a" (ret_val) : "Nd" (port));
+    __asm__ volatile("inl %1, %0"
+                     : "=a"(ret_val)
+                     : "Nd"(port));
     return ret_val;
 }
 
 /**
  * @brief Write an 8 bit value to the I/O bus.
  * 
- * @param port The address on the I/O bus.
- * @param val The 8 bit value to be written.
+ * @param port The address on the I/O bus
+ * @param val The 8 bit value to be written
  */
 void outportb(uint16_t port, uint8_t val) {
-    __asm__ volatile ("outb %b0,%w1" : : "a"(val), "d"(port));
+    __asm__ volatile("outb %b0, %w1"
+                     :
+                     : "a"(val), "d"(port));
 }
 
 /**
  * @brief Write a 16 bit value to the I/O bus.
  * 
- * @param port The address on the I/O bus.
- * @param val The 16 bit value to be written.
+ * @param port The address on the I/O bus
+ * @param val The 16 bit value to be written
  */
 void outportw(uint16_t port, uint16_t val) {
-    __asm__ volatile ("outw %%ax,%%dx" : : "a"(val), "d"(port));
+    __asm__ volatile("outw %%ax, %%dx"
+                     :
+                     : "a"(val), "d"(port));
 }
 
 /**
  * @brief Write a 32 bit value to the I/O bus.
  * 
- * @param port The address on the I/O bus.
- * @param val The 32 bit value to be written.
+ * @param port The address on the I/O bus
+ * @param val The 32 bit value to be written
  */
 void outportl(uint16_t port, uint32_t val) {
-    __asm__ volatile ("outl %0,%1" : : "a"(val), "Nd"(port));
+    __asm__ volatile("outl %0, %1"
+                     :
+                     : "a"(val), "Nd"(port));
 }
 
 void panic_assert(char* file, uint32_t line, char* desc) {
     cli();
-    printf("ASSERTION FAILED(%s) at %s:%i\tOPERATING SYSTEM HALTED\n", desc, file, line);
+    printf("ASSERTION FAILED(%s) at %s:%u\tOPERATING SYSTEM HALTED\n", desc, file, line);
     // Halt by going into an infinite loop.
-    for (;;) {
+    for (;;)
         hlt();
-    }
 }
 
 /**
- * @brief Dumps a block of memory
+ * @brief Dump a block of memory.
  * 
- * @param start pointer to the block of memory.
- * @param count number of bytes.
+ * @param start pointer to the block of memory
+ * @param count number of bytes
  */
 void memshow(void* start, size_t count) {
     const uint8_t* end = (const uint8_t*)(start + count);
@@ -193,11 +209,11 @@ void memshow(void* start, size_t count) {
 }
 
 /**
- * @brief Copies a block of memory.
+ * @brief Copy a block of memory.
  * 
- * @param dest pointer to the destination where the content is to be copied.
- * @param src pointer to the source of data to be copied.
- * @param count number of bytes to copy.
+ * @param dest pointer to the destination where the content is to be copied
+ * @param src pointer to the source of data to be copied
+ * @param count number of bytes to copy
  * @return void* dest
  */
 void* memcpy(void* dest, const void* src, size_t count) {
@@ -208,12 +224,12 @@ void* memcpy(void* dest, const void* src, size_t count) {
 }
 
 /**
- * @brief fills a block of memory with a byte.
+ * @brief Fill a block of memory with a byte.
  * 
- * @param dest pointer to the block of memory to fill.
- * @param val the 8 bit value to be set.
- * @param count number of bytes to be set to the value.
- * @return void* pointer to the memory area dest.
+ * @param dest pointer to the block of memory to fill
+ * @param val the 8 bit value to be set
+ * @param count number of bytes to be set to the value
+ * @return void* pointer to the memory area dest
  */
 void* memset(void* dest, int8_t val, size_t count) {
     char* temp = (char*)dest;
@@ -222,12 +238,12 @@ void* memset(void* dest, int8_t val, size_t count) {
 }
 
 /**
- * @brief fills a block of memory with a word.
+ * @brief Fill a block of memory with a word.
  * 
- * @param dest pointer to the block of memory to fill.
- * @param val the 16 bit value to be set.
- * @param count nukber of words to be set to the value.
- * @return uint16_t* pointer to the memory area dest.
+ * @param dest pointer to the block of memory to fill
+ * @param val the 16 bit value to be set
+ * @param count number of words to be set to the value
+ * @return uint16_t* pointer to the memory area dest
  */
 uint16_t* memsetw(uint16_t* dest, uint16_t val, size_t count) {
     uint16_t* temp = (uint16_t*)dest;
@@ -236,34 +252,34 @@ uint16_t* memsetw(uint16_t* dest, uint16_t val, size_t count) {
 }
 
 /**
- * @brief Computes the checksum of a string using the BSD checksum algorithm.
+ * @brief Compute the checksum of a string using the BSD checksum algorithm.
  * 
- * @param str string pointer to the string.
- * @return uint8_t the resulting checksum.
+ * @param str string pointer to the string
+ * @return uint8_t the resulting checksum
  */
 uint8_t BSDChecksum(char* str) {
     uint8_t sum;
     uint8_t i;
     size_t len = strlen(str);
-    for (sum = i = 0; i < len; ++i) {
+    for (sum = i = 0; i < len; ++i)
         sum = (uint8_t)((((sum & 1) << 7) | ((sum & 0xFE) >> 1)) + (uint8_t)str[i]);
-    }
+
     return sum;
 }
 
 static uint32_t seed = 0;
 
 /**
- * @brief Sets the seed for the random number generator.
+ * @brief Set the seed for the random number generator.
  * 
- * @param val seed.
+ * @param val seed
  */
 void randomSetSeed(uint32_t val) {
     seed = val;
 }
 
 /**
- * @brief Generates a pseudo-random number.
+ * @brief Generate a pseudo-random number.
  * 
  * @return uint32_t a value between 0 and UINT32_MAX
  */
@@ -273,13 +289,12 @@ uint32_t random() {
 }
 
 /**
- * @brief Reboots the system.
+ * @brief Reboot the system.
  * 
  */
 void reboot() {
     int32_t temp;  // A temporary int for storing keyboard info. The keyboard is used to reboot
-    do             //flush the keyboard controller
-    {
+    do {           //flush the keyboard controller
         temp = inportb(0x64);
         if (temp & 1)
             inportb(0x60);
@@ -290,10 +305,10 @@ void reboot() {
 }
 
 /**
- * @brief Converts uint32_t to a string.
+ * @brief Convert uint32_t to a string.
  * 
- * @param value value to be converted.
- * @param valuestring pointer to a block of memory where to store the resulting string.
+ * @param value value to be converted
+ * @param valuestring pointer to a block of memory where to store the resulting string
  */
 void uitoa(uint32_t value, char* valuestring) {
     uint32_t min_flag;
@@ -320,10 +335,10 @@ void uitoa(uint32_t value, char* valuestring) {
 }
 
 /**
- * @brief Converts int32_t to a string.
+ * @brief Convert int32_t to a string.
  * 
- * @param value value to be converted.
- * @param valuestring pointer to a block of memory where to store the resulting string.
+ * @param value value to be converted
+ * @param valuestring pointer to a block of memory where to store the resulting string
  */
 void itoa(int32_t value, char* valuestring) {
     int32_t min_flag;
@@ -355,11 +370,11 @@ void itoa(int32_t value, char* valuestring) {
 }
 
 /**
- * @brief Converts uint32_t to a hex string.
+ * @brief Convert uint32_t to a hex string.
  * 
- * @param val value to be converted.
- * @param dest pointer to a block of memory where to store the resulting string.
- * @param len number of hexadecimal digits.
+ * @param val value to be converted
+ * @param dest pointer to a block of memory where to store the resulting string
+ * @param len number of hexadecimal digits
  */
 void i2hex(uint32_t val, char* dest, int32_t len) {
     char* cp;
@@ -377,11 +392,11 @@ void i2hex(uint32_t val, char* dest, int32_t len) {
 }
 
 /**
- * @brief Converts float to a string.
+ * @brief Convert float to a string.
  * 
- * @param value value to be converted.
- * @param decimal number of digits to be considered after the decimal point.
- * @param valuestring pointer to a block memory where to store the resulting string.
+ * @param value value to be converted
+ * @param decimal number of digits to be considered after the decimal point
+ * @param valuestring pointer to a block memory where to store the resulting string
  */
 void ftoa(float value, int32_t decimal, char* valuestring) {
     int32_t neg = 0;
@@ -393,7 +408,7 @@ void ftoa(float value, int32_t decimal, char* valuestring) {
     char* tempstring;
     tempstring = valuestring;
     if (value < 0) {
-        neg = 1;
+        neg = true;
         value = -value;
     }
     for (j = 0; j < decimal; ++j) {
