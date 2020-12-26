@@ -180,7 +180,7 @@ def add_task(task):
     if (taskAlreadyExists == False):
         task_id = int(task["id"])
         task_page_directory = hex(int(task["page_directory"])).rstrip("L")
-        task_cpu_time_used = str(task["cpu_time_used"]) + "µs"
+        task_cpu_time_used = str(task["cpu_time_used"]) + u"\u00B5s"
         task_last_active = int(task["last_active"])
         task_threads = hex(int(task["threads"])).rstrip("L")
         task_next_threadId = int(task["next_threadId"])
