@@ -15,7 +15,6 @@ _start:
     rep stosb   ; repeats instruction decrementing ECX until zero
                 ; and stores value from AL incrementing ES:EDI
 
-    mov esp, 0x500000 ; stackpointer
     call _main
     call _exit
     jmp $
