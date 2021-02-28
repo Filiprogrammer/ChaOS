@@ -119,7 +119,15 @@ EFI_STATUS LoadKernel(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
     INT32 pages = (fileSize + 0x1000 - 1) / 0x1000;
     void* segment = (void*) 0x40000;
     SystemTable->BootServices->AllocatePages(AllocateAddress, EfiLoaderData, pages, (EFI_PHYSICAL_ADDRESS*)&segment);
-    Kernel->Read(Kernel, &fileSize, segment);
+
+    Kernel->SetPosition(Kernel, 0);
+
+    // Read the file in chunks as a workaround for some firmware implementations that have trouble reading files from some storage devices in one go.
+    for (UINT32 i = 0; i < fileSize;) {
+        UINT32 readSize = ((fileSize - i) > 0x10000) ? 0x10000 : (fileSize - i);
+        status = Kernel->Read(Kernel, &readSize, segment + i);
+        i += readSize;
+    }
 
     UINTN MemMapSize;
     UINTN MemMapKey;
