@@ -25,6 +25,16 @@ cecho {09}Creating Archive{0F}{\t}==^> efiboot.lib...{#}
 i686-elf-ar cr efiboot.lib @obj/object_files.lst || goto ERROR
 cecho {0a}done{#}{\n}
 
+for /F "tokens=*" %%A in (static_library_files.lst) do (
+    if not exist %%A (
+        set "a=%%A"
+        call set "a=%%a:/=\%%"
+        call pushd %%a%%\..
+        call BUILD.BAT
+        popd
+    )
+)
+
 cecho {09}Linking{0F}{\t}==^> efiboot.dll...{#}
 i686-elf-gcc -o efiboot.dll -nostdlib -Wl,-n,-q,--gc-sections -Wl,--entry,_ModuleEntryPoint -u _ModuleEntryPoint -Wl,-Map,efiboot.map,--whole-archive -Os -Wl,-m,elf_i386,--oformat=elf32-i386 -Wl,--start-group,@static_library_files.lst,--end-group -g -fshort-wchar -fno-builtin -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -ffunction-sections -fdata-sections -fno-common -m32 -march=i586 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables -Wno-address -fno-pic -fno-pie -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -Wl,--defsym=PECOFF_HEADER_SIZE=0x220 -Wl,--script=GccBase.lds -Wno-error || goto ERROR
 cecho {0a}done{#}{\n}

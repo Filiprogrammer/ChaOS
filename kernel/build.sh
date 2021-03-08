@@ -5,16 +5,28 @@ error() {
     exit 1
 }
 
+usage() {
+    echo "Usage: $0 [options]"
+    echo "Options:"
+    echo "  --debug   Produce debugging information"
+    echo "  --test    Build tests"
+    exit 1
+}
+
 cd "$(dirname "$(readlink -f "$0")")"
 ./clean.sh
 
 DEBUG=0
 TEST=0
 
-[ ! -z $1 ] && if [ $1 = "DEBUG" ]; then DEBUG=1; fi
-[ ! -z $1 ] && if [ $1 = "TEST" ]; then TEST=1; fi
-[ ! -z $2 ] && if [ $2 = "DEBUG" ]; then DEBUG=1; fi
-[ ! -z $2 ] && if [ $2 = "TEST" ]; then TEST=1; fi
+while [ $# -gt 0 ] ; do
+    case "${1}" in
+        (--debug) DEBUG=1 ;;
+        (--test) TEST=1 ;;
+        *) usage ;;
+    esac
+    shift
+done
 
 version_string="ChaOS [Ver 0.2.$(date +'%y%m%d')] made by Filiprogrammer\n"
 version_checksum=$(BSDChecksum "$version_string")

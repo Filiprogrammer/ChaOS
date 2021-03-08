@@ -2,167 +2,13 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build Floppy Image",
+            "label": "Build Image",
             "type": "shell",
             "windows": {
-                "command": "${workspaceRoot}/BUILD_FLOPPY_IMAGE.BAT"
+                "command": "${workspaceRoot}/BUILD_IMAGE.BAT ${input:type} ${input:debug} ${input:test} ${input:efi}"
             },
             "linux": {
-                "command": "${workspaceRoot}/build_floppy_image.sh"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Build HD Image",
-            "type": "shell",
-            "windows": {
-                "command": "${workspaceRoot}/BUILD_HD_IMAGE.BAT"
-            },
-            "linux": {
-                "command": "${workspaceRoot}/build_hd_image.sh"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Build HD Image with MBR",
-            "type": "shell",
-            "windows": {
-                "command": "${workspaceRoot}/BUILD_HD_MBR_IMAGE.BAT"
-            },
-            "linux": {
-                "command": "${workspaceRoot}/build_hd_mbr_image.sh"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Build HD Image EFI",
-            "type": "shell",
-            "windows": {
-                "command": "${workspaceRoot}/BUILD_HD_IMAGE_EFI.BAT"
-            },
-            "linux": {
-                "command": "${workspaceRoot}/build_hd_image_efi.sh"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Build Floppy Image - Debug",
-            "type": "shell",
-            "windows": {
-                "command": "${workspaceRoot}/BUILD_FLOPPY_IMAGE_DEBUG.BAT"
-            },
-            "linux": {
-                "command": "${workspaceRoot}/build_floppy_image_debug.sh"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Build HD Image - Debug",
-            "type": "shell",
-            "windows": {
-                "command": "${workspaceRoot}/BUILD_HD_IMAGE_DEBUG.BAT"
-            },
-            "linux": {
-                "command": "${workspaceRoot}/build_hd_image_debug.sh"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Build HD Image with MBR - Debug",
-            "type": "shell",
-            "windows": {
-                "command": "${workspaceRoot}/BUILD_HD_MBR_IMAGE_DEBUG.BAT"
-            },
-            "linux": {
-                "command": "${workspaceRoot}/build_hd_mbr_image_debug.sh"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": true
-            }
-        },
-        {
-            "label": "Build HD Image EFI - Debug",
-            "type": "shell",
-            "windows": {
-                "command": "${workspaceRoot}/BUILD_HD_IMAGE_EFI_DEBUG.BAT"
-            },
-            "linux": {
-                "command": "${workspaceRoot}/build_hd_image_efi_debug.sh"
+                "command": "${workspaceRoot}/build_image.sh ${input:type} ${input:debug} ${input:test} ${input:efi}"
             },
             "group": {
                 "kind": "build",
@@ -287,6 +133,76 @@
                     }
                 }
             ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "type",
+            "type": "pickString",
+            "description": "Select which type of image to build",
+            "options": [
+                {
+                    "label": "Floppy",
+                    "value": "floppy"
+                },
+                {
+                    "label": "HD",
+                    "value": "hd"
+                },
+                {
+                    "label": "HD with MBR",
+                    "value": "hd --mbr"
+                }
+            ],
+            "default": "hd"
+        },
+        {
+            "id": "debug",
+            "type": "pickString",
+            "description": "Select whether to produce debugging information",
+            "options": [
+                {
+                    "label": "Debug on",
+                    "value": "--debug"
+                },
+                {
+                    "label": "Debug off",
+                    "value": ""
+                }
+            ],
+            "default": "--debug"
+        },
+        {
+            "id": "test",
+            "type": "pickString",
+            "description": "Select whether to build tests",
+            "options": [
+                {
+                    "label": "Tests on",
+                    "value": "--test"
+                },
+                {
+                    "label": "Tests off",
+                    "value": ""
+                }
+            ],
+            "default": ""
+        },
+        {
+            "id": "efi",
+            "type": "pickString",
+            "description": "Select whether to add the EFI bootloader to the image",
+            "options": [
+                {
+                    "label": "with EFI bootloader",
+                    "value": "--efi"
+                },
+                {
+                    "label": "without EFI bootloader",
+                    "value": ""
+                }
+            ],
+            "default": ""
         }
     ]
 }

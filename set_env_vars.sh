@@ -13,10 +13,11 @@ if [ -z $CHAOS_TOOLS_PATH_SET ]; then
         TK_LIBRARY="$(dirname "$(readlink -f "$BASH_SOURCE")")/tools/python27-linux/Lib/tk8.6"
     fi
     
+    export PATH
     export LD_LIBRARY_PATH
     export TCL_LIBRARY
     export TK_LIBRARY
-    CHAOS_TOOLS_PATH_SET=1
+    export CHAOS_TOOLS_PATH_SET=1
     echo "Environment variables have been set"
 else
     echo "Environment variables are already set"

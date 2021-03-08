@@ -1,4 +1,36 @@
 @echo off
+
+set DEBUG=0
+set TEST=0
+set BUILD_ARGS=
+set USER_PROGRAMS_ALL=0
+set USER_PROGRAMS_NONE=0
+set result=
+
+:argLoop
+
+if "%1" neq "" (
+    if "%1"=="--debug" (
+        set DEBUG=1
+        set BUILD_ARGS=%BUILD_ARGS% --debug
+    ) else if "%1"=="--test" (
+        set TEST=1
+        set BUILD_ARGS=%BUILD_ARGS% --test
+    ) else if "%1"=="--user-programs-all" (
+        set USER_PROGRAMS_ALL=1
+    ) else if "%1"=="--user-programs-none" (
+        set USER_PROGRAMS_NONE=1
+    ) else if "%1"=="--add-user-program" (
+        set result=%result% %2
+        shift
+    ) else (
+        goto USAGE
+    )
+
+    shift
+    goto argLoop
+)
+
 cd %~d0%~p0
 call SET_ENV_VARS.BAT
 
@@ -29,7 +61,18 @@ cd ..
 
 ::User Programs
 cd user_programs
-call ..\..\SELECT_DIRS.BAT result
+
+setlocal ENABLEDELAYEDEXPANSION
+
+if "%USER_PROGRAMS_ALL%"=="1" (
+    for /D %%f in (*.*) do set result=!result! %%f
+) else if "%USER_PROGRAMS_NONE%"=="1" (
+    set result=
+) else if "%result%"=="" (
+    call ..\..\SELECT_DIRS.BAT result
+)
+
+endlocal & set result=%result%
 
 set i=1
 set user_programs_paths=
@@ -59,7 +102,7 @@ set errorlevel=0
 ::Kernel
 cd ..\..\kernel
 cecho {0A}Building kernel...{#}{\n}
-call BUILD.BAT %1 %2 || cecho {0C}Failed building kernel{#}{\n}&&goto ERROR
+call BUILD.BAT %BUILD_ARGS% || cecho {0C}Failed building kernel{#}{\n}&&goto ERROR
 cecho {0A}Kernel was built{#}{\n}
 
 cd ..
@@ -69,6 +112,16 @@ goto eof
 :ERROR
 cecho {0C}Build failed{#}{\n}
 cd %~d0%~p0
+EXIT /B 1
+
+:USAGE
+echo Usage: %0 [options]
+echo Options:
+echo   --debug                       Produce debugging information
+echo   --test                        Build tests
+echo   --user-programs-all           Build all user programs
+echo   --user-programs-none          Build no user program
+echo   --add-user-program ^<program^>  Build a ^<program^>
 EXIT /B 1
 
 :eof

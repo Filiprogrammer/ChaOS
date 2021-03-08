@@ -26,6 +26,12 @@ printf "\033[1;34mCreating Archive\033[1;97m\t==> efiboot.lib...\033[0m"
 i686-elf-ar cr efiboot.lib @obj/object_files.lst || error
 printf "\033[1;32mdone\033[0m\n"
 
+for line in `cat static_library_files.lst`; do
+    if [ ! -f "$line" ]; then
+        `dirname $line`/build.sh
+    fi
+done
+
 printf "\033[1;34mLinking\033[1;97m\t==> efiboot.dll...\033[0m"
 i686-elf-gcc -o efiboot.dll -nostdlib -Wl,-n,-q,--gc-sections -Wl,--entry,_ModuleEntryPoint -u _ModuleEntryPoint -Wl,-Map,efiboot.map,--whole-archive -Os -Wl,-m,elf_i386,--oformat=elf32-i386 -Wl,--start-group,@static_library_files.lst,--end-group -g -fshort-wchar -fno-builtin -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -ffunction-sections -fdata-sections -fno-common -m32 -march=i586 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables -Wno-address -fno-pic -fno-pie -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -Wl,--defsym=PECOFF_HEADER_SIZE=0x220 -Wl,--script=GccBase.lds -Wno-error || error
 printf "\033[1;32mdone\033[0m\n"
