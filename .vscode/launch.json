@@ -21,7 +21,8 @@
                 "MIMode": "gdb",
                 "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
             },
-            "preLaunchTask": "QEMU Boot Floppy & Run GDB Server"
+            "preLaunchTask": "QEMU Boot Floppy & Run GDB Server",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "name": "QEMU Debug HD",
@@ -43,7 +44,8 @@
                 "MIMode": "gdb",
                 "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
             },
-            "preLaunchTask": "QEMU Boot HD & Run GDB Server"
+            "preLaunchTask": "QEMU Boot HD & Run GDB Server",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "name": "QEMU Debug HD EFI",
@@ -65,7 +67,8 @@
                 "MIMode": "gdb",
                 "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
             },
-            "preLaunchTask": "QEMU Boot HD EFI & Run GDB Server"
+            "preLaunchTask": "QEMU Boot HD EFI & Run GDB Server",
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }
