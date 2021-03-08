@@ -25,6 +25,29 @@
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
+            "name": "QEMU Debug Floppy EFI",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/kernel/CHAOSKRN.SYS_debug",
+            "miDebuggerServerAddress": "localhost:1234",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/kernel/src",
+            "environment": [],
+            "externalConsole": true,
+            "launchCompleteCommand": "exec-run",
+            "windows": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.bat"
+            },
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
+            },
+            "preLaunchTask": "QEMU Boot Floppy EFI & Run GDB Server",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
             "name": "QEMU Debug HD",
             "type": "cppdbg",
             "request": "launch",

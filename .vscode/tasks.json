@@ -61,6 +61,43 @@
             ]
         },
         {
+            "label": "QEMU Boot Floppy EFI & Run GDB Server",
+            "type": "shell",
+            "windows": {
+                "command": "echo a & \"${workspaceRoot}/tools/qemu-windows/qemu-system-i386\" -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s"
+            },
+            "linux": {
+                "command": "cd \"${workspaceRoot}/tools/qemu-linux\" && export LD_LIBRARY_PATH=\"${workspaceRoot}/tools/qemu-linux/lib\" && echo a && ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios ../bios32.bin -drive format=raw,file=../../FloppyImage.bin,index=0,if=floppy -boot a -S -s || ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios ../bios32.bin -drive format=raw,file=../../FloppyImage.bin,index=0,if=floppy -boot a -S -s"
+            },
+            "group": "none",
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": true,
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".",
+                        "endsPattern": "."
+                    }
+                }
+            ]
+        },
+        {
             "label": "QEMU Boot HD & Run GDB Server",
             "type": "shell",
             "windows": {
