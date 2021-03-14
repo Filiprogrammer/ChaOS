@@ -17,7 +17,10 @@ bool timefreeze = false;
 uint32_t timemillis;
 
 uint8_t current_queue = 0;
-uint8_t timeQuantumCounter = 0;
+uint8_t timeQuantumCounters[QUEUE_NUMBER] = {0};
+
+// Prematurely preempted threads
+static thread_t* early_preempted_threads[QUEUE_NUMBER] = {NULL};
 
 task_t* kernel_task;
 
@@ -410,20 +413,35 @@ uint32_t task_switch(uint32_t esp) {
         old_thread->esp = esp;  // save esp
 
         if (old_thread->parent != doNothing_task) {
-            ++timeQuantumCounter;
+            timeQuantumCounters[current_queue]++;
 
             if (timemillis < old_thread->timeout) {
                 // Task was faster than the time quantum
                 old_thread->nice = (4 * old_thread->nice) / 5 + (old_thread->timeout - timemillis) / 5;
-            } else if (timeQuantumCounter > current_queue) {
+                timeQuantumCounters[current_queue] = 0;
+            } else if (timeQuantumCounters[current_queue] > current_queue) {
                 // Task took too long, demoting it to a lower priority queue
                 queue_enqueue(&(queues[MIN(current_queue + 1, QUEUE_NUMBER - 1)]), old_thread);
                 old_thread->nice = 0;
+                timeQuantumCounters[current_queue] = 0;
             } else {
-                // Task still has some time left to run
-                ODA.ts_flag = true;
-                timefreeze = false;
-                return old_thread->esp;
+                bool higherPriorityAppeared = false;
+
+                for (uint8_t i = 0; i < current_queue; ++i) {
+                    if (!queue_isEmpty(&(queues[i]))) {
+                        // Another task in a higher priority queue has appeared
+                        early_preempted_threads[current_queue] = old_thread;
+                        higherPriorityAppeared = true;
+                        break;
+                    }
+                }
+
+                if (!higherPriorityAppeared) {
+                    // Task still has some time left to run
+                    ODA.ts_flag = true;
+                    timefreeze = false;
+                    return old_thread->esp;
+                }
             }
 
             uint64_t cpuCycles = rdtsc() - old_thread->parent->last_active;
@@ -433,11 +451,16 @@ uint32_t task_switch(uint32_t esp) {
         }
     }
 
-    timeQuantumCounter = 0;
-
     // Find the next task to run
     for (uint8_t i = 0; i < QUEUE_NUMBER; ++i) {
         queue_t* queue = &(queues[i]);
+
+        if (early_preempted_threads[i] != NULL) {
+            current_thread = early_preempted_threads[i];
+            early_preempted_threads[i] = NULL;
+            current_queue = i;
+            goto found_new_task;
+        }
 
         if (!queue_isEmpty(queue)) {
             current_thread = queue_dequeue(queue);
