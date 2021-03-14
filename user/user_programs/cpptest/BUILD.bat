@@ -1,7 +1,7 @@
 @echo off
 cd %~d0%~p0
 call CLEAN.BAT
-make --makefile=makefile || goto ERROR
+make --makefile=makefile SHELL=cmd || goto ERROR
 goto EOF
 
 :ERROR

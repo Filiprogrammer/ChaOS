@@ -34,4 +34,4 @@ version_checksum=$(BSDChecksum "$version_string")
 mkdir obj 2>/dev/null
 mkdir obj-test 2>/dev/null
 
-make DEBUG=$DEBUG TEST=$TEST VERSION_STRING="$version_string" VERSION_CHECKSUM=$version_checksum --makefile=makefile || error
+make DEBUG=$DEBUG TEST=$TEST VERSION_STRING="$version_string" VERSION_CHECKSUM=$version_checksum --makefile=makefile SHELL=sh || error

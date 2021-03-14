@@ -31,7 +31,7 @@ set version_checksum=%%a
 mkdir obj >nul 2>&1
 mkdir obj-test >nul 2>&1
 
-make DEBUG=%DEBUG% TEST=%TEST% VERSION_STRING="%version_string%" VERSION_CHECKSUM=%version_checksum% --makefile=makefile || goto ERROR
+make DEBUG=%DEBUG% TEST=%TEST% VERSION_STRING="%version_string%" VERSION_CHECKSUM=%version_checksum% --makefile=makefile SHELL=cmd || goto ERROR
 
 goto EOF
 

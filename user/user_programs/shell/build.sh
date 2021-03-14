@@ -8,4 +8,4 @@ error() {
 cd "$(dirname "$(readlink -f "$0")")"
 ./clean.sh
 
-make --makefile=makefile || error
+make --makefile=makefile SHELL=sh || error
