@@ -1,0 +1,66 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  download_tools:
+    name: Download tools
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache tools
+        id: cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-tools
+        with:
+          path: tools
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('download_tools.sh', 'DOWNLOAD_TOOLS.BAT') }}
+      - name: Download tools (Linux)
+        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
+        run: ./download_tools.sh
+        shell: sh
+      - name: Download tools (Windows)
+        if: runner.os == 'Windows' && steps.cache.outputs.cache-hit != 'true'
+        run: DOWNLOAD_TOOLS.BAT
+        shell: cmd
+  build:
+    name: Build
+    needs: [download_tools]
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
+        type: ["floppy", "hd", "hd --mbr"]
+        debug: ["", "--debug"]
+        test: ["", "--test"]
+        efi: ["", "--efi"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache tools
+        id: cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-tools
+        with:
+          path: tools
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('download_tools.sh', 'DOWNLOAD_TOOLS.BAT') }}
+      - name: Download tools (Linux)
+        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
+        run: ./download_tools.sh
+        shell: sh
+      - name: Download tools (Windows)
+        if: runner.os == 'Windows' && steps.cache.outputs.cache-hit != 'true'
+        run: DOWNLOAD_TOOLS.BAT
+        shell: cmd
+      - name: Run the build script (Linux)
+        if: runner.os == 'Linux'
+        run: ./build_image.sh ${{ matrix.type }} ${{ matrix.debug }} ${{ matrix.test }} ${{ matrix.efi }} --user-programs-all
+        shell: sh
+      - name: Run the build script (Windows)
+        if: runner.os == 'Windows'
+        run: BUILD_IMAGE.BAT ${{ matrix.type }} ${{ matrix.debug }} ${{ matrix.test }} ${{ matrix.efi }} --user-programs-all
+        shell: cmd
