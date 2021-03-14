@@ -3,7 +3,7 @@ USERLIB=../../user_tools
 ASFLAGSOBJ= -O32 -f elf
 NASM = nasm
 
-CFLAGS= -std=c99 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -I'$(USERLIB)/src/include'
+CFLAGS= -std=c99 -Werror -Wall -O3 -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -I'$(USERLIB)/src/include'
 CC= i686-elf-gcc
 
 LDFLAGS= -T $(USERLIB)/user.ld -Map program.map -nostdinc -s --gc-sections --whole-archive
