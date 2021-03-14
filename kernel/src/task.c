@@ -421,10 +421,6 @@ uint32_t task_switch(uint32_t esp) {
                 old_thread->nice = 0;
             } else {
                 // Task still has some time left to run
-                tss.esp = old_thread->esp;
-                tss.esp0 = old_thread->kernel_stack;
-                tss.ss = old_thread->ss;
-
                 ODA.ts_flag = true;
                 timefreeze = false;
                 return old_thread->esp;
@@ -448,6 +444,14 @@ uint32_t task_switch(uint32_t esp) {
             current_queue = i;
             goto found_new_task;
         }
+    }
+
+    // No thread to run found
+    if (old_thread->parent == doNothing_task) {
+        // doNothing task is already running, no need to switch to it
+        ODA.ts_flag = true;
+        timefreeze = false;
+        return old_thread->esp;
     }
 
     current_thread = list_getElement(doNothing_task->threads, 1);
