@@ -92,11 +92,11 @@ uint8_t file_create(file_t* file_inst, char* filepath){
     Partition_t* partition = fileManage_getPartition(filepath);
     if(partition == 0) return 0;
 
-    uint8_t tmp_filepath_len = strlen(filepath)-2;
-    char tmp_filepath[tmp_filepath_len];
-    for(uint8_t i = 0; i < tmp_filepath_len+1; ++i){
-        tmp_filepath[i] = filepath[i+3];
-    }
+    uint8_t tmp_filepath_len = MAX(strlen(filepath), 3) - 3;
+    char tmp_filepath[tmp_filepath_len + 1];
+    for(uint8_t i = 0; i < tmp_filepath_len; ++i)
+        tmp_filepath[i] = filepath[i + 3];
+    tmp_filepath[tmp_filepath_len] = 0;
     //file_t* file_inst = malloc(sizeof(file_t), 0);
     if(partition->createFile(partition->inst, tmp_filepath, file_inst) == 0){
         //free(file_inst);
@@ -110,11 +110,11 @@ uint8_t file_find(file_t* file_inst, char* filepath){
     Partition_t* partition = fileManage_getPartition(filepath);
     if(partition == 0) return 0;
 
-    uint8_t tmp_filepath_len = strlen(filepath)-2;
-    char tmp_filepath[tmp_filepath_len];
-    for(uint8_t i = 0; i < tmp_filepath_len+1; ++i){
-        tmp_filepath[i] = filepath[i+3];
-    }
+    uint8_t tmp_filepath_len = MAX(strlen(filepath), 3) - 3;
+    char tmp_filepath[tmp_filepath_len + 1];
+    for(uint8_t i = 0; i < tmp_filepath_len; ++i)
+        tmp_filepath[i] = filepath[i + 3];
+    tmp_filepath[tmp_filepath_len] = 0;
 
     //file_t* file_inst = malloc(sizeof(file_t), 0);
     if(partition->findFile(partition->inst, tmp_filepath, file_inst) == 0){
@@ -133,11 +133,11 @@ uint8_t file_isDirectory(char* filepath){
     Partition_t* partition = fileManage_getPartition(filepath);
     if(partition == 0) return 0;
 
-    uint8_t tmp_filepath_len = strlen(filepath)-2;
-    char tmp_filepath[tmp_filepath_len];
-    for(uint8_t i = 0; i < tmp_filepath_len+1; ++i){
-        tmp_filepath[i] = filepath[i+3];
-    }
+    uint8_t tmp_filepath_len = MAX(strlen(filepath), 3) - 3;
+    char tmp_filepath[tmp_filepath_len + 1];
+    for(uint8_t i = 0; i < tmp_filepath_len; ++i)
+        tmp_filepath[i] = filepath[i + 3];
+    tmp_filepath[tmp_filepath_len] = 0;
     return partition->isDirectory(partition->inst, tmp_filepath);
 }
 
@@ -145,11 +145,11 @@ uint8_t file_createDirectory(char* filepath){
     Partition_t* partition = fileManage_getPartition(filepath);
     if(partition == 0) return 0;
 
-    uint8_t tmp_filepath_len = strlen(filepath)-2;
-    char tmp_filepath[tmp_filepath_len];
-    for(uint8_t i = 0; i < tmp_filepath_len+1; ++i){
-        tmp_filepath[i] = filepath[i+3];
-    }
+    uint8_t tmp_filepath_len = MAX(strlen(filepath), 3) - 3;
+    char tmp_filepath[tmp_filepath_len + 1];
+    for(uint8_t i = 0; i < tmp_filepath_len; ++i)
+        tmp_filepath[i] = filepath[i + 3];
+    tmp_filepath[tmp_filepath_len] = 0;
     //return 0; // just for debugging
     return partition->createDirectory(partition->inst, tmp_filepath);
 }
@@ -158,11 +158,11 @@ uint8_t file_findByIndex(file_t* file_inst, char* dirpath, uint32_t index){
     Partition_t* partition = fileManage_getPartition(dirpath);
     if(partition == 0) return 0;
     
-    uint8_t tmp_filepath_len = strlen(dirpath)-2;
-    char tmp_filepath[tmp_filepath_len];
-    for(uint8_t i = 0; i < tmp_filepath_len+1; ++i){
-        tmp_filepath[i] = dirpath[i+3];
-    }
+    uint8_t tmp_filepath_len = MAX(strlen(dirpath), 3) - 3;
+    char tmp_filepath[tmp_filepath_len + 1];
+    for(uint8_t i = 0; i < tmp_filepath_len; ++i)
+        tmp_filepath[i] = dirpath[i + 3];
+    tmp_filepath[tmp_filepath_len] = 0;
     if(!partition->findFileByIndex(partition->inst, file_inst, tmp_filepath, index)){
         return 0; // Failed
     }
@@ -214,11 +214,11 @@ uint8_t file_delete(char* filepath){
     Partition_t* partition = fileManage_getPartition(filepath);
     if(partition == 0) return 0;
 
-    uint8_t tmp_filepath_len = strlen(filepath)-2;
-    char tmp_filepath[tmp_filepath_len];
-    for(uint8_t i = 0; i < tmp_filepath_len+1; ++i){
-        tmp_filepath[i] = filepath[i+3];
-    }
+    uint8_t tmp_filepath_len = MAX(strlen(filepath), 3) - 3;
+    char tmp_filepath[tmp_filepath_len + 1];
+    for(uint8_t i = 0; i < tmp_filepath_len; ++i)
+        tmp_filepath[i] = filepath[i + 3];
+    tmp_filepath[tmp_filepath_len] = 0;
 
     partition->deleteFile(partition->inst, tmp_filepath);
     return 1;
