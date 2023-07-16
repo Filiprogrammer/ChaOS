@@ -49,11 +49,7 @@ bool fpu_install() {
 static void init() {
     clear_screen();
     settextcolor(14, 0);
-    char* welcomemsg = __VERSION_STRING;
-    if (BSDChecksum(welcomemsg) == __VERSION_CHECKSUM)
-        puts(welcomemsg);
-    else
-        reboot();
+    puts(__VERSION_STRING);
     time_t ptm;
     time_read_rtc(&ptm);
     printf("Date: %d.%d.%d\n", ptm.day, ptm.month, ptm.year);

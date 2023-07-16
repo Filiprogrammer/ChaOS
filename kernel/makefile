@@ -45,15 +45,15 @@ else
 endif
 ifeq ($(TEST), 1)
 ifeq ($(DEBUG), 1)
-	@$(CC) $(CFLAGSDEBUG) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -Isrc-test/include -D__TEST -c -o $@ $<
+	@$(CC) $(CFLAGSDEBUG) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -Isrc-test/include -D__TEST -c -o $@ $<
 else
-	@$(CC) $(CFLAGS) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -Isrc-test/include -D__TEST -c -o $@ $<
+	@$(CC) $(CFLAGS) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -Isrc-test/include -D__TEST -c -o $@ $<
 endif
 else
 ifeq ($(DEBUG), 1)
-	@$(CC) $(CFLAGSDEBUG) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -c -o $@ $<
+	@$(CC) $(CFLAGSDEBUG) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -c -o $@ $<
 else
-	@$(CC) $(CFLAGS) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -D__VERSION_CHECKSUM=$(VERSION_CHECKSUM) -c -o $@ $<
+	@$(CC) $(CFLAGS) "-D__VERSION_STRING=\"$(VERSION_STRING)\"" -c -o $@ $<
 endif
 endif
 ifeq ($(OS),Windows_NT)
