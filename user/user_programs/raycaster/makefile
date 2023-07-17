@@ -11,7 +11,7 @@ LD= i686-elf-ld
 
 all: RAYCAST.ELF
 ifeq ($(OS),Windows_NT)
-	@cecho .{09}Cleaning up...{#}{\n}
+	@echo [94mCleaning up...[0m
 	@del *.o
 else
 	@printf "\033[1;34mCleaning up...\033[0m\n"
@@ -20,26 +20,26 @@ endif
 
 RAYCAST.ELF: program.o
 ifeq ($(OS),Windows_NT)
-	@cecho {09}Linking program{0F}{\t}==^> $@...{#}
+	@echo|set /p dummy="[94mLinking program[97m	==> $@...[0m"
 else
 	@printf "\033[1;34mLinking program\033[1;97m\t==> $@...\033[0m"
 endif
 	@$(LD) $(LDFLAGS) -L$(USERLIB) -luser $+ -o $@
 ifeq ($(OS),Windows_NT)
-	@cecho .{0a}done{#}{\n}
+	@echo [92mdone[0m
 else
 	@printf "\033[1;32mdone\033[0m\n"
 endif
 
 program.o: program.c
 ifeq ($(OS),Windows_NT)
-	@cecho {09}Compiling{0F}{\t}==^> $<...{#}
+	@echo|set /p dummy="[94mCompiling[97m	==> $<...[0m"
 else
 	@printf "\033[1;34mCompiling\033[1;97m\t==> $<...\033[0m"
 endif
 	@$(CC) -c $(CFLAGS) $< -o $@
 ifeq ($(OS),Windows_NT)
-	@cecho .{0a}done{#}{\n}
+	@echo [92mdone[0m
 else
 	@printf "\033[1;32mdone\033[0m\n"
 endif

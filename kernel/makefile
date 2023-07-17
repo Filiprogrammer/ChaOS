@@ -22,7 +22,7 @@ OBJCOPY= i686-elf-objcopy
 
 obj/%.o: src/%.asm
 ifeq ($(OS),Windows_NT)
-	@cecho {09}Assembling{0F}{\t}==^> $<...{#}
+	@echo|set /p dummy="[94mAssembling[97m	==> $<...[0m"
 else
 	@printf "\033[1;34mAssembling\033[1;97m\t==> $<...\033[0m"
 endif
@@ -32,14 +32,14 @@ else
 	@$(NASM) $(ASFLAGSOBJ) $< -o $@
 endif
 ifeq ($(OS),Windows_NT)
-	@cecho .{0a}done{#}{\n}
+	@echo [92mdone[0m
 else
 	@printf "\033[1;32mdone\033[0m\n"
 endif
 
 obj/%.o: src/%.c
 ifeq ($(OS),Windows_NT)
-	@cecho {09}Compiling{0F}{\t}==^> $<...{#}
+	@echo|set /p dummy="[94mCompiling[97m	==> $<...[0m"
 else
 	@printf "\033[1;34mCompiling\033[1;97m\t==> $<...\033[0m"
 endif
@@ -57,14 +57,14 @@ else
 endif
 endif
 ifeq ($(OS),Windows_NT)
-	@cecho .{0a}done{#}{\n}
+	@echo [92mdone[0m
 else
 	@printf "\033[1;32mdone\033[0m\n"
 endif
 
 obj-test/%.o: src-test/%.c
 ifeq ($(OS),Windows_NT)
-	@cecho {09}Compiling test{0F}{\t}==^> $<...{#}
+	@echo|set /p dummy="[94mCompiling test[97m	==> $<...[0m"
 else
 	@printf "\033[1;34mCompiling test\033[1;97m\t==> $<...\033[0m"
 endif
@@ -74,7 +74,7 @@ else
 	@$(CC) $(CFLAGS) -Isrc-test/include -c -o $@ $<
 endif
 ifeq ($(OS),Windows_NT)
-	@cecho .{0a}done{#}{\n}
+	@echo [92mdone[0m
 else
 	@printf "\033[1;32mdone\033[0m\n"
 endif
@@ -86,33 +86,33 @@ CHAOSKRN.SYS: $(OBJECTS)
 endif
 ifeq ($(DEBUG), 1)
 ifeq ($(OS),Windows_NT)
-	@cecho {09}Linking Kernel{0F}{\t}==^> CHAOSKRN.SYS_debug...{#}
+	@echo|set /p dummy="[94mLinking Kernel[97m	==> CHAOSKRN.SYS_debug...[0m"
 else
 	@printf "\033[1;34mLinking Kernel\033[1;97m\t==> CHAOSKRN.SYS_debug...\033[0m"
 endif
 	@$(LD) $(LDFLAGSDEBUG) $+ -o $@_debug
 ifeq ($(OS),Windows_NT)
-	@cecho .{0a}done{#}{\n}
-	@cecho {09}Stripping CHAOSKRN.SYS_debug{0F}{\t}==^> CHAOSKRN.SYS...{#}
+	@echo [92mdone[0m
+	@echo|set /p dummy="[94mStripping CHAOSKRN.SYS_debug[97m	==> CHAOSKRN.SYS...[0m"
 else
 	@printf "\033[1;32mdone\033[0m\n"
 	@printf "\033[1;34mStripping CHAOSKRN.SYS_debug\033[1;97m\t==> CHAOSKRN.SYS...\033[0m"
 endif
 	@$(OBJCOPY) -O binary $@_debug $@
 ifeq ($(OS),Windows_NT)
-	@cecho .{0a}done{#}{\n}
+	@echo [92mdone[0m
 else
 	@printf "\033[1;32mdone\033[0m\n"
 endif
 else
 ifeq ($(OS),Windows_NT)
-	@cecho {09}Linking Kernel{0F}{\t}==^> CHAOSKRN.SYS...{#}
+	@echo|set /p dummy="[94mLinking Kernel[97m	==> CHAOSKRN.SYS...[0m"
 else
 	@printf "\033[1;34mLinking Kernel\033[1;97m\t==> CHAOSKRN.SYS...\033[0m"
 endif
 	@$(LD) $(LDFLAGS) $+ -o $@
 ifeq ($(OS),Windows_NT)
-	@cecho .{0a}done{#}{\n}
+	@echo [92mdone[0m
 else
 	@printf "\033[1;32mdone\033[0m\n"
 endif

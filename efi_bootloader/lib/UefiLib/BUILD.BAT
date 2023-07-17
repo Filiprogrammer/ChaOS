@@ -9,9 +9,10 @@ setlocal EnableDelayedExpansion
 
 FOR %%G IN (src/*.c) DO (
     set "xyz=%%G"
-    cecho {09}Compiling {0F}{\t}==^> %%G...{#}
+    echo|set /p dummy="[94mCompiling[97m	==> %%G...[0m"
     i686-elf-gcc %CFLAGS% -o obj/!xyz:~,-2!.obj src/%%G || exit /B 1
-    cecho {0a}done{#}{\n}
+    echo|set /p dummy="[92mdone[0m"
+    echo.
 )
 
 
@@ -22,6 +23,6 @@ FOR /R obj %%G IN (*.obj) DO (
 
 endlocal
 
-cecho {09}Creating Archive{0F}{\t}==^> UefiLib.lib...{#}
+echo|set /p dummy="[94mCreating Archive[97m	==> UefiLib.lib...[0m"
 i686-elf-ar cr UefiLib.lib @obj/object_files.lst || exit /B 1
-cecho {0a}done{#}{\n}
+echo [92mdone[0m

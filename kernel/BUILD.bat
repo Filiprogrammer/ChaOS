@@ -36,7 +36,7 @@ make DEBUG=%DEBUG% TEST=%TEST% VERSION_STRING="%version_string%" VERSION_CHECKSU
 goto EOF
 
 :ERROR
-cecho {0C}Error{#}{\n}
+echo [91mError[0m
 EXIT /B 1
 
 :USAGE
