@@ -182,7 +182,7 @@ uint8_t file_execute(char* filepath){
         uint32_t elf_offset    = *( (uint32_t*)( buffer + 0x38 ) );
         uint32_t elf_filesize  = *( (uint32_t*)( buffer + 0x44 ) );
         uint32_t elf_memsz     = *( (uint32_t*)( buffer + 0x48 ) );
-        if( (elf_vaddr>0x5FF000) || (elf_vaddr<0x400000) || (elf_offset>0x130) || (elf_filesize>0xF0000) ) return 0;
+        if( (elf_vaddr>0x5FF000) || (elf_vaddr<0x400000) || (elf_filesize>0xF0000) ) return 0;
         if( (elf_offset + elf_filesize) > file_inst.size ) return 0;
 
         page_directory_t* pd = paging_createPageDirectory();
