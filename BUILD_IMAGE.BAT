@@ -47,13 +47,13 @@ call BUILD.BAT %BUILD_ARGS% || goto ERROR
 
 if "%EFI%"=="1" (
     cd efi_bootloader
-    cecho {0A}Building EFI Bootloader...{#}{\n}
+    echo [92mBuilding EFI Bootloader...[0m
     call BUILD.BAT || goto ERROR
-    cecho {0A}EFI Bootloader was built{#}{\n}
+    echo [92mEFI Bootloader was built[0m
     cd ..
 )
 
-cecho {0A}Building %IMAGE_TYPE% Image...{#}{\n}
+echo [92mBuilding %IMAGE_TYPE% Image...[0m
 
 if "%IMAGE_TYPE%"=="HD" (
     if "%MBR%"=="1" (
@@ -88,13 +88,13 @@ for %%a in ("%user_programs_paths: =" "%") do (
 :imageBuilt
 if "%IMAGE_TYPE%"=="HD" (
     del HDImage.vdi >nul 2>&1
-    VBoxManage convertfromraw --uuid d32a4d71-7ccb-4864-a684-c9d7c7a425f5 -format VDI HDImage.bin HDImage.vdi || cecho {0C}Failed building VDI HD image{#}{\n}&&goto ERROR
+    VBoxManage convertfromraw --uuid d32a4d71-7ccb-4864-a684-c9d7c7a425f5 -format VDI HDImage.bin HDImage.vdi || echo [91mFailed building VDI HD image[0m&&goto ERROR
 )
-cecho {0A}%IMAGE_TYPE% Image was built{#}{\n}
+echo [92m%IMAGE_TYPE% Image was built[0m
 goto eof
 
 :ERROR
-cecho {0C}Build failed{#}{\n}
+echo [91mBuild failed[0m
 cd %~d0%~p0
 EXIT /B 1
 

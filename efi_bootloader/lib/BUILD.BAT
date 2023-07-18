@@ -1,82 +1,94 @@
 @echo off
 cd %~d0%~p0
 
-cecho {0A}Building BaseDebugPrintErrorLevelLib...{#}{\n}
+echo [92mBuilding BaseDebugPrintErrorLevelLib...[0m
 cd BaseDebugPrintErrorLevelLib
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}BaseDebugPrintErrorLevelLib was built{#}{\n\n}
+echo [92mBaseDebugPrintErrorLevelLib was built[0m
+echo.
 
-cecho {0A}Building BaseLib...{#}{\n}
+echo [92mBuilding BaseLib...[0m
 cd BaseLib
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}BaseLib was built{#}{\n\n}
+echo [92mBaseLib was built[0m
+echo.
 
-cecho {0A}Building BaseMemoryLib...{#}{\n}
+echo [92mBuilding BaseMemoryLib...[0m
 cd BaseMemoryLib
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}BaseMemoryLib was built{#}{\n\n}
+echo [92mBaseMemoryLib was built[0m
+echo.
 
-cecho {0A}Building BasePcdLibNull...{#}{\n}
+echo [92mBuilding BasePcdLibNull...[0m
 cd BasePcdLibNull
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}BasePcdLibNull was built{#}{\n\n}
+echo [92mBasePcdLibNull was built[0m
+echo.
 
-cecho {0A}Building BasePrintLib...{#}{\n}
+echo [92mBuilding BasePrintLib...[0m
 cd BasePrintLib
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}BasePrintLib was built{#}{\n\n}
+echo [92mBasePrintLib was built[0m
+echo.
 
-cecho {0A}Building UefiApplicationEntryPoint...{#}{\n}
+echo [92mBuilding UefiApplicationEntryPoint...[0m
 cd UefiApplicationEntryPoint
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}UefiApplicationEntryPoint was built{#}{\n\n}
+echo [92mUefiApplicationEntryPoint was built[0m
+echo.
 
-cecho {0A}Building UefiBootServicesTableLib...{#}{\n}
+echo [92mBuilding UefiBootServicesTableLib...[0m
 cd UefiBootServicesTableLib
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}UefiBootServicesTableLib was built{#}{\n\n}
+echo [92mUefiBootServicesTableLib was built[0m
+echo.
 
-cecho {0A}Building UefiDebugLibStdErr...{#}{\n}
+echo [92mBuilding UefiDebugLibStdErr...[0m
 cd UefiDebugLibStdErr
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}UefiDebugLibStdErr was built{#}{\n\n}
+echo [92mUefiDebugLibStdErr was built[0m
+echo.
 
-cecho {0A}Building UefiDevicePathLib...{#}{\n}
+echo [92mBuilding UefiDevicePathLib...[0m
 cd UefiDevicePathLib
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}UefiDevicePathLib was built{#}{\n\n}
+echo [92mUefiDevicePathLib was built[0m
+echo.
 
-cecho {0A}Building UefiLib...{#}{\n}
+echo [92mBuilding UefiLib...[0m
 cd UefiLib
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}UefiLib was built{#}{\n\n}
+echo [92mUefiLib was built[0m
+echo.
 
-cecho {0A}Building UefiMemoryAllocationLib...{#}{\n}
+echo [92mBuilding UefiMemoryAllocationLib...[0m
 cd UefiMemoryAllocationLib
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}UefiMemoryAllocationLib was built{#}{\n\n}
+echo [92mUefiMemoryAllocationLib was built[0m
+echo.
 
-cecho {0A}Building UefiRuntimeServicesTableLib...{#}{\n}
+echo [92mBuilding UefiRuntimeServicesTableLib...[0m
 cd UefiRuntimeServicesTableLib
 call BUILD.BAT || goto ERROR
 cd ..
-cecho {0A}UefiRuntimeServicesTableLib was built{#}{\n\n}
+echo [92mUefiRuntimeServicesTableLib was built[0m
+echo.
 
 goto EOF
 
 :ERROR
-cecho {0C}Error{#}{\n}
+echo [91mError[0m
 EXIT /B 1
 
 :EOF

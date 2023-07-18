@@ -49,7 +49,7 @@ if "%IMAGE_TYPE%"=="HD" (
 
 if "%DEBUG%"=="1" (
     call SET_ENV_VARS.BAT
-    if not exist kernel\CHAOSKRN.SYS_debug cecho {0C}WARNING^^! CHAOSKRN.SYS_debug does not exist{#}{\n}
+    if not exist kernel\CHAOSKRN.SYS_debug echo [91mWARNING^^! CHAOSKRN.SYS_debug does not exist[0m
     start /b cmd /c %QEMU_CMD% %QEMU_ARGS% -S -s
     tools\gdb-multiarch.bat -x kernel_debug.gdb
 ) else (

@@ -35,28 +35,31 @@ cd %~d0%~p0
 call SET_ENV_VARS.BAT
 
 cd mbr_bootloader
-cecho {0A}Building Master Boot Record bootloader...{#}{\n}
+echo [92mBuilding Master Boot Record bootloader...[0m
 call BUILD.BAT || goto ERROR
-cecho {0A}Master Boot Record bootloader was built{#}{\n}
+echo [92mMaster Boot Record bootloader was built[0m
 echo.
 
 cd ..\stage2_bootloader
-cecho {0A}Building second stage bootloader...{#}{\n}
+echo [92mBuilding second stage bootloader...[0m
 call BUILD.BAT || goto ERROR
-cecho {0A}Second stage bootloader was built{#}{\n\n}
+echo [92mSecond stage bootloader was built[0m
+echo.
 
 cd ..\stage1_bootloader
-cecho {0A}Building first stage bootloader...{#}{\n}
+echo [92mBuilding first stage bootloader...[0m
 call BUILD.BAT || goto ERROR
-cecho {0A}First stage bootloader was built{#}{\n\n}
+echo [92mFirst stage bootloader was built[0m
+echo.
 
 cd ..
 
 ::User Library
 cd user\user_tools
-cecho {0A}Building user library...{#}{\n}
+echo [92mBuilding user library...[0m
 call BUILD.bat || goto ERROR
-cecho {0A}User library was built{#}{\n\n}
+echo [92mUser library was built[0m
+echo.
 cd ..
 
 ::User Programs
@@ -81,10 +84,11 @@ setlocal ENABLEDELAYEDEXPANSION
 set errorlevel=1
 FOR /F "tokens=%i%" %%a IN ("%result%") DO (
     set errorlevel=0
-    cecho {0A}Building program "%%a"...{#}{\n}
+    echo [92mBuilding program "%%a"...[0m
     cd %%a
-    call BUILD.BAT || cecho {0C}Failed building program "%%a"{#}{\n}&&endlocal&&goto ERROR
-    cecho {0A}Program "%%a" was built{#}{\n\n}
+    call BUILD.BAT || echo [91mFailed building program "%%a"[0m&&endlocal&&goto ERROR
+    echo [92mProgram "%%a" was built[0m
+    echo.
     FOR /F %%b IN ('dir *.ELF /B /A:A') DO (
         set "usr_programs_paths=!usr_programs_paths! user/user_programs/%%a/%%b"
     )
@@ -96,21 +100,22 @@ goto user_programs_loop
 
 :user_programs_loop_end
 endlocal & set user_programs_paths=%usr_programs_paths%
-cecho {0A}All selected programs were built{#}{\n\n}
+echo [92mAll selected programs were built[0m
+echo.
 set errorlevel=0
 
 ::Kernel
 cd ..\..\kernel
-cecho {0A}Building kernel...{#}{\n}
-call BUILD.BAT %BUILD_ARGS% || cecho {0C}Failed building kernel{#}{\n}&&goto ERROR
-cecho {0A}Kernel was built{#}{\n}
+echo [92mBuilding kernel...[0m
+call BUILD.BAT %BUILD_ARGS% || echo [91mFailed building kernel[0m&&goto ERROR
+echo [92mKernel was built[0m
 
 cd ..
 
 goto eof
 
 :ERROR
-cecho {0C}Build failed{#}{\n}
+echo [91mBuild failed[0m
 cd %~d0%~p0
 EXIT /B 1
 
