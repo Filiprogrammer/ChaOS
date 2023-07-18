@@ -35,19 +35,11 @@ entry_point:
     mov ds, ax
     mov es, ax
 
-;=====================================================HOTFIX============
-;   mov ss, ax
-;   mov sp, 0xFFFF                      ; stack begins at 0xffff (downwards)
+    mov ax, 0x3000                      ; stack begins at 0x3FFFF (downwards)
+    mov ss, ax
+    mov sp, 0xFFFF
 
-; stack bei 0000:FFFF ?
-
-mov ax,0x1000
-mov ss,ax
-xor sp,sp
-dec sp
-;=====================================================HOTFIX============
-
-   sti                                  ; enable interrupts
+    sti                                 ; enable interrupts
 
 A20:
    call EnableA20
