@@ -5,7 +5,7 @@ make --makefile=makefile SHELL=cmd || goto ERROR
 goto EOF
 
 :ERROR
-cecho {0C}Error{#}{\n}
+echo [91mError[0m
 EXIT /B 1
 
 :EOF

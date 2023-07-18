@@ -6,13 +6,13 @@ mkdir obj >nul 2>&1
 
 cd src
 
-cecho {09}Assembling{0F}{\t}==^> start.asm...{#}
+echo|set /p dummy="[94mAssembling[97m	==> start.asm...[0m"
 nasm -O32 -f elf start.asm -o ../obj/start.o || goto ERROR
-cecho {0a}done{#}{\n}
+echo [92mdone[0m
 
-cecho {09}Compiling{0F}{\t}==^> userlib.c...{#}
+echo|set /p dummy="[94mCompiling[97m	==> userlib.c...[0m"
 i686-elf-gcc -std=c99 -c -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -ffunction-sections -fdata-sections -Iinclude userlib.c -o ../obj/userlib.o || goto ERROR
-cecho {0a}done{#}{\n}
+echo [92mdone[0m
 
 cd %~d0%~p0
 
@@ -30,7 +30,7 @@ goto EOF
 
 :ERROR
 cd %~d0%~p0
-cecho {0C}Error{#}{\n}
+echo [91mError[0m
 EXIT /B 1
 
 :EOF
