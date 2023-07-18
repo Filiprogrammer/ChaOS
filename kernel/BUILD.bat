@@ -22,16 +22,10 @@ if "%1" neq "" (
 
 set version_string=ChaOS [Ver 0.2.%date:~8,2%%date:~3,2%%date:~0,2%] made by Filiprogrammer\n
 
-for /f "tokens=*" %%a in ( 
-'BSDChecksum.exe "%version_string%"' 
-) do ( 
-set version_checksum=%%a 
-)
-
 mkdir obj >nul 2>&1
 mkdir obj-test >nul 2>&1
 
-make DEBUG=%DEBUG% TEST=%TEST% VERSION_STRING="%version_string%" VERSION_CHECKSUM=%version_checksum% --makefile=makefile SHELL=cmd || goto ERROR
+make DEBUG=%DEBUG% TEST=%TEST% VERSION_STRING="%version_string%" --makefile=makefile SHELL=cmd || goto ERROR
 
 goto EOF
 

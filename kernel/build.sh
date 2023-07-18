@@ -29,9 +29,8 @@ while [ $# -gt 0 ] ; do
 done
 
 version_string="ChaOS [Ver 0.2.$(date +'%y%m%d')] made by Filiprogrammer\n"
-version_checksum=$(BSDChecksum "$version_string")
 
 mkdir obj 2>/dev/null
 mkdir obj-test 2>/dev/null
 
-make DEBUG=$DEBUG TEST=$TEST VERSION_STRING="$version_string" VERSION_CHECKSUM=$version_checksum --makefile=makefile SHELL=sh || error
+make DEBUG=$DEBUG TEST=$TEST VERSION_STRING="$version_string" --makefile=makefile SHELL=sh || error
