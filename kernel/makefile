@@ -14,8 +14,8 @@ CFLAGS= -std=gnu99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -flea
 CFLAGSDEBUG= -std=gnu99 -march=i386 -mtune=i386 -Werror -Wall -O -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -fno-stack-protector -Isrc/include -ggdb
 CC= i686-elf-gcc
 
-LDFLAGS= -T kernel.ld -Map kernel.map -nostdinc
-LDFLAGSDEBUG = -T kernel_debug.ld -Map kernel.map -nostdinc
+LDFLAGS= -T kernel.ld -Map kernel.map
+LDFLAGSDEBUG = -T kernel_debug.ld -Map kernel.map
 LD= i686-elf-ld
 
 OBJCOPY= i686-elf-objcopy

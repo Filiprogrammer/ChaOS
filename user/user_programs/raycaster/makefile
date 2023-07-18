@@ -6,7 +6,7 @@ NASM = nasm
 CFLAGS= -std=c99 -Werror -Wall -O3 -ffreestanding -fleading-underscore -nostdlib -nostdinc -fno-builtin -I'$(USERLIB)/src/include'
 CC= i686-elf-gcc
 
-LDFLAGS= -T $(USERLIB)/user.ld -Map program.map -nostdinc -s --gc-sections --whole-archive
+LDFLAGS= -T $(USERLIB)/user.ld -Map program.map -s --gc-sections --whole-archive
 LD= i686-elf-ld
 
 all: RAYCAST.ELF
