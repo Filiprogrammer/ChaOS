@@ -3,64 +3,157 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  download_tools:
-    name: Download tools
-    strategy:
-      matrix:
-        os: ["ubuntu-latest", "windows-latest"]
-    runs-on: ${{ matrix.os }}
+  build_tools_linux:
+    name: Build tools for Linux
+    runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Cache tools
         id: cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-tools
         with:
           path: tools
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('download_tools.sh', 'DOWNLOAD_TOOLS.BAT') }}
-      - name: Download tools (Linux)
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: ./download_tools.sh
+          key: linux-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('tools/src') }}
+      - name: Install build requirements
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: sudo apt install wget build-essential file
+      - name: Build i686-elf-tools
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tools/src/build-i686-elf-tools.sh
         shell: sh
-      - name: Download tools (Windows)
-        if: runner.os == 'Windows' && steps.cache.outputs.cache-hit != 'true'
-        run: DOWNLOAD_TOOLS.BAT
-        shell: cmd
-  build:
-    name: Build
-    needs: [download_tools]
+      - name: Cleanup after i686-elf-tools build
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: rm -rf tools/src/binutils-* tools/src/gcc-*
+      - name: Build GenFw
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tools/src/GenFw/build.sh
+        shell: sh
+      - name: Build imgtools
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tools/src/imgtools/build.sh
+        shell: sh
+      - name: Build mkdosfs
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tools/src/mkdosfs/build.sh
+        shell: sh
+      - name: Tar tools
+        run: tar -cf chaostools-linux.tar --exclude='src' -C tools .
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: chaostools-linux.tar
+          path: chaostools-linux.tar
+  build_tools_windows:
+    name: Build tools for Windows
+    needs: [build_tools_linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache tools
+        id: cache
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-tools
+        with:
+          path: tools
+          key: windows-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('tools/src') }}
+      - name: Install build requirements
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: sudo apt install wget build-essential file git automake autopoint bison flex libgdk-pixbuf2.0-dev gperf intltool libtool libltdl-dev python3-mako ruby unzip p7zip-full lzip libtool-bin python-is-python3 gcc-mingw-w64-x86-64
+      - name: Download linux tools artifact
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v3
+        with:
+          name: chaostools-linux.tar
+      - name: Untar tools
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tar -xvf chaostools-linux.tar -C tools
+      - name: Build i686-elf-tools
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tools/src/build-i686-elf-tools-win.sh
+        shell: sh
+      - name: Cleanup after i686-elf-tools build
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: rm -rf tools/src/mxe tools/src/binutils-* tools/src/gcc-*
+      - name: Build GenFw
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tools/src/GenFw/build-win.sh
+        shell: sh
+      - name: Build imgtools
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tools/src/imgtools/build-win.sh
+        shell: sh
+      - name: Build mkdosfs
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tools/src/mkdosfs/build-win.sh
+        shell: sh
+      - name: Remove linux tools
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tar -tf chaostools-linux.tar | tail -n +2 | sed -e 's!^!tools/!' | xargs rm -rf
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: chaostools-windows
+          path: |
+            tools
+            !tools/src
+  build_linux:
+    name: Build on Linux
+    needs: [build_tools_linux]
     strategy:
       matrix:
-        os: ["ubuntu-latest", "windows-latest"]
         type: ["floppy", "hd", "hd --mbr"]
         debug: ["", "--debug"]
         test: ["", "--test"]
         efi: ["", "--efi"]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Cache tools
-        id: cache
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-tools
+      - uses: actions/checkout@v3
+      - name: Install tools
+        run: sudo apt install nasm make qemu-utils python3
+      - name: Download additional tools artifact
+        uses: actions/download-artifact@v3
         with:
-          path: tools
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('download_tools.sh', 'DOWNLOAD_TOOLS.BAT') }}
-      - name: Download tools (Linux)
-        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
-        run: ./download_tools.sh
-        shell: sh
-      - name: Download tools (Windows)
-        if: runner.os == 'Windows' && steps.cache.outputs.cache-hit != 'true'
-        run: DOWNLOAD_TOOLS.BAT
-        shell: cmd
-      - name: Run the build script (Linux)
-        if: runner.os == 'Linux'
+          name: chaostools-linux.tar
+      - name: Untar tools
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tar -xvf chaostools-linux.tar -C tools
+      - name: Run the build script
         run: ./build_image.sh ${{ matrix.type }} ${{ matrix.debug }} ${{ matrix.test }} ${{ matrix.efi }} --user-programs-all
         shell: sh
-      - name: Run the build script (Windows)
-        if: runner.os == 'Windows'
+  build_windows:
+    name: Build on Windows
+    needs: [build_tools_windows]
+    strategy:
+      matrix:
+        type: ["floppy", "hd", "hd --mbr"]
+        debug: ["", "--debug"]
+        test: ["", "--test"]
+        efi: ["", "--efi"]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install nasm
+        uses: ilammy/setup-nasm@v1
+      - name: Install Python3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install winget
+        uses: Cyberboss/install-winget@v1
+      - name: Install QEMU
+        run: winget install --accept-source-agreements --accept-package-agreements --id=SoftwareFreedomConservancy.QEMU -e
+      - name: Add QEMU to the PATH
+        shell: pwsh
+        run: |
+          "C:\Program Files\qemu" >> $env:GITHUB_PATH
+      - name: Download tools artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: chaostools-windows
+          path: tools
+      - name: Run the build script
         run: BUILD_IMAGE.BAT ${{ matrix.type }} ${{ matrix.debug }} ${{ matrix.test }} ${{ matrix.efi }} --user-programs-all
         shell: cmd

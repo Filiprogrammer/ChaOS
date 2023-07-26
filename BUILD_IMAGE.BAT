@@ -88,7 +88,8 @@ for %%a in ("%user_programs_paths: =" "%") do (
 :imageBuilt
 if "%IMAGE_TYPE%"=="HD" (
     del HDImage.vdi >nul 2>&1
-    VBoxManage convertfromraw --uuid d32a4d71-7ccb-4864-a684-c9d7c7a425f5 -format VDI HDImage.bin HDImage.vdi || echo [91mFailed building VDI HD image[0m&&goto ERROR
+    qemu-img convert -f raw -O vdi HDImage.bin HDImage.vdi || echo [91mFailed building VDI HD image[0m&&goto ERROR
+    python3 -c "f = open('HDImage.vdi', 'r+b'); f.seek(0x188); f.write(b'\x71\x4d\x2a\xd3\xcb\x7c\x64\x48\xa6\x84\xc9\xd7\xc7\xa4\x25\xf5'); f.close();"
 )
 echo [92m%IMAGE_TYPE% Image was built[0m
 goto eof

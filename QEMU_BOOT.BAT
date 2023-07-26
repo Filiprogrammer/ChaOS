@@ -1,11 +1,12 @@
 @echo off
 cd %~d0%~p0
+call SET_ENV_VARS.BAT
 
 set IMAGE_TYPE=
 set DEBUG=0
 set EFI=0
 set SECONDARY_HD_IMAGE=
-set QEMU_CMD=tools\qemu-windows\qemu-system-i386.exe
+set QEMU_CMD=qemu-system-i386
 set QEMU_ARGS=-audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound
 
 :argLoop
@@ -22,7 +23,7 @@ if "%1" neq "" (
     ) else if "%1"=="--efi" (
         set EFI=1
     ) else if "%1"=="--x64" (
-        set QEMU_CMD=tools\qemu-windows\qemu-system-x86_64.exe
+        set QEMU_CMD=qemu-system-x86_64
     ) else if "%1"=="--secondary-hd-image" (
         set SECONDARY_HD_IMAGE=%2
         set SECONDARY_HD_IMAGE=!SECONDARY_HD_IMAGE:"=!
@@ -48,10 +49,9 @@ if "%IMAGE_TYPE%"=="HD" (
 )
 
 if "%DEBUG%"=="1" (
-    call SET_ENV_VARS.BAT
     if not exist kernel\CHAOSKRN.SYS_debug echo [91mWARNING^^! CHAOSKRN.SYS_debug does not exist[0m
     start /b cmd /c %QEMU_CMD% %QEMU_ARGS% -S -s
-    tools\gdb-multiarch.bat -x kernel_debug.gdb
+    gdb -x kernel_debug.gdb
 ) else (
     %QEMU_CMD% %QEMU_ARGS%
 )

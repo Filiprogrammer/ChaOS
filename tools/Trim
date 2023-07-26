@@ -1,0 +1,5 @@
+#!/bin/sh
+
+PYTHONPATH="$(dirname "$(readlink -f "$0")")/python"
+export PYTHONPATH
+python3 "$PYTHONPATH/Trim/Trim.py" $* || exit 1
