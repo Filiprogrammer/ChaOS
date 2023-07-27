@@ -15,11 +15,11 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.bat"
+                "miDebuggerPath": "gdb"
             },
             "linux": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
+                "miDebuggerPath": "gdb"
             },
             "preLaunchTask": "QEMU Boot Floppy & Run GDB Server",
             "internalConsoleOptions": "openOnSessionStart"
@@ -38,11 +38,11 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.bat"
+                "miDebuggerPath": "gdb"
             },
             "linux": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
+                "miDebuggerPath": "gdb"
             },
             "preLaunchTask": "QEMU Boot Floppy EFI & Run GDB Server",
             "internalConsoleOptions": "openOnSessionStart"
@@ -61,11 +61,11 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.bat"
+                "miDebuggerPath": "gdb"
             },
             "linux": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
+                "miDebuggerPath": "gdb"
             },
             "preLaunchTask": "QEMU Boot HD & Run GDB Server",
             "internalConsoleOptions": "openOnSessionStart"
@@ -84,11 +84,11 @@
             "launchCompleteCommand": "exec-run",
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.bat"
+                "miDebuggerPath": "gdb"
             },
             "linux": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "${workspaceRoot}/tools/gdb-multiarch.sh"
+                "miDebuggerPath": "gdb"
             },
             "preLaunchTask": "QEMU Boot HD EFI & Run GDB Server",
             "internalConsoleOptions": "openOnSessionStart"

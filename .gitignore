@@ -1,4 +1,3 @@
-/tools
 *.o
 *.map
 *.elf
@@ -20,3 +19,12 @@
 *.i
 *.iii
 *.lst
+*.pyc
+/tools
+!/tools
+/tools/*
+!/tools/src
+!/tools/python
+!/tools/Trim
+!/tools/Trim.bat
+!/tools/bios32.bin

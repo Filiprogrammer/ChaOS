@@ -1,9 +1,8 @@
 import gdb
-import Tkinter
-from Tkinter import *
-import ttk
-from ttk import *
-import thread
+import tkinter
+from tkinter import *
+from tkinter.ttk import *
+import _thread
 from collections import namedtuple
 
 Region = namedtuple("Region", "size reserved");
@@ -32,7 +31,7 @@ def update_gui():
 
 def run_gui():
     global window;
-    window = Tkinter.Tk();
+    window = tkinter.Tk();
     window.title("Heap");
     
     global lblRegionCount;
@@ -45,9 +44,9 @@ def run_gui():
     treeHeap.column("one", width=100, minwidth=100, stretch=True);
     treeHeap.column("two", width=100, minwidth=100, stretch=True);
     treeHeap.column("three", width=50, minwidth=50, stretch=True);
-    treeHeap.heading("one", text="Offset",anchor=Tkinter.W);
-    treeHeap.heading("two", text="Size",anchor=Tkinter.W);
-    treeHeap.heading("three", text="Reserved",anchor=Tkinter.W);
+    treeHeap.heading("one", text="Offset",anchor=tkinter.W);
+    treeHeap.heading("two", text="Size",anchor=tkinter.W);
+    treeHeap.heading("three", text="Reserved",anchor=tkinter.W);
     treeHeap["show"] = "headings";
     treeHeap.bind('<Button-1>', on_treeview_click);
     treeHeap.pack(side="left", fill="both", expand=True);
@@ -62,7 +61,7 @@ def run_gui():
     window.protocol("WM_DELETE_WINDOW", on_closing);
     window.mainloop();
     gdb.events.stop.disconnect(stop_handler);
-    Tkinter._default_root = None;
+    tkinter._default_root = None;
     return;
 
 def stop_handler(event):
@@ -85,5 +84,5 @@ def read_heap():
 
 read_heap();
 
-thread.start_new_thread(run_gui, ());
+_thread.start_new_thread(run_gui, ());
 gdb.events.stop.connect(stop_handler);

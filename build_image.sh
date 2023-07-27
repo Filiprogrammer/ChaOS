@@ -64,7 +64,7 @@ if [ "$IMAGE_TYPE" = "HD" ]; then
     else
         mkdosfs -hd -no-mbr -fats2 -fatz12 -spc1 -z2 -noverb -b stage1_bootloader/boot.bin HDImage.bin || error
     fi
-    
+
     image_file=HDImage.bin
 elif [ "$IMAGE_TYPE" = "Floppy" ]; then
     mkdosfs -fd -spt18 -heads2 -cyls80 -fats2 -fatz12 -spc1 -noverb -b stage1_bootloader/boot.bin FloppyImage.bin || error
@@ -90,7 +90,8 @@ done
 
 if [ "$IMAGE_TYPE" = "HD" ]; then
     rm HDImage.vdi 2>/dev/null
-    VBoxManage convertfromraw --uuid d32a4d71-7ccb-4864-a684-c9d7c7a425f5 -format VDI HDImage.bin HDImage.vdi || { printf "\033[1;31mFailed building VDI HD image\033[0m\n"; error; }
+    qemu-img convert -f raw -O vdi HDImage.bin HDImage.vdi || { printf "\033[1;31mFailed building VDI HD image\033[0m\n"; error; }
+    printf '\161\115\052\323\313\174\144\110\246\204\311\327\307\244\045\365' | dd of=HDImage.vdi bs=1 seek=$((0x188)) conv=notrunc
 fi
 
 printf "\033[1;32m$IMAGE_TYPE Image was built\033[0m\n"

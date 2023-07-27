@@ -1,9 +1,8 @@
 import gdb
-import Tkinter
-from Tkinter import *
-import ttk
-from ttk import *
-import thread
+import tkinter
+from tkinter import *
+from tkinter.ttk import *
+import _thread
 from collections import namedtuple
 
 Task = namedtuple("Task", "id page_directory cpu_time_used last_active threads next_threadId")
@@ -81,21 +80,21 @@ def setup_treeview_thread_queue(treeview):
     treeview.column("seven", width=70, minwidth=70, stretch=True)
     treeview.column("eight", width=60, minwidth=60, stretch=True)
     treeview.column("nine", width=50, minwidth=50, stretch=True)
-    treeview.heading("#0", text="id", anchor=Tkinter.W)
-    treeview.heading("one", text="esp", anchor=Tkinter.W)
-    treeview.heading("two", text="ss", anchor=Tkinter.W)
-    treeview.heading("three", text="Kernel Stack", anchor=Tkinter.W)
-    treeview.heading("four", text="Stack Begin", anchor=Tkinter.W)
-    treeview.heading("five", text="Stack End", anchor=Tkinter.W)
-    treeview.heading("six", text="FPUPtr", anchor=Tkinter.W)
-    treeview.heading("seven", text="Parent Task", anchor=Tkinter.W)
-    treeview.heading("eight", text="Timeout", anchor=Tkinter.W)
-    treeview.heading("nine", text="nice", anchor=Tkinter.W)
+    treeview.heading("#0", text="id", anchor=tkinter.W)
+    treeview.heading("one", text="esp", anchor=tkinter.W)
+    treeview.heading("two", text="ss", anchor=tkinter.W)
+    treeview.heading("three", text="Kernel Stack", anchor=tkinter.W)
+    treeview.heading("four", text="Stack Begin", anchor=tkinter.W)
+    treeview.heading("five", text="Stack End", anchor=tkinter.W)
+    treeview.heading("six", text="FPUPtr", anchor=tkinter.W)
+    treeview.heading("seven", text="Parent Task", anchor=tkinter.W)
+    treeview.heading("eight", text="Timeout", anchor=tkinter.W)
+    treeview.heading("nine", text="nice", anchor=tkinter.W)
     treeview.bind('<Button-1>', on_treeview_click)
 
 def run_gui():
     global window
-    window = Tkinter.Tk()
+    window = tkinter.Tk()
     window.geometry("1300x600")
     window.title("ChaOS Tasks")
     global lblKernelTask
@@ -139,12 +138,12 @@ def run_gui():
     treeTasks.column("three", width=80, minwidth=80, stretch=True)
     treeTasks.column("four", width=70, minwidth=70, stretch=True)
     treeTasks.column("five", width=70, minwidth=70, stretch=True)
-    treeTasks.heading("#0", text="id", anchor=Tkinter.W)
-    treeTasks.heading("one", text="page directory", anchor=Tkinter.W)
-    treeTasks.heading("two", text="CPU time used", anchor=Tkinter.W)
-    treeTasks.heading("three", text="last active", anchor=Tkinter.W)
-    treeTasks.heading("four", text="threads", anchor=Tkinter.W)
-    treeTasks.heading("five", text="next thread id", anchor=Tkinter.W)
+    treeTasks.heading("#0", text="id", anchor=tkinter.W)
+    treeTasks.heading("one", text="page directory", anchor=tkinter.W)
+    treeTasks.heading("two", text="CPU time used", anchor=tkinter.W)
+    treeTasks.heading("three", text="last active", anchor=tkinter.W)
+    treeTasks.heading("four", text="threads", anchor=tkinter.W)
+    treeTasks.heading("five", text="next thread id", anchor=tkinter.W)
     treeTasks.bind('<Button-1>', on_treeview_click)
     treeTasks.grid(column=0, row=3+queue_number, sticky="EW")
     window.grid_rowconfigure(3+queue_number, weight=2, uniform="fred")
@@ -161,7 +160,7 @@ def run_gui():
     window.protocol("WM_DELETE_WINDOW", on_closing)
     window.mainloop()
     gdb.events.stop.disconnect(stop_handler)
-    Tkinter._default_root = None
+    tkinter._default_root = None
     return
 
 def stop_handler(event):
@@ -252,5 +251,5 @@ def read_task_queues():
     do_nothing_task_str = do_nothing_task.format_string()
 
 read_task_queues()
-thread.start_new_thread(run_gui, ())
+_thread.start_new_thread(run_gui, ())
 gdb.events.stop.connect(stop_handler)

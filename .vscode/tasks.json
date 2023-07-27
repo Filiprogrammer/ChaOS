@@ -27,10 +27,10 @@
             "label": "QEMU Boot Floppy & Run GDB Server",
             "type": "shell",
             "windows": {
-                "command": "echo a & \"${workspaceRoot}/tools/qemu-windows/qemu-system-i386\" -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s"
+                "command": "echo a & call \"${workspaceRoot}/SET_ENV_VARS.BAT\" & qemu-system-i386 -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s"
             },
             "linux": {
-                "command": "cd \"${workspaceRoot}/tools/qemu-linux\" && export LD_LIBRARY_PATH=\"${workspaceRoot}/tools/qemu-linux/lib\" && echo a && ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=../../FloppyImage.bin,index=0,if=floppy -boot a -S -s || ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=../../FloppyImage.bin,index=0,if=floppy -boot a -S -s"
+                "command": "echo a && qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s || qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s"
             },
             "group": "none",
             "presentation": {
@@ -64,10 +64,10 @@
             "label": "QEMU Boot Floppy EFI & Run GDB Server",
             "type": "shell",
             "windows": {
-                "command": "echo a & \"${workspaceRoot}/tools/qemu-windows/qemu-system-i386\" -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s"
+                "command": "echo a & call \"${workspaceRoot}/SET_ENV_VARS.BAT\" & qemu-system-i386 -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s"
             },
             "linux": {
-                "command": "cd \"${workspaceRoot}/tools/qemu-linux\" && export LD_LIBRARY_PATH=\"${workspaceRoot}/tools/qemu-linux/lib\" && echo a && ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios ../bios32.bin -drive format=raw,file=../../FloppyImage.bin,index=0,if=floppy -boot a -S -s || ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios ../bios32.bin -drive format=raw,file=../../FloppyImage.bin,index=0,if=floppy -boot a -S -s"
+                "command": "echo a && qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s || qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=FloppyImage.bin,index=0,if=floppy -boot a -S -s"
             },
             "group": "none",
             "presentation": {
@@ -101,10 +101,10 @@
             "label": "QEMU Boot HD & Run GDB Server",
             "type": "shell",
             "windows": {
-                "command": "echo a & \"${workspaceRoot}/tools/qemu-windows/qemu-system-i386.exe\" -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s"
+                "command": "echo a & call \"${workspaceRoot}/SET_ENV_VARS.BAT\" & qemu-system-i386 -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s"
             },
             "linux": {
-                "command": "cd \"${workspaceRoot}/tools/qemu-linux\" && export LD_LIBRARY_PATH=\"${workspaceRoot}/tools/qemu-linux/lib\" && echo a && ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=../../HDImage.bin,index=0,if=ide -boot c -S -s || ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=../../HDImage.bin,index=0,if=ide -boot c -S -s"
+                "command": "echo a && qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s || qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s"
             },
             "group": "none",
             "presentation": {
@@ -138,10 +138,10 @@
             "label": "QEMU Boot HD EFI & Run GDB Server",
             "type": "shell",
             "windows": {
-                "command": "echo a & \"${workspaceRoot}/tools/qemu-windows/qemu-system-i386\" -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s"
+                "command": "echo a & call \"${workspaceRoot}/SET_ENV_VARS.BAT\" & qemu-system-i386 -audiodev dsound,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s"
             },
             "linux": {
-                "command": "cd \"${workspaceRoot}/tools/qemu-linux\" && export LD_LIBRARY_PATH=\"${workspaceRoot}/tools/qemu-linux/lib\" && echo a && ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios ../bios32.bin -drive format=raw,file=../../HDImage.bin,index=0,if=ide -boot c -S -s || ${workspaceRoot}/tools/qemu-linux/qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios ../bios32.bin -drive format=raw,file=../../HDImage.bin,index=0,if=ide -boot c -S -s"
+                "command": "echo a && qemu-system-i386 -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s || qemu-system-i386 -curses -audiodev pa,id=stdsound -machine pcspk-audiodev=stdsound -bios tools/bios32.bin -drive format=raw,file=HDImage.bin,index=0,if=ide -boot c -S -s"
             },
             "group": "none",
             "presentation": {

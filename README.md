@@ -36,56 +36,57 @@ git clone https://github.com/Filiprogrammer/ChaOS.git
 cd ChaOS
 ```
 
-### Download tools
+### Setup tools
 
 #### Debian
 
-Install wget and unzip if not already installed
+Install tools required to build, run and debug ChaOS.
 
 ```console
-sudo apt install wget unzip
+sudo apt install nasm make qemu-system-x86 qemu-utils dialog gdb python3-tk
 ```
 
-Download ChaOS tools
+Get additional tools by either downloading the binaries:
 
 ```console
-./download_tools.sh
+wget https://github.com/Filiprogrammer/ChaOS/releases/download/v0.2.230727/chaostools-linux.tar.gz
+tar -xf chaostools-linux.tar.gz -C tools
 ```
 
-#### Arch Linux
-
-Install wget and unzip if not already installed
+Or building them yourself:
 
 ```console
-sudo pacman -Sy wget unzip
-```
-
-Download ChaOS tools
-
-```console
-./download_tools.sh
-```
-
-#### Fedora
-
-Install wget and unzip if not already installed
-
-```console
-sudo yum install wget unzip
-```
-
-Download ChaOS tools
-
-```console
-./download_tools.sh
+sudo apt install wget build-essential file
+tools/src/build-i686-elf-tools.sh
+tools/src/GenFw/build.sh
+tools/src/imgtools/build.sh
+tools/src/mkdosfs/build.sh
 ```
 
 #### Windows
 
-Download ChaOS tools
+To get the tools required to build, run and debug ChaOS on Windows, download the binaries [here](https://github.com/Filiprogrammer/ChaOS/releases/download/v0.2.230727/chaostools-windows.zip).
+
+Or gather and build the tools yourself:
+
+- [QEMU](https://qemu.weilnetz.de/w64/)
+- [Python3](https://www.python.org/downloads/windows/)
+- gdb
+- make
+- [nasm](https://www.nasm.us/pub/nasm/stable/win64/)
+
+Cross-build the additional tools on linux:
 
 ```console
-DOWNLOAD_TOOLS.BAT
+sudo apt install wget build-essential file git automake autopoint bison flex libgdk-pixbuf2.0-dev gperf intltool libtool libltdl-dev python3-mako ruby unzip p7zip-full lzip libtool-bin python-is-python3
+
+tools/src/build-i686-elf-tools-win.sh
+
+sudo apt install gcc-mingw-w64-x86-64
+
+tools/src/GenFw/build-win.sh
+tools/src/imgtools/build-win.sh
+tools/src/mkdosfs/build-win.sh
 ```
 
 ### Build image
